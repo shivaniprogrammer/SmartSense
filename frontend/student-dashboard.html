@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | SmartSense</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+</head>
+<body>
+
+    <aside class="dash-sidebar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h2>SmartSense</h2>
+        </div>
+
+        <button class="nav-item active">
+            <i class="fa-solid fa-house"></i> Dashboard
+        </button>
+        <button class="nav-item">
+            <i class="fa-solid fa-calendar-check"></i> Attendance
+        </button>
+        <button class="nav-item">
+            <i class="fa-solid fa-file-lines"></i> Leave & OD
+        </button>
+        <button class="nav-item">
+            <i class="fa-solid fa-bell"></i> Notifications
+        </button>
+
+        <div class="sidebar-bottom">
+            <button class="nav-item logout-btn" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </aside>
+
+    <main class="dash-main">
+
+        <div class="dash-topbar">
+            <div>
+                <p>Welcome back</p>
+                <h1 id="studentName">Student</h1>
+            </div>
+
+            <div class="topbar-right">
+                <button class="bell-btn">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="dot"></span>
+                </button>
+
+                <div class="profile-pill">
+                    <div class="profile-avatar" id="avatarInitial">S</div>
+                    <span id="profileName">Student</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <div class="icon attendance"><i class="fa-solid fa-chart-pie"></i></div>
+                <p>Attendance</p>
+                <h3 id="attendancePercent">--%</h3>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon present"><i class="fa-solid fa-user-check"></i></div>
+                <p>Present Days</p>
+                <h3 id="presentDays">--</h3>
+            </div>
+
+            <div class="stat-card">
+                <div class="icon pending"><i class="fa-solid fa-hourglass-half"></i></div>
+                <p>Pending Requests</p>
+                <h3 id="pendingRequests">--</h3>
+            </div>
+
+        </div>
+
+        <div class="dash-lower">
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h4>Attendance Overview</h4>
+                    <button class="action-btn" id="applyBtn">
+                        <i class="fa-solid fa-plus"></i> Apply Leave/OD
+                    </button>
+                </div>
+
+                <div class="chart-row">
+                    <div class="donut" id="donutChart" style="--pct: 0;">
+                        <div class="donut-inner">
+                            <strong id="donutPercent">--%</strong>
+                            <span>Present</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-legend">
+                        <p><span class="dot-sm green"></span> Present <strong id="legendPresent">--</strong></p>
+                        <p><span class="dot-sm red"></span> Absent <strong id="legendAbsent">--</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-heading">
+                    <h4>Recent Activity</h4>
+                </div>
+
+                <div id="activityList">
+                    <!-- populated by dashboard.js -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Apply Leave/OD Modal -->
+    <div class="modal-overlay" id="applyModal">
+        <div class="modal-box">
+            <h3>Apply for Leave / OD</h3>
+
+            <div class="modal-status" id="modalStatus"></div>
+
+            <form id="applyForm">
+                <div class="form-group">
+                    <label for="requestType">Request Type</label>
+                    <select id="requestType">
+                        <option value="leave">Leave</option>
+                        <option value="od">On Duty (OD)</option>
+                    </select>
+                </div>
+
+                <div class="date-row">
+                    <div class="form-group">
+                        <label for="fromDate">From</label>
+                        <input type="date" id="fromDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="toDate">To</label>
+                        <input type="date" id="toDate">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Reason</label>
+                    <textarea id="reason" placeholder="Briefly explain the reason"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-cancel" id="cancelModalBtn">Cancel</button>
+                    <button type="submit" class="modal-submit" id="modalSubmitBtn">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
