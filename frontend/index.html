@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartSense | Smart Classroom Management</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <header class="navbar">
+
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+
+            <div>
+                <h2>SmartSense</h2>
+                <span>Smart Classroom Management</span>
+            </div>
+        </div>
+
+        <nav class="nav-links" id="navLinks">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#features">Features</a>
+            <a href="#roles">Roles</a>
+            <a href="#contact">Contact</a>
+        </nav>
+
+        <div class="nav-buttons">
+            <button class="login-btn">Login</button>
+            <button class="get-started-btn">Get Started</button>
+        </div>
+
+        <button class="menu-btn" id="menuBtn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </header>
+
+
+    <!-- Hero Section -->
+    <main>
+
+        <section class="hero" id="home">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    <i class="fa-solid fa-microchip"></i>
+                    AI & IoT Powered Classroom System
+                </div>
+
+                <h1>
+                    Smarter Classrooms.
+                    <span>Better Learning.</span>
+                </h1>
+
+                <p>
+                    SmartSense automates classroom attendance, simplifies leave
+                    and On Duty management, and provides real-time attendance
+                    updates through one secure platform.
+                </p>
+
+                <div class="hero-buttons">
+                    <button class="primary-btn">
+                        Explore SmartSense
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <button class="secondary-btn">
+                        <i class="fa-solid fa-circle-play"></i>
+                        How It Works
+                    </button>
+                </div>
+
+                <div class="hero-stats">
+
+                    <div class="stat">
+                        <h3>Automatic</h3>
+                        <p>Attendance Tracking</p>
+                    </div>
+
+                    <div class="stat">
+                        <h3>Real-Time</h3>
+                        <p>Notifications</p>
+                    </div>
+
+                    <div class="stat">
+                        <h3>Secure</h3>
+                        <p>Role-Based Access</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Dashboard Preview -->
+            <div class="hero-dashboard">
+
+                <div class="dashboard-window">
+
+                    <div class="dashboard-topbar">
+
+                        <div class="window-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+
+                        <div class="dashboard-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Search
+                        </div>
+
+                        <div class="profile-circle">
+                            S
+                        </div>
+
+                    </div>
+
+                    <div class="dashboard-body">
+
+                        <aside class="dashboard-sidebar">
+
+                            <div class="mini-logo">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+
+                            <div class="side-item active">
+                                <i class="fa-solid fa-house"></i>
+                            </div>
+
+                            <div class="side-item">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+
+                            <div class="side-item">
+                                <i class="fa-solid fa-calendar-check"></i>
+                            </div>
+
+                            <div class="side-item">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+
+                            <div class="side-item">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+
+                        </aside>
+
+                        <div class="dashboard-main">
+
+                            <div class="dashboard-heading">
+                                <div>
+                                    <p>Welcome back</p>
+                                    <h3>Smart Classroom Dashboard</h3>
+                                </div>
+
+                                <span>Today</span>
+                            </div>
+
+                            <div class="dashboard-cards">
+
+                                <div class="dashboard-card">
+                                    <div class="card-icon students">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <p>Total Students</p>
+                                    <h3>120</h3>
+                                </div>
+
+                                <div class="dashboard-card">
+                                    <div class="card-icon present">
+                                        <i class="fa-solid fa-user-check"></i>
+                                    </div>
+                                    <p>Present Today</p>
+                                    <h3>98</h3>
+                                </div>
+
+                                <div class="dashboard-card">
+                                    <div class="card-icon absent">
+                                        <i class="fa-solid fa-user-xmark"></i>
+                                    </div>
+                                    <p>Absent Today</p>
+                                    <h3>22</h3>
+                                </div>
+
+                            </div>
+
+                            <div class="dashboard-lower">
+
+                                <div class="attendance-card">
+
+                                    <div class="section-title">
+                                        <h4>Attendance Overview</h4>
+                                        <span>81.7%</span>
+                                    </div>
+
+                                    <div class="chart-area">
+
+                                        <div class="donut-chart">
+                                            <div class="donut-center">
+                                                <strong>81.7%</strong>
+                                                <span>Present</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="chart-details">
+                                            <p>
+                                                <span class="green-dot"></span>
+                                                Present
+                                                <strong>98</strong>
+                                            </p>
+
+                                            <p>
+                                                <span class="red-dot"></span>
+                                                Absent
+                                                <strong>22</strong>
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="activity-card">
+
+                                    <div class="section-title">
+                                        <h4>Recent Activity</h4>
+                                        <span>View All</span>
+                                    </div>
+
+                                    <div class="activity">
+                                        <div class="activity-icon success">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5>Attendance marked</h5>
+                                            <p>Class CSE-A</p>
+                                        </div>
+
+                                        <small>10:15 AM</small>
+                                    </div>
+
+                                    <div class="activity">
+                                        <div class="activity-icon warning">
+                                            <i class="fa-solid fa-file"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5>OD request received</h5>
+                                            <p>Student request</p>
+                                        </div>
+
+                                        <small>09:45 AM</small>
+                                    </div>
+
+                                    <div class="activity">
+                                        <div class="activity-icon notification">
+                                            <i class="fa-solid fa-bell"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5>Low attendance alert</h5>
+                                            <p>Notification sent</p>
+                                        </div>
+
+                                        <small>09:20 AM</small>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="floating-card floating-attendance">
+                    <div class="floating-icon">
+                        <i class="fa-solid fa-user-check"></i>
+                    </div>
+
+                    <div>
+                        <strong>Attendance Marked</strong>
+                        <span>Successfully updated</span>
+                    </div>
+                </div>
+
+                <div class="floating-card floating-notification">
+                    <div class="floating-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+
+                    <div>
+                        <strong>Live Alerts</strong>
+                        <span>Instant notifications</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- About Section -->
+        <section class="about section" id="about">
+
+            <div class="section-heading">
+                <span>ABOUT SMARTSENSE</span>
+                <h2>One Platform for Smarter Classroom Management</h2>
+                <p>
+                    SmartSense combines IoT technology, BLE verification and
+                    intelligent software to simplify everyday classroom activities.
+                </p>
+            </div>
+
+            <div class="about-grid">
+
+                <div class="about-image">
+
+                    <div class="about-main-card">
+                        <i class="fa-solid fa-school"></i>
+
+                        <h3>Connected Classroom</h3>
+
+                        <p>
+                            Students, teachers and administrators stay connected
+                            through one centralized system.
+                        </p>
+                    </div>
+
+                    <div class="small-about-card">
+                        <i class="fa-solid fa-wifi"></i>
+                        <span>IoT Enabled</span>
+                    </div>
+
+                </div>
+
+                <div class="about-content">
+
+                    <h3>Simple, Secure and Efficient</h3>
+
+                    <p>
+                        Traditional attendance systems consume classroom time and
+                        make record management difficult. SmartSense helps automate
+                        attendance and provides digital access to classroom records.
+                    </p>
+
+                    <div class="about-points">
+
+                        <div class="about-point">
+                            <i class="fa-solid fa-check"></i>
+
+                            <div>
+                                <h4>Automated Attendance</h4>
+                                <p>
+                                    Attendance is recorded using BLE device
+                                    verification and classroom IoT integration.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="about-point">
+                            <i class="fa-solid fa-check"></i>
+
+                            <div>
+                                <h4>Centralized Records</h4>
+                                <p>
+                                    Attendance, leave and OD details are maintained
+                                    securely in one place.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="about-point">
+                            <i class="fa-solid fa-check"></i>
+
+                            <div>
+                                <h4>Instant Notifications</h4>
+                                <p>
+                                    Students receive real-time attendance and
+                                    low-attendance alerts.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Features -->
+        <section class="features section" id="features">
+
+            <div class="section-heading">
+                <span>CORE FEATURES</span>
+                <h2>Everything Needed for a Smart Classroom</h2>
+                <p>
+                    Designed to improve accuracy, save time and simplify classroom
+                    administration.
+                </p>
+            </div>
+
+            <div class="features-grid">
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+
+                    <h3>Automated Attendance</h3>
+
+                    <p>
+                        Records student attendance using BLE verification and
+                        classroom IoT devices.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                    </div>
+
+                    <h3>Leave & OD Management</h3>
+
+                    <p>
+                        Students can submit leave and On Duty requests digitally
+                        for teacher approval.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+
+                    <h3>Real-Time Notifications</h3>
+
+                    <p>
+                        Receive immediate attendance updates, request status and
+                        low-attendance warnings.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <h3>Reports & Analytics</h3>
+
+                    <p>
+                        View attendance percentages, daily records and useful
+                        classroom reports.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+
+                    <h3>Role-Based Access</h3>
+
+                    <p>
+                        Separate dashboards and permissions for students, teachers
+                        and administrators.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+
+                    <h3>Secure Data Management</h3>
+
+                    <p>
+                        Classroom records are stored securely and can be accessed
+                        only by authorized users.
+                    </p>
+
+                    <a href="#">
+                        Learn More
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Roles -->
+        <section class="roles section" id="roles">
+
+            <div class="section-heading">
+                <span>ROLE-BASED ACCESS</span>
+                <h2>Built for Every Member of the Classroom</h2>
+                <p>
+                    Each user receives a dashboard designed specifically for their
+                    responsibilities.
+                </p>
+            </div>
+
+            <div class="roles-grid">
+
+                <div class="role-card">
+                    <div class="role-number">01</div>
+
+                    <div class="role-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+
+                    <h3>Students</h3>
+
+                    <p>
+                        Check attendance, apply for leave or OD and receive
+                        important notifications.
+                    </p>
+
+                    <button>Student Login</button>
+                </div>
+
+                <div class="role-card featured-role">
+                    <div class="popular-label">Most Accessed</div>
+
+                    <div class="role-number">02</div>
+
+                    <div class="role-icon">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+
+                    <h3>Teachers</h3>
+
+                    <p>
+                        Monitor attendance, approve requests and access classroom
+                        reports.
+                    </p>
+
+                    <button>Teacher Login</button>
+                </div>
+
+                <div class="role-card">
+                    <div class="role-number">03</div>
+
+                    <div class="role-icon">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+
+                    <h3>Administrators</h3>
+
+                    <p>
+                        Manage users, classroom information, reports and system
+                        settings.
+                    </p>
+
+                    <button>Admin Login</button>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Call to Action -->
+        <section class="cta section">
+
+            <div class="cta-content">
+
+                <div>
+                    <span>START USING SMARTSENSE</span>
+                    <h2>Transform Your Classroom Experience</h2>
+
+                    <p>
+                        Save time, improve attendance accuracy and manage your
+                        classroom through one intelligent platform.
+                    </p>
+                </div>
+
+                <div class="cta-buttons">
+                    <button class="cta-primary">
+                        Get Started
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <button class="cta-secondary">
+                        Contact Us
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+
+        <div class="footer-main">
+
+            <div class="footer-brand">
+
+                <div class="logo footer-logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+
+                    <div>
+                        <h2>SmartSense</h2>
+                        <span>Smart Classroom Management</span>
+                    </div>
+                </div>
+
+                <p>
+                    An AI and IoT-powered classroom management platform designed
+                    to automate attendance and simplify academic administration.
+                </p>
+
+                <div class="social-icons">
+                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fa-brands fa-github"></i></a>
+                    <a href="#"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+
+            </div>
+
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#features">Features</a>
+                <a href="#roles">User Roles</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Features</h3>
+                <a href="#">Attendance</a>
+                <a href="#">Leave & OD</a>
+                <a href="#">Notifications</a>
+                <a href="#">Reports</a>
+            </div>
+
+            <div class="footer-column">
+                <h3>Contact</h3>
+
+                <p>
+                    <i class="fa-solid fa-envelope"></i>
+                    smartsense@example.com
+                </p>
+
+                <p>
+                    <i class="fa-solid fa-location-dot"></i>
+                    Chennai, Tamil Nadu
+                </p>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 SmartSense. All Rights Reserved.</p>
+            <p>AI & IoT Powered Smart Classroom Management System</p>
+        </div>
+
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
