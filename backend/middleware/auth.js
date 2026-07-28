@@ -28,35 +28,3 @@ function requireRole(...allowedRoles) {
 }
 
 module.exports = { requireAuth, requireRole };
-
-
-
-
-const jwt = require("jsonwebtoken");
-
-function protect(req, res, next) {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ message: "Not authorized, no token" });
-    }
-
-    try {
-        const token = authHeader.split(" ")[1];
-        req.user = jwt.verify(token, process.env.JWT_SECRET);
-        next();
-    } catch (err) {
-        res.status(401).json({ message: "Token invalid or expired" });
-    }
-}
-
-function requireRole(role) {
-    return (req, res, next) => {
-        if (req.user.role !== role) {
-            return res.status(403).json({ message: "Access denied" });
-        }
-        next();
-    };
-}
-
-module.exports = { protect, requireRole };

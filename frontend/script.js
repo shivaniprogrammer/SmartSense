@@ -28,13 +28,31 @@ navigationLinks.forEach(function (link) {
     });
 });
 
+const studentLoginBtn = document.querySelector(".role-card:nth-child(1) button");
+const teacherLoginBtn = document.querySelector(".role-card:nth-child(2) button");
+const getStartedBtns = document.querySelectorAll(".get-started-btn, .primary-btn, .cta-primary");
+const navLoginBtn = document.querySelector(".login-btn");
 
-const buttons = document.querySelectorAll(
-    ".login-btn, .get-started-btn, .role-card button"
-);
+if (studentLoginBtn) {
+    studentLoginBtn.addEventListener("click", function () {
+        window.location.href = "login-student.html";
+    });
+}
 
-buttons.forEach(function (button) {
+if (teacherLoginBtn) {
+    teacherLoginBtn.addEventListener("click", function () {
+        window.location.href = "login-teacher.html";
+    });
+}
+
+getStartedBtns.forEach(function (button) {
     button.addEventListener("click", function () {
-        alert("Login page will be connected next.");
+        window.location.href = "register.html";
     });
 });
+
+if (navLoginBtn) {
+    navLoginBtn.addEventListener("click", function () {
+        window.location.href = "login-student.html";
+    });
+}
