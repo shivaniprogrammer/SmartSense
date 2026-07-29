@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Attendance | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #0f9fa8;
+  --primary-dark: #087f86;
+  --primary-light: #dff7f8;
+  --primary-soft: #eefafb;
+  --white: #ffffff;
+  --background: #f7fbfc;
+  --text-dark: #14212b;
+  --text-medium: #465963;
+  --text-muted: #72818a;
+  --border: #d9ecee;
+  --green: #1f9d55;
+  --green-bg: #e5f7ec;
+  --amber: #b7791f;
+  --amber-bg: #fff6e0;
+  --red: #e45858;
+  --red-bg: #ffeaea;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
+
+.topbar {
+  height: 70px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5%;
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 12px; }
+.topbar-brand .icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; display: flex; align-items: center; justify-content: center;
+}
+.topbar-brand h2 { font-size: 17px; }
+.topbar-brand span { font-size: 10px; color: var(--text-muted); }
+
+.profile-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--primary-soft); padding: 6px 14px 6px 6px; border-radius: 100px;
+}
+.profile-pill .avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--primary); color: white; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 700;
+}
+.profile-pill span { font-size: 13px; font-weight: 600; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 5%; }
+
+.page-heading { margin-bottom: 28px; }
+.page-heading h1 { font-size: 26px; margin-bottom: 4px; }
+.page-heading p { color: var(--text-muted); font-size: 13px; }
+
+.summary-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px;
+}
+.summary-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
+}
+.summary-card .label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+.summary-card .value { font-size: 24px; font-weight: 700; }
+.summary-card.present .value { color: var(--green); }
+.summary-card.late .value { color: var(--amber); }
+.summary-card.absent .value { color: var(--red); }
+.summary-card.percent .value { color: var(--primary); }
+
+.panel {
+  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; margin-bottom: 20px;
+}
+.panel-heading {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+}
+.panel-heading h3 { font-size: 16px; }
+.panel-heading .filter {
+  font-size: 12px; color: var(--text-muted); border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 8px; cursor: pointer;
+}
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; font-size: 11px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 1px solid var(--border);
+}
+td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 100px; font-size: 11px; font-weight: 600;
+}
+.status-badge.present { background: var(--green-bg); color: var(--green); }
+.status-badge.late { background: var(--amber-bg); color: var(--amber); }
+.status-badge.absent { background: var(--red-bg); color: var(--red); }
+
+.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.method-tag {
+  font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
+}
+
+@media (max-width: 700px) {
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  table { font-size: 11px; }
+  th, td { padding: 8px 6px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
+    <div>
+      <h2>SmartSense</h2>
+      <span>My Attendance</span>
+    </div>
+  </div>
+  <div class="profile-pill">
+    <div class="avatar">S</div>
+    <span>Shivani S.</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="page-heading">
+    <h1>My Attendance</h1>
+    <p>Your attendance record for this month</p>
+  </div>
+
+  <!-- Summary cards - mock data -->
+  <div class="summary-grid">
+    <div class="summary-card percent">
+      <div class="label">Attendance %</div>
+      <div class="value">91%</div>
+    </div>
+    <div class="summary-card present">
+      <div class="label">Days Present</div>
+      <div class="value">20</div>
+    </div>
+    <div class="summary-card late">
+      <div class="label">Days Late</div>
+      <div class="value">2</div>
+    </div>
+    <div class="summary-card absent">
+      <div class="label">Days Absent</div>
+      <div class="value">2</div>
+    </div>
+  </div>
+
+  <!-- Attendance history - mock data -->
+  <div class="panel">
+    <div class="panel-heading">
+      <h3>Attendance History</h3>
+      <div class="filter"><i class="fa-solid fa-filter"></i> This Month</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Method</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Jul 29, 2026</td>
+          <td>08:58 AM</td>
+          <td>04:02 PM</td>
+          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+        </tr>
+        <tr>
+          <td>Jul 28, 2026</td>
+          <td>09:12 AM</td>
+          <td>04:05 PM</td>
+          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+          <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
+        </tr>
+        <tr>
+          <td>Jul 27, 2026</td>
+          <td>—</td>
+          <td>—</td>
+          <td><span class="method-tag">—</span></td>
+          <td><span class="status-badge absent"><span class="dot"></span>Absent</span></td>
+        </tr>
+        <tr>
+          <td>Jul 26, 2026</td>
+          <td>08:50 AM</td>
+          <td>04:00 PM</td>
+          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+        </tr>
+        <tr>
+          <td>Jul 25, 2026</td>
+          <td>08:55 AM</td>
+          <td>03:58 PM</td>
+          <td><span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span></td>
+          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+</body>
+</html>

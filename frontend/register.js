@@ -158,15 +158,20 @@ registerForm.addEventListener("submit", function (e) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Create Account <i class="fa-solid fa-arrow-right"></i>';
 
-            if (status !== 201) {
+            if (status !== 201 && status !== 200) {
                 formStatus.textContent = data.error || "Registration failed.";
                 formStatus.classList.add("show", "fail");
                 return;
             }
 
-            formStatus.textContent = data.message || "Account created! You can now log in.";
+            formStatus.textContent = data.message || "Account created! Redirecting to verification...";
             formStatus.classList.add("show", "success");
-            registerForm.reset();
+
+            const registeredEmail = emailInput.value.trim();
+
+            setTimeout(function () {
+                window.location.href = "verify-otp.html?email=" + encodeURIComponent(registeredEmail);
+            }, 1000);
         })
         .catch(function () {
             submitBtn.disabled = false;

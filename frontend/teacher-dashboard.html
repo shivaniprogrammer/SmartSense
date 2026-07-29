@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #eef0ff;
+  --background: #f6f7fb;
+  --white: #ffffff;
+  --text-dark: #1a1d29;
+  --text-muted: #7a7f92;
+  --border: #ececf3;
+  --green: #16a34a;
+  --green-bg: #e8f8ee;
+  --red: #e0473e;
+  --red-bg: #fdeceb;
+  --amber: #b7791f;
+  --amber-bg: #fff6e0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar { width: 260px; background: var(--white); border-right: 1px solid var(--border); padding: 24px 16px; }
+.sidebar-brand { display: flex; align-items: center; gap: 12px; padding: 8px 8px 28px; }
+.sidebar-brand .icon {
+  width: 38px; height: 38px; border-radius: 10px; background: var(--primary);
+  color: white; display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.sidebar-brand h2 { font-size: 17px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none;
+  margin-bottom: 4px;
+}
+.nav-item i { width: 18px; text-align: center; }
+.nav-item.active { background: var(--primary-light); color: var(--primary); }
+.nav-item:hover:not(.active) { background: #fafafd; }
+
+.main { flex: 1; padding: 32px 4%; max-width: 1300px; }
+
+.main-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+.main-heading p { color: var(--text-muted); font-size: 13px; }
+.main-heading h1 { font-size: 24px; margin-top: 2px; }
+
+.profile-pill { display: flex; align-items: center; gap: 12px; }
+.bell-icon {
+  width: 38px; height: 38px; border-radius: 50%; background: var(--white); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; color: var(--text-muted); position: relative;
+}
+.bell-icon .dot { position: absolute; top: 8px; right: 9px; width: 6px; height: 6px; background: var(--red); border-radius: 50%; }
+.avatar-pill { display: flex; align-items: center; gap: 8px; }
+.avatar-pill .avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: white;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;
+}
+.avatar-pill span { font-size: 14px; font-weight: 600; }
+
+.summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
+.summary-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+.summary-card .icon-badge {
+  width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; margin-bottom: 12px;
+}
+.summary-card.total .icon-badge { background: var(--primary-light); color: var(--primary); }
+.summary-card.present .icon-badge { background: var(--green-bg); color: var(--green); }
+.summary-card.late .icon-badge { background: var(--amber-bg); color: var(--amber); }
+.summary-card.absent .icon-badge { background: var(--red-bg); color: var(--red); }
+.summary-card.inroom .icon-badge { background: var(--primary-light); color: var(--primary); }
+.summary-card .label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.summary-card .value { font-size: 22px; font-weight: 700; }
+
+.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
+
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+.panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.panel-heading h3 { font-size: 15px; }
+.panel-heading .link { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: none; }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.4px; padding: 8px 10px; border-bottom: 1px solid var(--border);
+}
+td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+
+.student-cell { display: flex; align-items: center; gap: 10px; }
+.student-cell .avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light);
+  color: var(--primary-dark); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 100px; font-size: 11px; font-weight: 600;
+}
+.status-badge.present { background: var(--green-bg); color: var(--green); }
+.status-badge.late { background: var(--amber-bg); color: var(--amber); }
+.status-badge.unverified { background: #f0f0f0; color: var(--text-muted); }
+.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; padding-top: 10px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+.bar { width: 100%; background: linear-gradient(180deg, var(--primary), var(--primary-dark)); border-radius: 6px 6px 0 0; }
+.bar-col .day-label { font-size: 10px; color: var(--text-muted); }
+.bar-col .day-value { font-size: 11px; font-weight: 700; color: var(--text-dark); }
+
+@media (max-width: 1000px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <h2>SmartSense</h2>
+    </div>
+    <a href="teacher-dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
+    <a href="#" class="nav-item"><i class="fa-solid fa-user-graduate"></i> Students</a>
+    <a href="teacher-attendence.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+    <a href="#" class="nav-item"><i class="fa-solid fa-file-lines"></i> Leave & OD Requests</a>
+    <a href="#" class="nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+  </aside>
+
+  <main class="main">
+
+    <div class="main-heading">
+      <div>
+        <p>Welcome back</p>
+        <h1>Teacher Dashboard</h1>
+      </div>
+      <div class="profile-pill">
+        <div class="bell-icon"><i class="fa-solid fa-bell"></i><span class="dot"></span></div>
+        <div class="avatar-pill">
+          <div class="avatar">T</div>
+          <span>Teacher</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card total">
+        <div class="icon-badge"><i class="fa-solid fa-users"></i></div>
+        <div class="label">Total Students</div>
+        <div class="value">45</div>
+      </div>
+      <div class="summary-card present">
+        <div class="icon-badge"><i class="fa-solid fa-user-check"></i></div>
+        <div class="label">Present Today</div>
+        <div class="value">38</div>
+      </div>
+      <div class="summary-card late">
+        <div class="icon-badge"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="label">Late Today</div>
+        <div class="value">4</div>
+      </div>
+      <div class="summary-card absent">
+        <div class="icon-badge"><i class="fa-solid fa-user-xmark"></i></div>
+        <div class="label">Absent Today</div>
+        <div class="value">3</div>
+      </div>
+      <div class="summary-card inroom">
+        <div class="icon-badge"><i class="fa-solid fa-door-open"></i></div>
+        <div class="label">Currently In Room</div>
+        <div class="value">35</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3>Today's Attendance</h3>
+          <a href="teacher-attendence.html" class="link">View All</a>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Student</th><th>Check-in</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="student-cell"><div class="avatar">AR</div>Aisha R.</div></td>
+              <td>08:52 AM</td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+            <tr>
+              <td><div class="student-cell"><div class="avatar">RK</div>Ravi K.</div></td>
+              <td>08:55 AM</td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+            <tr>
+              <td><div class="student-cell"><div class="avatar">DS</div>Divya S.</div></td>
+              <td>09:14 AM</td>
+              <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
+            </tr>
+            <tr>
+              <td><div class="student-cell"><div class="avatar">KM</div>Karthik M.</div></td>
+              <td>&mdash;</td>
+              <td><span class="status-badge unverified"><span class="dot"></span>Unverified</span></td>
+            </tr>
+            <tr>
+              <td><div class="student-cell"><div class="avatar">SP</div>Sanjay P.</div></td>
+              <td>08:49 AM</td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3>Weekly Attendance Trend</h3>
+        </div>
+        <div class="bar-chart">
+          <div class="bar-col"><span class="day-value">40</span><div class="bar" style="height: 80%;"></div><span class="day-label">Mon</span></div>
+          <div class="bar-col"><span class="day-value">42</span><div class="bar" style="height: 88%;"></div><span class="day-label">Tue</span></div>
+          <div class="bar-col"><span class="day-value">39</span><div class="bar" style="height: 76%;"></div><span class="day-label">Wed</span></div>
+          <div class="bar-col"><span class="day-value">44</span><div class="bar" style="height: 95%;"></div><span class="day-label">Thu</span></div>
+          <div class="bar-col"><span class="day-value">38</span><div class="bar" style="height: 70%;"></div><span class="day-label">Fri</span></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

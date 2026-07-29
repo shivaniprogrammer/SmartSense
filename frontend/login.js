@@ -97,7 +97,7 @@ loginForm.addEventListener("submit", function (e) {
     fetch(API_BASE + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value })
+        body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value, role: "student" })
     })
         .then(res => res.json().then(data => ({ status: res.status, data })))
         .then(({ status, data }) => {
