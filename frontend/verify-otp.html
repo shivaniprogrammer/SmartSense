@@ -102,6 +102,7 @@ const API_BASE = "http://localhost:5000/api/auth";
 
 const params = new URLSearchParams(window.location.search);
 const email = params.get("email") || "";
+const role = params.get("role") || "student";
 document.getElementById("emailDisplay").textContent = email || "your email";
 
 const inputs = document.querySelectorAll("#otpInputs input");
@@ -164,8 +165,9 @@ verifyBtn.addEventListener("click", async () => {
 
     if (res.ok) {
       showMessage(data.message || "Email verified!", "success");
+      const redirectPage = role === "teacher" ? "login-teacher.html" : "login-student.html";
       setTimeout(() => {
-        window.location.href = "login-student.html";
+        window.location.href = redirectPage;
       }, 1200);
     } else {
       showMessage(data.error || "Verification failed.", "error");

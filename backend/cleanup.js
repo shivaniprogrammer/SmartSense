@@ -7,14 +7,18 @@ const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/attendance
 mongoose
   .connect(MONGO_URI)
   .then(async () => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to database");
 
-    const result = await Student.deleteMany({ studentId: "CSE352" });
-    console.log(`Deleted ${result.deletedCount} document(s) with studentId "CSE352"`);
+    const result = await Student.deleteOne({ email: "rythmbytez@gmail.com" });
 
-    await mongoose.disconnect();
-    console.log("Done.");
+    if (result.deletedCount > 0) {
+      console.log("Deleted successfully:", result);
+    } else {
+      console.log("No matching user found with that email.");
+    }
+
+    mongoose.connection.close();
   })
   .catch((err) => {
-    console.error("Error:", err.message);
+    console.error("Connection failed:", err.message);
   });

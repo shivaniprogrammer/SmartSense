@@ -9,6 +9,9 @@ const formStatus = document.getElementById("formStatus");
 const togglePassword = document.getElementById("togglePassword");
 const submitBtn = document.getElementById("submitBtn");
 
+// Reads which role this login page is for, e.g. <body data-role="teacher">
+const pageRole = document.body.getAttribute("data-role") || "student";
+
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function setError(input, errorEl, message) {
@@ -97,7 +100,7 @@ loginForm.addEventListener("submit", function (e) {
     fetch(API_BASE + "/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value, role: "student" })
+        body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value, role: pageRole })
     })
         .then(res => res.json().then(data => ({ status: res.status, data })))
         .then(({ status, data }) => {

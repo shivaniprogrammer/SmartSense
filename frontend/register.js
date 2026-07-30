@@ -170,7 +170,7 @@ registerForm.addEventListener("submit", function (e) {
             const registeredEmail = emailInput.value.trim();
 
             setTimeout(function () {
-                window.location.href = "verify-otp.html?email=" + encodeURIComponent(registeredEmail);
+             window.location.href = "verify-otp.html?email=" + encodeURIComponent(registeredEmail) + "&role=" + encodeURIComponent(role);
             }, 1000);
         })
         .catch(function () {
