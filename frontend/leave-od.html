@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave & OD | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="student-sidebar.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #eef0ff;
+  --background: #f6f7fb;
+  --white: #ffffff;
+  --text-dark: #1a1d29;
+  --text-muted: #7a7f92;
+  --border: #ececf3;
+  --red: #e0473e;
+  --red-bg: #fdeceb;
+  --green: #16a34a;
+  --green-bg: #e8f8ee;
+  --amber: #b45309;
+  --amber-bg: #fef3e2;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
+
+.layout { display: flex; min-height: 100vh; }
+.main { flex: 1; padding: 32px 4%; max-width: 900px; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 22px; margin-bottom: 4px; }
+.page-header p { font-size: 13px; color: var(--text-muted); }
+
+.card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+  padding: 28px; margin-bottom: 24px;
+}
+.card h2 { font-size: 15px; margin-bottom: 18px; }
+
+.form-row { display: flex; gap: 14px; margin-bottom: 16px; }
+.form-group { flex: 1; margin-bottom: 16px; }
+.form-row .form-group { margin-bottom: 0; }
+
+label {
+  display: block; font-size: 12px; font-weight: 600; color: var(--text-muted);
+  margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em;
+}
+
+select, input[type="date"], textarea {
+  width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: inherit; font-size: 14px; outline: none; color: var(--text-dark);
+}
+select:focus, input[type="date"]:focus, textarea:focus { border-color: var(--primary); }
+textarea { resize: vertical; min-height: 80px; }
+
+.error-msg { display: none; color: var(--red); font-size: 12px; margin-top: 5px; }
+.error-msg.show { display: block; }
+.error { border-color: var(--red) !important; }
+
+.submit-btn {
+  width: 100%; padding: 13px; border: none; border-radius: 10px;
+  background: var(--primary); color: white; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.submit-btn:hover { background: var(--primary-dark); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-status { display: none; padding: 11px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }
+.form-status.show { display: block; }
+.form-status.success { background: var(--green-bg); color: var(--green); }
+.form-status.fail { background: var(--red-bg); color: var(--red); }
+
+.request-item {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 16px 0; border-bottom: 1px solid var(--border); gap: 12px;
+}
+.request-item:last-child { border-bottom: none; }
+.request-main { flex: 1; }
+.request-type { font-size: 13px; font-weight: 700; text-transform: capitalize; margin-bottom: 3px; }
+.request-dates { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.request-reason { font-size: 13px; color: var(--text-dark); }
+.request-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
+
+.status-badge {
+  font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 100px;
+  text-transform: capitalize; white-space: nowrap; height: fit-content;
+}
+.status-pending { background: var(--amber-bg); color: var(--amber); }
+.status-approved { background: var(--green-bg); color: var(--green); }
+.status-rejected { background: var(--red-bg); color: var(--red); }
+
+.empty-state, .loading-state { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <main class="main">
+
+    <div class="page-header">
+      <h1>Leave & OD Requests</h1>
+      <p>Submit a new request or check the status of your past ones.</p>
+    </div>
+
+    <div class="card">
+      <h2>Submit a New Request</h2>
+
+      <div class="form-status" id="formStatus"></div>
+
+      <form id="requestForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type">
+              <option value="leave">Leave</option>
+              <option value="od">On Duty (OD)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fromDate">From</label>
+            <input type="date" id="fromDate">
+            <span class="error-msg" id="fromDateError"></span>
+          </div>
+          <div class="form-group">
+            <label for="toDate">To</label>
+            <input type="date" id="toDate">
+            <span class="error-msg" id="toDateError"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reason">Reason</label>
+          <textarea id="reason" placeholder="Briefly explain the reason for this request..."></textarea>
+          <span class="error-msg" id="reasonError"></span>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Your Requests</h2>
+      <div id="requestsList">
+        <div class="loading-state">Loading your requests...</div>
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+<script src="student-sidebar.js"></script>
+<script>
+const API_BASE = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location.href = "login-student.html";
+}
+
+const requestForm = document.getElementById("requestForm");
+const typeInput = document.getElementById("type");
+const fromDateInput = document.getElementById("fromDate");
+const toDateInput = document.getElementById("toDate");
+const reasonInput = document.getElementById("reason");
+const fromDateError = document.getElementById("fromDateError");
+const toDateError = document.getElementById("toDateError");
+const reasonError = document.getElementById("reasonError");
+const formStatus = document.getElementById("formStatus");
+const submitBtn = document.getElementById("submitBtn");
+const requestsList = document.getElementById("requestsList");
+
+function setError(input, errorEl, message) {
+  input.classList.add("error");
+  errorEl.textContent = message;
+  errorEl.classList.add("show");
+}
+
+function clearError(input, errorEl) {
+  input.classList.remove("error");
+  errorEl.classList.remove("show");
+  errorEl.textContent = "";
+}
+
+function validateForm() {
+  let valid = true;
+
+  if (!fromDateInput.value) {
+    setError(fromDateInput, fromDateError, "From date is required.");
+    valid = false;
+  } else {
+    clearError(fromDateInput, fromDateError);
+  }
+
+  if (!toDateInput.value) {
+    setError(toDateInput, toDateError, "To date is required.");
+    valid = false;
+  } else if (fromDateInput.value && toDateInput.value < fromDateInput.value) {
+    setError(toDateInput, toDateError, "To date cannot be before from date.");
+    valid = false;
+  } else {
+    clearError(toDateInput, toDateError);
+  }
+
+  if (!reasonInput.value.trim()) {
+    setError(reasonInput, reasonError, "Please provide a reason.");
+    valid = false;
+  } else {
+    clearError(reasonInput, reasonError);
+  }
+
+  return valid;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderRequests(requests) {
+  if (!requests.length) {
+    requestsList.innerHTML = '<div class="empty-state">You haven\'t submitted any requests yet.</div>';
+    return;
+  }
+
+  requestsList.innerHTML = requests.map(function (r) {
+    const noteHtml = r.reviewNote ? '<div class="request-note">Note: ' + escapeHtml(r.reviewNote) + '</div>' : "";
+    return (
+      '<div class="request-item">' +
+        '<div class="request-main">' +
+          '<div class="request-type">' + escapeHtml(r.type) + '</div>' +
+          '<div class="request-dates">' + formatDate(r.fromDate) + ' &mdash; ' + formatDate(r.toDate) + '</div>' +
+          '<div class="request-reason">' + escapeHtml(r.reason) + '</div>' +
+          noteHtml +
+        '</div>' +
+        '<span class="status-badge status-' + r.status + '">' + escapeHtml(r.status) + '</span>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+function loadRequests() {
+  fetch(API_BASE + "/requests/mine", {
+    headers: { "Authorization": "Bearer " + token }
+  })
+    .then(function (res) {
+      if (res.status === 401) {
+        window.location.href = "login-student.html";
+        return;
+      }
+      return res.json();
+    })
+    .then(function (requests) {
+      if (requests) {
+        requests.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        renderRequests(requests);
+      }
+    })
+    .catch(function () {
+      requestsList.innerHTML = '<div class="empty-state">Could not load your requests. Is the server running?</div>';
+    });
+}
+
+requestForm.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  formStatus.classList.remove("show", "success", "fail");
+
+  if (!validateForm()) {
+    formStatus.textContent = "Please fix the errors above.";
+    formStatus.classList.add("show", "fail");
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  fetch(API_BASE + "/requests", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      type: typeInput.value,
+      fromDate: fromDateInput.value,
+      toDate: toDateInput.value,
+      reason: reasonInput.value.trim()
+    })
+  })
+    .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+    .then(function (result) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Request";
+
+      if (result.status !== 201) {
+        formStatus.textContent = result.data.error || "Could not submit request.";
+        formStatus.classList.add("show", "fail");
+        return;
+      }
+
+      formStatus.textContent = "Request submitted for teacher approval.";
+      formStatus.classList.add("show", "success");
+      requestForm.reset();
+      loadRequests();
+    })
+    .catch(function () {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit Request";
+      formStatus.textContent = "Could not reach the server.";
+      formStatus.classList.add("show", "fail");
+    });
+});
+
+loadRequests();
+</script>
+
+</body>
+</html>

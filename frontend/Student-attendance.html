@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Attendance | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="student-sidebar.css">
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
@@ -30,24 +31,17 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
 
+.layout { display: flex; min-height: 100vh; }
+
 .topbar {
   height: 70px;
   background: var(--white);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0 5%;
 }
-
-.topbar-brand { display: flex; align-items: center; gap: 12px; }
-.topbar-brand .icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: white; display: flex; align-items: center; justify-content: center;
-}
-.topbar-brand h2 { font-size: 17px; }
-.topbar-brand span { font-size: 10px; color: var(--text-muted); }
 
 .profile-pill {
   display: flex; align-items: center; gap: 10px;
@@ -59,6 +53,8 @@ body { font-family: "Inter", sans-serif; background: var(--background); color: v
   justify-content: center; font-size: 12px; font-weight: 700;
 }
 .profile-pill span { font-size: 13px; font-weight: 600; }
+
+.main-content { flex: 1; }
 
 .container { max-width: 1100px; margin: 0 auto; padding: 40px 5%; }
 
@@ -123,105 +119,109 @@ tr:last-child td { border-bottom: none; }
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-brand">
-    <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
-    <div>
-      <h2>SmartSense</h2>
-      <span>My Attendance</span>
-    </div>
-  </div>
-  <div class="profile-pill">
-    <div class="avatar">S</div>
-    <span>Shivani S.</span>
-  </div>
-</header>
+<div class="layout">
 
-<div class="container">
+  <div id="sidebar-root"></div>
 
-  <div class="page-heading">
-    <h1>My Attendance</h1>
-    <p>Your attendance record for this month</p>
-  </div>
+  <div class="main-content">
 
-  <!-- Summary cards - mock data -->
-  <div class="summary-grid">
-    <div class="summary-card percent">
-      <div class="label">Attendance %</div>
-      <div class="value">91%</div>
-    </div>
-    <div class="summary-card present">
-      <div class="label">Days Present</div>
-      <div class="value">20</div>
-    </div>
-    <div class="summary-card late">
-      <div class="label">Days Late</div>
-      <div class="value">2</div>
-    </div>
-    <div class="summary-card absent">
-      <div class="label">Days Absent</div>
-      <div class="value">2</div>
-    </div>
-  </div>
+    <header class="topbar">
+      <div class="profile-pill">
+        <div class="avatar">S</div>
+        <span>Shivani S.</span>
+      </div>
+    </header>
 
-  <!-- Attendance history - mock data -->
-  <div class="panel">
-    <div class="panel-heading">
-      <h3>Attendance History</h3>
-      <div class="filter"><i class="fa-solid fa-filter"></i> This Month</div>
+    <div class="container">
+
+      <div class="page-heading">
+        <h1>My Attendance</h1>
+        <p>Your attendance record for this month</p>
+      </div>
+
+      <!-- Summary cards - mock data, not yet wired to backend -->
+      <div class="summary-grid">
+        <div class="summary-card percent">
+          <div class="label">Attendance %</div>
+          <div class="value">91%</div>
+        </div>
+        <div class="summary-card present">
+          <div class="label">Days Present</div>
+          <div class="value">20</div>
+        </div>
+        <div class="summary-card late">
+          <div class="label">Days Late</div>
+          <div class="value">2</div>
+        </div>
+        <div class="summary-card absent">
+          <div class="label">Days Absent</div>
+          <div class="value">2</div>
+        </div>
+      </div>
+
+      <!-- Attendance history - mock data, not yet wired to backend -->
+      <div class="panel">
+        <div class="panel-heading">
+          <h3>Attendance History</h3>
+          <div class="filter"><i class="fa-solid fa-filter"></i> This Month</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Method</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Jul 29, 2026</td>
+              <td>08:58 AM</td>
+              <td>04:02 PM</td>
+              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+            <tr>
+              <td>Jul 28, 2026</td>
+              <td>09:12 AM</td>
+              <td>04:05 PM</td>
+              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+              <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
+            </tr>
+            <tr>
+              <td>Jul 27, 2026</td>
+              <td>&mdash;</td>
+              <td>&mdash;</td>
+              <td><span class="method-tag">&mdash;</span></td>
+              <td><span class="status-badge absent"><span class="dot"></span>Absent</span></td>
+            </tr>
+            <tr>
+              <td>Jul 26, 2026</td>
+              <td>08:50 AM</td>
+              <td>04:00 PM</td>
+              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+            <tr>
+              <td>Jul 25, 2026</td>
+              <td>08:55 AM</td>
+              <td>03:58 PM</td>
+              <td><span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span></td>
+              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Check-in</th>
-          <th>Check-out</th>
-          <th>Method</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Jul 29, 2026</td>
-          <td>08:58 AM</td>
-          <td>04:02 PM</td>
-          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-        </tr>
-        <tr>
-          <td>Jul 28, 2026</td>
-          <td>09:12 AM</td>
-          <td>04:05 PM</td>
-          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-          <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
-        </tr>
-        <tr>
-          <td>Jul 27, 2026</td>
-          <td>—</td>
-          <td>—</td>
-          <td><span class="method-tag">—</span></td>
-          <td><span class="status-badge absent"><span class="dot"></span>Absent</span></td>
-        </tr>
-        <tr>
-          <td>Jul 26, 2026</td>
-          <td>08:50 AM</td>
-          <td>04:00 PM</td>
-          <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-        </tr>
-        <tr>
-          <td>Jul 25, 2026</td>
-          <td>08:55 AM</td>
-          <td>03:58 PM</td>
-          <td><span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span></td>
-          <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
 </div>
 
+<script src="student-sidebar.js"></script>
 </body>
 </html>

@@ -5,38 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard | SmartSense</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="student-sidebar.css">
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
+    <style>
+        .layout { display: flex; min-height: 100vh; }
+    </style>
 </head>
 <body>
 
-    <aside class="dash-sidebar">
-        <div class="logo">
-            <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-            <h2>SmartSense</h2>
-        </div>
+<div class="layout">
 
-        <button class="nav-item active">
-            <i class="fa-solid fa-house"></i> Dashboard
-        </button>
-   <a href="Student-attendance.html" class="nav-item">
-  <i class="fa-solid fa-calendar-check"></i> Attendance
-</a>
-        <button class="nav-item">
-            <i class="fa-solid fa-file-lines"></i> Leave & OD
-        </button>
-        <button class="nav-item">
-            <i class="fa-solid fa-bell"></i> Notifications
-        </button>
-
-        <div class="sidebar-bottom">
-            <button class="nav-item logout-btn" id="logoutBtn">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
-        </div>
-    </aside>
+    <div id="sidebar-root"></div>
 
     <main class="dash-main">
 
@@ -120,6 +102,8 @@
 
     </main>
 
+</div>
+
     <!-- Apply Leave/OD Modal -->
     <div class="modal-overlay" id="applyModal">
         <div class="modal-box">
@@ -160,6 +144,7 @@
         </div>
     </div>
 
+    <script src="student-sidebar.js"></script>
     <script src="dashboard.js"></script>
 </body>
 </html>

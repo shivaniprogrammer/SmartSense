@@ -8,6 +8,15 @@ if (!token) {
     window.location.href = "login-student.html";
 }
 
+// Add this near the other modal listeners (after the applyBtn.addEventListener block)
+
+const leaveOdNavBtn = document.getElementById("leaveOdNavBtn");
+if (leaveOdNavBtn) {
+    leaveOdNavBtn.addEventListener("click", function () {
+        applyModal.classList.add("show");
+    });
+}
+
 let user = storedUser ? JSON.parse(storedUser) : null;
 
 const studentNameEl = document.getElementById("studentName");
@@ -21,12 +30,6 @@ if (user && user.name) {
     avatarInitialEl.textContent = user.name.charAt(0).toUpperCase();
 }
 
-const logoutBtn = document.getElementById("logoutBtn");
-logoutBtn.addEventListener("click", function () {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    window.location.href = "login-student.html";
-});
 
 function authFetch(path, options = {}) {
     return fetch(API_BASE + path, {
@@ -108,6 +111,17 @@ authFetch("/students/me")
         const pendingCount = requests.filter(r => r.status === "pending").length;
         document.getElementById("pendingRequests").textContent = pendingCount;
         renderRequests(requests);
+         const lastSeen = localStorage.getItem("notifLastSeen") || "0";
+    const hasUnseenUpdate = requests.some(function (r) {
+        return r.status !== "pending" && new Date(r.updatedAt) > new Date(lastSeen);
+    });
+    const notifDot = document.getElementById("notifDot");
+    if (notifDot) {
+        notifDot.style.display = hasUnseenUpdate ? "block" : "none";
+    }
+
+
+        
     })
     .catch(function () {
         // silently ignore if unauthorized redirect already fired
@@ -123,6 +137,14 @@ const modalSubmitBtn = document.getElementById("modalSubmitBtn");
 
 applyBtn.addEventListener("click", function () {
     applyModal.classList.add("show");
+    const notifNavBtn = document.getElementById("notifNavBtn");
+if (notifNavBtn) {
+    notifNavBtn.addEventListener("click", function () {
+        localStorage.setItem("notifLastSeen", new Date().toISOString());
+        const dot = document.getElementById("notifDot");
+        if (dot) dot.style.display = "none";
+    });
+}
 });
 
 cancelModalBtn.addEventListener("click", function () {

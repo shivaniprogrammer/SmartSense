@@ -1,8 +1,39 @@
 const express = require("express");
 const router = express.Router();
+const nodemailer = require("nodemailer");
 const Request = require("../models/Request");
 const AttendanceRecord = require("../models/AttendanceRecord");
 const { requireAuth, requireRole } = require("../middleware/auth");
+
+const NOTIFY_EMAIL = process.env.REQUEST_NOTIFY_EMAIL || "shivu9328.s.h@gmail.com";
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+async function sendRequestNotification(studentName, request) {
+  try {
+    await transporter.sendMail({
+      from: `"SmartSense" <${process.env.EMAIL_USER}>`,
+      to: NOTIFY_EMAIL,
+      subject: `New ${request.type === "od" ? "OD" : "Leave"} request from ${studentName}`,
+      text: `${studentName} has submitted a ${request.type} request from ${request.fromDate} to ${request.toDate}.\n\nReason: ${request.reason}`,
+      html: `
+        <p><strong>${studentName}</strong> has submitted a new ${request.type === "od" ? "On Duty" : "Leave"} request.</p>
+        <p><strong>From:</strong> ${request.fromDate}<br/>
+           <strong>To:</strong> ${request.toDate}<br/>
+           <strong>Reason:</strong> ${request.reason}</p>
+      `,
+    });
+  } catch (err) {
+    console.error("Failed to send request notification email:", err.message);
+    // Don't block the request submission if the email fails
+  }
+}
 
 function dateRange(fromDate, toDate) {
   const dates = [];
@@ -39,6 +70,9 @@ router.post("/", requireAuth, requireRole("student"), async (req, res) => {
     });
 
     await request.save();
+
+    // Fire-and-forget: don't make the student wait on the email to complete
+    sendRequestNotification(req.user.name || "A student", request);
 
     res.status(201).json({ message: "Request submitted for teacher approval", request });
   } catch (err) {

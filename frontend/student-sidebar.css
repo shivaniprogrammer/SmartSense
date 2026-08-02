@@ -1,0 +1,41 @@
+/* student-sidebar.css — shared sidebar styling for all student pages */
+/* All rules scoped under .sidebar to avoid any collision with dashboard.css */
+
+.sidebar {
+  width: 220px; background: linear-gradient(180deg, #0f9fa8, #087f86);
+  color: white; padding: 24px 0; display: flex; flex-direction: column; min-height: 100vh;
+}
+
+.sidebar .sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; }
+.sidebar .sidebar-brand .icon {
+  width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+}
+.sidebar .sidebar-brand h2 { font-size: 15px; color: white; margin: 0; }
+
+.sidebar .nav-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.75);
+  cursor: pointer; text-decoration: none; position: relative;
+  background: none; border: none; width: 100%; text-align: left; font-family: inherit;
+}
+
+.sidebar .nav-item i { width: 16px; text-align: center; color: rgba(255,255,255,0.75); }
+
+.sidebar .nav-item.active { color: white; font-weight: 700; }
+.sidebar .nav-item.active i { color: white; }
+
+.sidebar .nav-item:hover:not(.active) { color: white; }
+.sidebar .nav-item:hover:not(.active) i { color: white; }
+
+.sidebar .sidebar-bottom { margin-top: auto; }
+
+.sidebar .nav-dot {
+  position: absolute; top: 10px; left: 30px; width: 8px; height: 8px;
+  border-radius: 50%; background: #e0473e; display: none;
+}
+.sidebar .nav-dot.show { display: block; }
+
+@media (max-width: 1000px) {
+  .sidebar { display: none; }
+}

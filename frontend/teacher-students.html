@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance | SmartSense</title>
+<title>Students | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="teacher-sidebar.css">
 <style>
@@ -13,7 +13,6 @@
   --primary: #0f9fa8;
   --primary-dark: #087f86;
   --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
   --white: #ffffff;
   --background: #f7fbfc;
   --text-dark: #14212b;
@@ -21,27 +20,23 @@
   --border: #d9ecee;
   --green: #1f9d55;
   --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
 
 .layout { display: flex; min-height: 100vh; }
-
 .main { flex: 1; padding: 32px 4%; max-width: 1300px; }
 
 .main-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .main-heading h1 { font-size: 24px; margin-bottom: 4px; }
 .main-heading p { color: var(--text-muted); font-size: 13px; }
 
-.date-picker {
+.search-box {
   padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px;
-  font-family: inherit; font-size: 13px; background: var(--white); color: var(--text-dark);
+  font-family: inherit; font-size: 13px; width: 240px; outline: none;
 }
+.search-box:focus { border-color: var(--primary); }
 
 .panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
 
@@ -55,20 +50,17 @@ tr:last-child td { border-bottom: none; }
 
 .student-cell { display: flex; align-items: center; gap: 10px; }
 .student-cell .avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light);
+  width: 30px; height: 30px; border-radius: 50%; background: var(--primary-light);
   color: var(--primary-dark); display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: 700;
 }
 
-.status-badge {
+.verified-badge {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-  border-radius: 100px; font-size: 11px; font-weight: 600; text-transform: capitalize;
+  border-radius: 100px; font-size: 11px; font-weight: 600;
 }
-.status-badge.present { background: var(--green-bg); color: var(--green); }
-.status-badge.late { background: var(--amber-bg); color: var(--amber); }
-.status-badge.absent { background: var(--red-bg); color: var(--red); }
-.status-badge.unverified { background: #f0f0f0; color: var(--text-muted); }
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.verified-badge.yes { background: var(--green-bg); color: var(--green); }
+.verified-badge.no { background: #f0f0f0; color: var(--text-muted); }
 
 .empty-state, .loading-state { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 13px; }
 </style>
@@ -83,19 +75,19 @@ tr:last-child td { border-bottom: none; }
 
     <div class="main-heading">
       <div>
-        <h1>Attendance</h1>
-        <p>Class CSE-A — daily attendance records</p>
+        <h1>Students</h1>
+        <p>All enrolled students</p>
       </div>
-      <input type="date" class="date-picker" id="dateFilter">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search by name or ID...">
     </div>
 
     <div class="panel">
       <table>
         <thead>
-          <tr><th>Student</th><th>Check-in</th><th>Method</th><th>Status</th></tr>
+          <tr><th>Student</th><th>Student ID</th><th>Email</th><th>Email Verified</th></tr>
         </thead>
-        <tbody id="attendanceBody">
-          <tr><td colspan="4"><div class="loading-state">Loading attendance...</div></td></tr>
+        <tbody id="studentsBody">
+          <tr><td colspan="4"><div class="loading-state">Loading students...</div></td></tr>
         </tbody>
       </table>
     </div>
@@ -113,12 +105,9 @@ if (!token) {
   window.location.href = "login-teacher.html";
 }
 
-const attendanceBody = document.getElementById("attendanceBody");
-const dateFilter = document.getElementById("dateFilter");
-
-function todayStr() {
-  return new Date().toISOString().split("T")[0];
-}
+const studentsBody = document.getElementById("studentsBody");
+const searchBox = document.getElementById("searchBox");
+let allStudents = [];
 
 function initials(name) {
   return (name || "?").split(" ").map(function (w) { return w.charAt(0); }).slice(0, 2).join("").toUpperCase();
@@ -130,35 +119,26 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function renderAttendance(records) {
-  if (!records.length) {
-    attendanceBody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No attendance records for this date.</div></td></tr>';
+function renderStudents(students) {
+  if (!students.length) {
+    studentsBody.innerHTML = '<tr><td colspan="4"><div class="empty-state">No students found.</div></td></tr>';
     return;
   }
 
-  attendanceBody.innerHTML = records.map(function (r) {
-    const name = r.student ? r.student.name : "Unknown student";
-    const checkIn = r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }) : "&mdash;";
+  studentsBody.innerHTML = students.map(function (s) {
     return (
       '<tr>' +
-        '<td><div class="student-cell"><div class="avatar">' + initials(name) + '</div>' + escapeHtml(name) + '</div></td>' +
-        '<td>' + checkIn + '</td>' +
-        '<td>' + escapeHtml(r.method || "&mdash;") + '</td>' +
-        '<td><span class="status-badge ' + r.status + '"><span class="dot"></span>' + escapeHtml(r.status) + '</span></td>' +
+        '<td><div class="student-cell"><div class="avatar">' + initials(s.name) + '</div>' + escapeHtml(s.name) + '</div></td>' +
+        '<td>' + escapeHtml(s.studentId) + '</td>' +
+        '<td>' + escapeHtml(s.email) + '</td>' +
+        '<td><span class="verified-badge ' + (s.emailVerified ? "yes" : "no") + '">' + (s.emailVerified ? "Verified" : "Unverified") + '</span></td>' +
       '</tr>'
     );
   }).join("");
 }
 
-function loadAttendance() {
-  attendanceBody.innerHTML = '<tr><td colspan="4"><div class="loading-state">Loading attendance...</div></td></tr>';
-
-  const date = dateFilter.value || todayStr();
-
-  // NOTE: this assumes a GET /api/attendance?date=YYYY-MM-DD endpoint returning
-  // an array of AttendanceRecord docs populated with student name.
-  // Adjust the endpoint/query param below to match your actual attendanceRoutes.js.
-  fetch(API_BASE + "/attendance?date=" + date, {
+function loadStudents() {
+  fetch(API_BASE + "/students", {
     headers: { "Authorization": "Bearer " + token }
   })
     .then(function (res) {
@@ -168,18 +148,26 @@ function loadAttendance() {
       }
       return res.json();
     })
-    .then(function (records) {
-      if (records) renderAttendance(Array.isArray(records) ? records : []);
+    .then(function (students) {
+      if (students) {
+        allStudents = students;
+        renderStudents(allStudents);
+      }
     })
     .catch(function () {
-      attendanceBody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Could not load attendance. Is the server running?</div></td></tr>';
+      studentsBody.innerHTML = '<tr><td colspan="4"><div class="empty-state">Could not load students. Is the server running?</div></td></tr>';
     });
 }
 
-dateFilter.value = todayStr();
-dateFilter.addEventListener("change", loadAttendance);
+searchBox.addEventListener("input", function () {
+  const q = searchBox.value.trim().toLowerCase();
+  const filtered = allStudents.filter(function (s) {
+    return s.name.toLowerCase().includes(q) || s.studentId.toLowerCase().includes(q);
+  });
+  renderStudents(filtered);
+});
 
-loadAttendance();
+loadStudents();
 </script>
 
 </body>
