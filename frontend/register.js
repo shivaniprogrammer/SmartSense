@@ -3,17 +3,23 @@ const API_BASE = "http://localhost:5000/api";
 const registerForm = document.getElementById("registerForm");
 const nameInput = document.getElementById("name");
 const studentIdInput = document.getElementById("studentId");
-const parentEmailInput = document.getElementById("parentEmail");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("confirmPassword");
+
 const nameError = document.getElementById("nameError");
 const studentIdError = document.getElementById("studentIdError");
 const emailError = document.getElementById("emailError");
 const passwordError = document.getElementById("passwordError");
 const confirmPasswordError = document.getElementById("confirmPasswordError");
+
 const formStatus = document.getElementById("formStatus");
 const submitBtn = document.getElementById("submitBtn");
+
+// Role Radio buttons & Container
+const roleStudent = document.getElementById("roleStudent");
+const roleTeacher = document.getElementById("roleTeacher");
+const studentIdContainer = document.getElementById("studentIdContainer");
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -39,7 +45,8 @@ function validateName() {
 }
 
 function validateStudentId() {
-    if (studentIdInput.value.trim() === "") {
+    // Only required if student role is selected
+    if (roleStudent.checked && studentIdInput.value.trim() === "") {
         setError(studentIdInput, studentIdError, "Student ID is required.");
         return false;
     }
@@ -84,10 +91,26 @@ function validateConfirmPassword() {
     return true;
 }
 
+// Toggle Visibility of Student ID based on Role Selection
+function handleRoleChange() {
+    if (roleStudent.checked) {
+        studentIdContainer.style.display = "block";
+    } else {
+        studentIdContainer.style.display = "none";
+        clearError(studentIdInput, studentIdError);
+    }
+}
+
+roleStudent.addEventListener("change", handleRoleChange);
+roleTeacher.addEventListener("change", handleRoleChange);
+
+// Initialize role field visibility
+handleRoleChange();
+
 [nameInput, studentIdInput, emailInput, passwordInput, confirmPasswordInput].forEach(function (input) {
     input.addEventListener("blur", function () {
         if (input === nameInput) validateName();
-        if (input === studentIdInput) validateStudentId();
+        if (input === studentIdInput && roleStudent.checked) validateStudentId();
         if (input === emailInput) validateEmail();
         if (input === passwordInput) validatePassword();
         if (input === confirmPasswordInput) validateConfirmPassword();
@@ -96,7 +119,7 @@ function validateConfirmPassword() {
     input.addEventListener("input", function () {
         if (input.classList.contains("error")) {
             if (input === nameInput) validateName();
-            if (input === studentIdInput) validateStudentId();
+            if (input === studentIdInput && roleStudent.checked) validateStudentId();
             if (input === emailInput) validateEmail();
             if (input === passwordInput) validatePassword();
             if (input === confirmPasswordInput) validateConfirmPassword();
@@ -123,7 +146,7 @@ registerForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
     const isNameValid = validateName();
-    const isStudentIdValid = validateStudentId();
+    const isStudentIdValid = roleStudent.checked ? validateStudentId() : true;
     const isEmailValid = validateEmail();
     const isPasswordValid = validatePassword();
     const isConfirmValid = validateConfirmPassword();
@@ -136,22 +159,26 @@ registerForm.addEventListener("submit", function (e) {
         return;
     }
 
-    const role = document.querySelector('input[name="role"]:checked').value;
+    const role = roleStudent.checked ? "student" : "teacher";
 
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
 
+    const payload = {
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        password: passwordInput.value,
+        role: role
+    };
+
+    if (role === "student") {
+        payload.studentId = studentIdInput.value.trim();
+    }
+
     fetch(API_BASE + "/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            name: nameInput.value.trim(),
-            studentId: studentIdInput.value.trim(),
-            parentEmail: parentEmailInput.value.trim() || undefined,
-            email: emailInput.value.trim(),
-            password: passwordInput.value,
-            role: role
-        })
+        body: JSON.stringify(payload)
     })
         .then(res => res.json().then(data => ({ status: res.status, data })))
         .then(({ status, data }) => {

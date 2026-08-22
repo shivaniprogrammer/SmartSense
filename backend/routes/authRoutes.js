@@ -31,10 +31,14 @@ async function sendOtpEmail(toEmail, otp) {
 // ---- Register ----
 router.post("/register", async (req, res) => {
   try {
-    const { name, studentId, parentEmail, email, password, role } = req.body;
+    const { name, studentId, email, password, role } = req.body;
 
-    if (!name || !studentId || !email || !password || !role) {
-      return res.status(400).json({ error: "name, studentId, email, password and role are required" });
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ error: "name, email, password and role are required" });
+    }
+
+    if (role === "student" && !studentId) {
+      return res.status(400).json({ error: "studentId is required for student registration" });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -50,8 +54,7 @@ router.post("/register", async (req, res) => {
 
     const student = await Student.create({
       name,
-      studentId,
-      parentEmail,
+      studentId: role === "student" ? studentId : undefined,
       email: normalizedEmail,
       password: hashedPassword,
       role,

@@ -33,8 +33,18 @@ app.get("/api/health", (req, res) => {
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => {
+  .then(async () => {
     console.log("MongoDB connected");
+    
+    // Sync Student model indexes to ensure sparse unique index for studentId
+    const Student = require("./models/Student");
+    try {
+      await Student.syncIndexes();
+      console.log("Database indexes synced successfully");
+    } catch (err) {
+      console.warn("Index sync warning:", err.message);
+    }
+
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`View recent sensor events at http://localhost:${PORT}/index.html`);

@@ -21,13 +21,12 @@
     <div id="sidebar-root"></div>
 
     <main class="dash-main">
-
-        <div class="dash-topbar">
-            <div>
-                <p>Welcome back</p>
-                <h1 id="studentName">Student</h1>
-            </div>
-
+<div class="dash-topbar">
+    <div>
+        <p>Welcome back</p>
+        <h1 id="studentName">Student</h1>
+        <p class="today-status" id="todayStatus"></p>
+    </div>
             <div class="topbar-right">
                 <button class="bell-btn">
                     <i class="fa-solid fa-bell"></i>
@@ -40,6 +39,20 @@
                 </div>
             </div>
         </div>
+        <div class="today-card" id="todayCard">
+    <div class="today-card-left">
+        <div class="icon today-icon"><i class="fa-solid fa-calendar-day"></i></div>
+        <div>
+            <p id="todayDate">Loading date...</p>
+            <span>Today's Status</span>
+        </div>
+    </div>
+    <div class="today-status-badge" id="todayStatusBadge">
+        <span class="dot"></span>
+        <span id="todayStatusText">--</span>
+    </div>
+</div>
+
 
         <div class="stats-grid">
 

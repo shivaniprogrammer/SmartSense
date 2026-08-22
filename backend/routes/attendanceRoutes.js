@@ -145,9 +145,9 @@ router.post("/notify-absentees", requireAuth, requireRole("teacher", "admin"), a
 
     const results = [];
     for (const student of absentStudents) {
-      if (student.parentEmail) {
+      if (student.email) {
         const result = await sendEmail(
-          student.parentEmail,
+          student.email,
           "Attendance Alert",
           `${student.name} was not marked present today (${date}). Please contact the class teacher if this is unexpected.`
         );

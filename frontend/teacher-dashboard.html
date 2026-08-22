@@ -114,6 +114,9 @@ tr:last-child td { border-bottom: none; }
         <p>Class CSE-A — live attendance overview</p>
       </div>
       <div style="display: flex; align-items: center; gap: 14px;">
+        <button id="alertBtn" style="padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-dark); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;">
+          <i class="fa-solid fa-triangle-exclamation" style="color: var(--red);"></i> Send Low Attendance Alerts
+        </button>
         <div class="date-pill">Jul 29, 2026</div>
         <a href="teacher-requests.html" class="bell-icon"><i class="fa-solid fa-bell"></i><span class="dot" id="notifDot"></span></a>
       </div>
@@ -227,6 +230,35 @@ tr:last-child td { border-bottom: none; }
       }
     })
     .catch(function () {});
+
+  const alertBtn = document.getElementById("alertBtn");
+  if (alertBtn) {
+    alertBtn.addEventListener("click", function () {
+      alertBtn.disabled = true;
+      const originalText = alertBtn.innerHTML;
+      alertBtn.innerHTML = "Checking...";
+
+      fetch("http://localhost:5000/api/alerts/low-attendance-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({})
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          alertBtn.disabled = false;
+          alertBtn.innerHTML = originalText;
+          alert(data.message || "Check complete.");
+        })
+        .catch(function () {
+          alertBtn.disabled = false;
+          alertBtn.innerHTML = originalText;
+          alert("Could not reach the server.");
+        });
+    });
+  }
 })();
 </script>
 </body>

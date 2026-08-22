@@ -12,80 +12,111 @@
 </head>
 <body data-role="student">
 
-    <div class="login-topbar">
-        <a href="index.html" class="logo">
-            <div class="logo-icon">
-                <i class="fa-solid fa-graduation-cap"></i>
+    <div class="auth-container">
+        <!-- Left Sidebar: Visual Hero Banner -->
+        <div class="auth-sidebar">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h2>SmartSense</h2>
+                    <span>Smart Classroom Management</span>
+                </div>
+            </a>
+            <div class="auth-sidebar-body">
+                <div class="auth-sidebar-text">
+                    <h3>Smarter Classrooms. Better Learning.</h3>
+                    <p>Verify attendance automatically, view live notifications, and request leave or OD with just a few clicks.</p>
+                </div>
             </div>
-            <div>
-                <h2>SmartSense</h2>
-                <span>Smart Classroom Management</span>
+            <div class="auth-sidebar-footer">
+                <span>© 2026 SmartSense Systems. All rights reserved.</span>
             </div>
-        </a>
+        </div>
 
-        <a href="index.html" class="back-home">
-            <i class="fa-solid fa-arrow-left"></i>
-            Back to Home
-        </a>
-    </div>
-
-    <div class="login-wrapper">
-        <div class="login-card">
-
-            <div class="login-role-icon">
-                <i class="fa-solid fa-user-graduate"></i>
-            </div>
-
-            <h1>Student Login</h1>
-            <p class="subtitle">Check attendance, apply for leave and view notifications.</p>
-
-            <div class="form-status" id="formStatus"></div>
-
-            <form id="loginForm" novalidate>
-
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="input-box">
-                        <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="email" placeholder="you@college.edu" autocomplete="email">
+        <!-- Right Area: Form Content -->
+        <div class="auth-content">
+            <!-- Mobile View Logo Topbar -->
+            <div class="auth-topbar-mobile">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
                     </div>
-                    <span class="error-msg" id="emailError"></span>
-                </div>
+                    <h2>SmartSense</h2>
+                </a>
+                <a href="index.html" class="back-home">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </div>
 
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-box">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
-                        <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+            <div class="login-topbar">
+                <div></div>
+                <a href="index.html" class="back-home">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </div>
+
+            <div class="login-wrapper">
+                <div class="login-card">
+
+                    <div class="login-role-icon">
+                        <i class="fa-solid fa-user-graduate"></i>
                     </div>
-                    <span class="error-msg" id="passwordError"></span>
+
+                    <h1>Student Login</h1>
+                    <p class="subtitle">Check attendance, apply for leave and view notifications.</p>
+
+                    <div class="form-status" id="formStatus"></div>
+
+                    <form id="loginForm" novalidate>
+
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <div class="input-box">
+                                <i class="fa-solid fa-envelope"></i>
+                                <input type="email" id="email" placeholder="you@college.edu" autocomplete="email">
+                            </div>
+                            <span class="error-msg" id="emailError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <div class="input-box">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+                                <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+                            </div>
+                            <span class="error-msg" id="passwordError"></span>
+                        </div>
+
+                        <div class="form-options">
+                            <label class="remember-me">
+                                <input type="checkbox" id="remember">
+                                Remember me
+                            </label>
+                            <a href="#">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="login-submit" id="submitBtn">
+                            Sign In
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+                    <p class="switch-role">
+                        Not a student?
+                        <a href="login-teacher.html">Login as Teacher</a>
+                    </p>
+
+                    <p class="login-footer">
+                        New to SmartSense? <a href="register.html">Create an Account</a>
+                    </p>
+
                 </div>
-
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="remember">
-                        Remember me
-                    </label>
-                    <a href="#">Forgot password?</a>
-                </div>
-
-                <button type="submit" class="login-submit" id="submitBtn">
-                    Sign In
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-
-            </form>
-
-            <p class="switch-role">
-                Not a student?
-                <a href="login-teacher.html">Login as Teacher</a>
-            </p>
-
-            <p class="login-footer">
-                New to SmartSense? <a href="#">Contact your administrator</a>
-            </p>
-
+            </div>
         </div>
     </div>
 

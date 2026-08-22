@@ -3,6 +3,32 @@ const API_BASE = "http://localhost:5000/api";
 const token = localStorage.getItem("token");
 const storedUser = localStorage.getItem("user");
 
+/*
+  MOCK for now — swap todaysAttendanceStatus with a real value
+  once you fetch the student's actual attendance record for today.
+*/
+function renderTodayCard() {
+    const today = new Date();
+    const dateString = today.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+
+    document.getElementById("todayDate").textContent = dateString;
+
+    const todaysAttendanceStatus = "present"; // MOCK — "present" or "absent"
+
+    const badge = document.getElementById("todayStatusBadge");
+    const statusText = document.getElementById("todayStatusText");
+
+    badge.classList.add(todaysAttendanceStatus);
+    statusText.textContent = todaysAttendanceStatus === "present" ? "Present" : "Absent";
+}
+
+renderTodayCard();
+
 // Auth guard - redirect to login if no token
 if (!token) {
     window.location.href = "login-student.html";

@@ -17,7 +17,6 @@ const transporter = nodemailer.createTransport({
 
 async function sendLowAttendanceEmail(student, percent, threshold) {
   const recipients = [student.email];
-  if (student.parentEmail) recipients.push(student.parentEmail);
 
   try {
     await transporter.sendMail({

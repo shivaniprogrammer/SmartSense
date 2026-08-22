@@ -483,3 +483,136 @@ body {
     .stats-grid { grid-template-columns: 1fr; }
     .dash-lower { grid-template-columns: 1fr; }
 }
+/* More breathing room across the whole dashboard */
+.dash-main {
+    padding: 40px 4%;
+    width: 100%;
+}
+
+.dash-topbar {
+    margin-bottom: 32px;
+}
+
+/* Wider gaps between the 3 stat cards, more internal padding */
+.stats-grid {
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    padding: 24px;
+}
+
+.stat-card .icon {
+    margin-bottom: 14px;
+}
+
+.stat-card p {
+    margin-bottom: 6px;
+}
+
+/* Space between the two lower panels, and inside each */
+.dash-lower {
+    gap: 20px;
+    margin-top: 24px;
+}
+
+.panel {
+    padding: 28px;
+}
+
+.panel-heading {
+    margin-bottom: 20px;
+}
+
+/* Give the donut chart room instead of sitting flush against the legend */
+.chart-row {
+    gap: 32px;
+    padding: 16px 0 8px;
+}
+
+.chart-legend p {
+    margin-bottom: 10px;
+}
+
+/* Space out activity rows so they don't touch */
+#activityList > * {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+}
+.today-status {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+    color: var(--text-muted);
+}
+.today-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.today-card-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.today-card-left .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.today-icon {
+    background: #eefafb;
+    color: #0f9fa8;
+}
+
+.today-card-left p {
+    font-size: 15px;
+    font-weight: 700;
+    color: #14212b;
+    margin: 0;
+}
+
+.today-card-left span {
+    font-size: 12px;
+    color: #72818a;
+}
+
+.today-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.today-status-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.today-status-badge.present {
+    background: #e5f7ec;
+    color: #1f9d55;
+}
+
+.today-status-badge.absent {
+    background: #ffeaea;
+    color: #e45858;
+}
