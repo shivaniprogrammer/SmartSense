@@ -6,7 +6,10 @@ const Student = require("../models/Student");
 const generateToken = require("../utils/generateToken");
 
 const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 }
@@ -39,28 +42,33 @@ router.post("/register", async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ error: "An account with this email already exists" });
     }
+const hashedPassword = await bcrypt.hash(password, 10);
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOtp();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+const otp = role === "student"
+  ? generateOtp()
+  : undefined;
 
-    const student = await Student.create({
+const otpExpiry = role === "student"
+  ? new Date(Date.now() + 10 * 60 * 1000)
+  : undefined;
+
+const student = await Student.create({
       name,
       studentId: role === "student" ? studentId : undefined,
       email: normalizedEmail,
       password: hashedPassword,
       role,
-      otpCode: otp,
-      otpExpiry,
-      emailVerified: false,
+     otpCode: otp,
+otpExpiry,
+emailVerified: role === "teacher",
     });
-
-    try {
-      await sendOtpEmail(normalizedEmail, otp);
-    } catch (mailErr) {
-      console.error("Failed to send OTP email:", mailErr.message);
-      // Account is still created; user can use "resend code" once mail issue is fixed
-    }
+if (role === "student") {
+  try {
+    await sendOtpEmail(normalizedEmail, otp);
+  } catch (mailErr) {
+    console.error("Failed to send OTP email:", mailErr.message);
+  }
+}
 
     res.status(201).json({
       message: "Account created. Check your email for the verification code.",
@@ -166,9 +174,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials for this role" });
     }
 
-    if (!student.emailVerified) {
-      return res.status(403).json({ error: "Please verify your email before logging in" });
-    }
+   if (role === "student" && !student.emailVerified) {
+  return res.status(403).json({
+    error: "Please verify your email before logging in"
+  });
+}
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
