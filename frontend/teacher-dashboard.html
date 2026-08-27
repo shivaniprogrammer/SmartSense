@@ -216,7 +216,7 @@ tr:last-child td { border-bottom: none; }
       const originalText = alertBtn.innerHTML;
       alertBtn.innerHTML = "Checking...";
 
-      fetch("http://localhost:5000/api/alerts/low-attendance-check", {
+      fetch("/api/alerts/low-attendance-check", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
