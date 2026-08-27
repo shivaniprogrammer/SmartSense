@@ -99,6 +99,13 @@ tr:last-child td { border-bottom: none; }
   .grid-2 { grid-template-columns: 1fr; }
   .summary-grid { grid-template-columns: repeat(2, 1fr); }
 }
+.see-all-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 16px; padding: 10px; border-radius: 10px;
+  background: var(--primary-light); color: var(--primary-dark);
+  font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.see-all-btn:hover { background: var(--primary); color: white; }
 </style>
 </head>
 <body>
@@ -112,7 +119,7 @@ tr:last-child td { border-bottom: none; }
     <div class="main-heading">
       <div>
         <h1>Teacher Dashboard</h1>
-        <p>Class CSE-A — live attendance overview</p>
+        <p>Class CSE-F- live attendance overview</p>
       </div>
       <div style="display: flex; align-items: center; gap: 14px;">
         <button id="alertBtn" style="padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-dark); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;">
@@ -124,76 +131,46 @@ tr:last-child td { border-bottom: none; }
     </div>
 
     <!-- Summary cards - mock data, not yet wired to backend -->
-    <div class="summary-grid">
-      <div class="summary-card total">
-        <div class="icon-badge"><i class="fa-solid fa-users"></i></div>
-        <div class="label">Total Students</div>
-        <div class="value">45</div>
-      </div>
-      <div class="summary-card present">
-        <div class="icon-badge"><i class="fa-solid fa-user-check"></i></div>
-        <div class="label">Present Today</div>
-        <div class="value">38</div>
-      </div>
-      <div class="summary-card late">
-        <div class="icon-badge"><i class="fa-solid fa-clock"></i></div>
-        <div class="label">Late Today</div>
-        <div class="value">4</div>
-      </div>
-      <div class="summary-card absent">
-        <div class="icon-badge"><i class="fa-solid fa-user-xmark"></i></div>
-        <div class="label">Absent Today</div>
-        <div class="value">3</div>
-      </div>
-      <div class="summary-card inroom">
-        <div class="icon-badge"><i class="fa-solid fa-door-open"></i></div>
-        <div class="label">Currently In Room</div>
-        <div class="value">35</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
-
-      <!-- Live attendance table - mock data, not yet wired to backend -->
-      <div class="panel">
-        <div class="panel-heading">
-          <h3>Today's Attendance</h3>
-          <span class="link">View All</span>
-        </div>
-        <table>
-          <thead>
-            <tr><th>Student</th><th>Check-in</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><div class="student-cell"><div class="avatar">AR</div>Aisha R.</div></td>
-              <td>08:52 AM</td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-            <tr>
-              <td><div class="student-cell"><div class="avatar">RK</div>Ravi K.</div></td>
-              <td>08:55 AM</td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-            <tr>
-              <td><div class="student-cell"><div class="avatar">DS</div>Divya S.</div></td>
-              <td>09:14 AM</td>
-              <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
-            </tr>
-            <tr>
-              <td><div class="student-cell"><div class="avatar">KM</div>Karthik M.</div></td>
-              <td>&mdash;</td>
-              <td><span class="status-badge unverified"><span class="dot"></span>Unverified</span></td>
-            </tr>
-            <tr>
-              <td><div class="student-cell"><div class="avatar">SP</div>Sanjay P.</div></td>
-              <td>08:49 AM</td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
+    <div class="panel">
+  <div class="panel-heading">
+    <h3>Today's Attendance</h3>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Student</th><th>Check-in</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><div class="student-cell"><div class="avatar">SM</div>Santhosh M</div></td>
+        <td>08:52 AM</td>
+        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+      </tr>
+      <tr>
+        <td><div class="student-cell"><div class="avatar">SN</div>Santhosh Narayan</div></td>
+        <td>08:55 AM</td>
+        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+      </tr>
+      <tr>
+        <td><div class="student-cell"><div class="avatar">SJ</div>Saranraj J</div></td>
+        <td>09:14 AM</td>
+        <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
+      </tr>
+      <tr>
+        <td><div class="student-cell"><div class="avatar">SS</div>S Saravana Kumar</div></td>
+        <td>08:49 AM</td>
+        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
+      </tr>
+      <tr>
+        <td><div class="student-cell"><div class="avatar">SS</div>Saravanan S</div></td>
+        <td>—</td>
+        <td><span class="status-badge unverified"><span class="dot"></span>Unverified</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <a href="teacher-students.html" class="see-all-btn">
+    See All Students <i class="fa-solid fa-arrow-right"></i>
+  </a>
+</div>
       <!-- Weekly trend - mock data, not yet wired to backend -->
       <div class="panel">
         <div class="panel-heading">
