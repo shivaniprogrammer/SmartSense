@@ -5,7 +5,7 @@
 //   3. <script src="student-sidebar.js"></script> before </body>
 
 (function () {
-  const API_BASE = "http://localhost:5000/api";
+     const API_BASE = "/api";
   const currentPage = window.location.pathname.split("/").pop();
   const token = localStorage.getItem("token");
 
