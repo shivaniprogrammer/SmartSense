@@ -5,25 +5,14 @@ const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
 const generateToken = require("../utils/generateToken");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 8000,
-  greetingTimeout: 8000,
-  socketTimeout: 8000,
-});
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 }
-
 async function sendOtpEmail(toEmail, otp) {
-  await transporter.sendMail({
-    from: `"SmartSense" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "SmartSense <onboarding@resend.dev>",
     to: toEmail,
     subject: "Your verification code",
     text: `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`,
