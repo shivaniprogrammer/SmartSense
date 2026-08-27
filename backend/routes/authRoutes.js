@@ -70,10 +70,12 @@ if (role === "student") {
   }
 }
 
-    res.status(201).json({
-      message: "Account created. Check your email for the verification code.",
-      email: normalizedEmail,
-    });
+ res.status(201).json({
+  message: role === "student"
+    ? "Account created. Check your email for the verification code."
+    : "Teacher account created successfully. You can now log in.",
+  email: normalizedEmail,
+});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error during registration" });
