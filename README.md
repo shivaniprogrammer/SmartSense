@@ -29,3 +29,5 @@ which would break matching over time if enabled.
 3. Submits it via `POST /api/students/enroll/ble`
 4. ESP32 later matches detected MAC addresses against enrolled students
    via `POST /api/attendance/checkin/ble`
+
+
