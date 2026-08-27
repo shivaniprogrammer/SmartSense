@@ -157,7 +157,7 @@ verifyBtn.addEventListener("click", async () => {
   verifyBtn.textContent = "Verifying...";
 
   try {
-    const res = await fetch(`${API_BASE}/verify-otp`, {
+  const res = await fetch(`${API_BASE}/auth/verify-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp }),
@@ -200,7 +200,7 @@ resendLink.addEventListener("click", async () => {
   if (resendLink.classList.contains("disabled")) return;
 
   try {
-    const res = await fetch(`${API_BASE}/resend-otp`, {
+    const res = await fetch(`${API_BASE}/auth/resend-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
