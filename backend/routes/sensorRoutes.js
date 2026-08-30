@@ -3,7 +3,7 @@ const router = express.Router();
 const SensorEvent = require("../models/SensorEvent");
 const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
-
+const sendTelegramMessage = require("../utils/sendTelegram");
 // ---- Motion + door sensor (already working, unchanged) ----
 router.post("/sensor-data", async (req, res) => {
   try {
@@ -74,7 +74,7 @@ router.post("/ble-scan", async (req, res) => {
       });
     }
 
-    const record = await AttendanceRecord.create({
+     const record = await AttendanceRecord.create({
       student: student._id,
       date: today,
       checkInTime: new Date(),
@@ -84,6 +84,8 @@ router.post("/ble-scan", async (req, res) => {
     });
 
     console.log(`[${new Date().toLocaleTimeString()}] BLE scan matched ${student.name} (${bleId}) -> marked present`);
+
+    sendTelegramMessage(`✅ ${student.name} marked present at ${new Date().toLocaleTimeString()}`);
 
     res.status(201).json({
       message: `${student.name} marked present`,
