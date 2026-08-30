@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Students | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
@@ -28,108 +29,442 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
 
-.layout { display: flex; min-height: 100vh; }
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--background);
+  color: var(--text-dark);
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
 
 .sidebar {
-  width: 220px; background: linear-gradient(180deg, var(--primary), var(--primary-dark));
-  color: white; padding: 24px 0; display: flex; flex-direction: column;
+  width: 220px;
+  background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+  color: white;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
 }
-.sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; }
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px 24px;
+}
+
 .sidebar-brand .icon {
-  width: 34px; height: 34px; border-radius: 9px; background: rgba(255,255,255,0.2);
-  display: flex; align-items: center; justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.sidebar-brand h2 { font-size: 15px; }
+
+.sidebar-brand h2 {
+  font-size: 15px;
+}
+
 .nav-item {
-  display: flex; align-items: center; gap: 12px; padding: 12px 20px;
-  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.75); text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
-.nav-item.active { background: rgba(255,255,255,0.15); color: white; border-right: 3px solid white; }
-.nav-item i { width: 16px; text-align: center; }
 
-.main { flex: 1; padding: 32px 4%; }
+.nav-item:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
 
-.main-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.main-heading h1 { font-size: 24px; margin-bottom: 4px; }
-.main-heading p { color: var(--text-muted); font-size: 13px; }
+.nav-item.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border-right: 3px solid white;
+}
 
-.toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+.nav-item i {
+  width: 16px;
+  text-align: center;
+}
+
+/* Notification Badge */
+.notification-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: auto;
+}
+
+/* Notification Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 9998;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.show {
+  display: flex;
+}
+
+.modal {
+  background: white;
+  border-radius: 18px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f3f4;
+  color: #555;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
+}
+
+.modal h2 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: var(--text-dark);
+}
+
+.notification-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item .icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notification-item .content {
+  flex: 1;
+}
+
+.notification-item .content strong {
+  display: block;
+  font-size: 13px;
+  color: var(--text-dark);
+}
+
+.notification-item .content span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.notification-item .time {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.main {
+  flex: 1;
+  padding: 32px 4%;
+}
+
+.main-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.main-heading h1 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.main-heading p {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .search-box {
-  flex: 1; max-width: 320px; display: flex; align-items: center; gap: 10px;
-  background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
-.search-box input { border: none; outline: none; font-size: 13px; flex: 1; font-family: inherit; }
-.search-box i { color: var(--text-muted); }
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  flex: 1;
+  font-family: inherit;
+}
+
+.search-box i {
+  color: var(--text-muted);
+}
 
 .filter-select {
-  border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px;
-  font-size: 13px; color: var(--text-muted); background: var(--white); cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--white);
+  cursor: pointer;
 }
 
-.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
 
-table { width: 100%; border-collapse: collapse; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
 th {
-  text-align: left; font-size: 11px; color: var(--text-muted); text-transform: uppercase;
-  letter-spacing: 0.5px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--primary-soft);
+  text-align: left;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--primary-soft);
 }
-td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--primary-soft); }
 
-.student-cell { display: flex; align-items: center; gap: 12px; }
+td {
+  padding: 14px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: var(--primary-soft);
+}
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .student-cell .avatar {
-  width: 34px; height: 34px; border-radius: 50%; background: var(--primary-light);
-  color: var(--primary-dark); display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
 }
-.student-cell .info strong { display: block; font-size: 13px; }
-.student-cell .info span { font-size: 11px; color: var(--text-muted); }
 
-.pct-bar-wrap { display: flex; align-items: center; gap: 10px; }
-.pct-bar { width: 70px; height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
-.pct-bar-fill { height: 100%; background: var(--primary); border-radius: 100px; }
-.pct-bar-fill.low { background: var(--red); }
-.pct-bar-fill.mid { background: var(--amber); }
+.student-cell .info strong {
+  display: block;
+  font-size: 13px;
+}
+
+.student-cell .info span {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.pct-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pct-bar {
+  width: 70px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.pct-bar-fill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 100px;
+}
+
+.pct-bar-fill.low {
+  background: var(--red);
+}
+
+.pct-bar-fill.mid {
+  background: var(--amber);
+}
 
 .status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-  border-radius: 100px; font-size: 11px; font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
 }
-.status-badge.present { background: var(--green-bg); color: var(--green); }
-.status-badge.absent { background: var(--red-bg); color: var(--red); }
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.status-badge.present {
+  background: var(--green-bg);
+  color: var(--green);
+}
+
+.status-badge.absent {
+  background: var(--red-bg);
+  color: var(--red);
+}
+
+.status-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
 .action-icon {
-  width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--white); color: var(--text-muted); display: inline-flex; align-items: center;
-  justify-content: center; cursor: pointer; font-size: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 @media (max-width: 900px) {
-  .sidebar { display: none; }
-  table { font-size: 11px; }
-  th, td { padding: 10px 8px; }
+  .sidebar {
+    display: none;
+  }
+
+  table {
+    font-size: 11px;
+  }
+
+  th,
+  td {
+    padding: 10px 8px;
+  }
 }
+
 </style>
 </head>
+
 <body>
 
 <div class="layout">
 
   <aside class="sidebar">
+
     <div class="sidebar-brand">
-      <div class="icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
       <h2>SmartSense</h2>
     </div>
-    <a href="teacher-dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
-    <a href="teacher-students.html" class="nav-item active"><i class="fa-solid fa-user-graduate"></i> Students</a>
-    <a href="teacher-attendence.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-    <a href="#" class="nav-item"><i class="fa-solid fa-file-lines"></i> Reports</a>
-    <a href="#" class="nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+
+    <a href="teacher-dashboard.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      Dashboard
+    </a>
+
+    <a href="teacher-students.html" class="nav-item active">
+      <i class="fa-solid fa-user-graduate"></i>
+      Students
+    </a>
+
+    <a href="teacher-attendence.html" class="nav-item">
+      <i class="fa-solid fa-calendar-check"></i>
+      Attendance
+    </a>
+
+    <a href="teacher-reports.html" class="nav-item">
+      <i class="fa-solid fa-file-lines"></i>
+      Reports
+    </a>
+
+    <!-- NOTIFICATIONS - Now clickable with badge -->
+    <div class="nav-item" id="notificationsLink">
+      <i class="fa-solid fa-bell"></i>
+      Notifications
+      <span class="notification-badge">3</span>
+    </div>
+
   </aside>
+
 
   <main class="main">
 
@@ -141,18 +476,28 @@ tr:hover td { background: var(--primary-soft); }
     </div>
 
     <div class="toolbar">
+
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="searchInput" placeholder="Search by name or Student ID...">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by name or Student ID..."
+        >
       </div>
+
       <select class="filter-select" id="filterSelect">
         <option value="all">All Students</option>
         <option value="low">Low Attendance (&lt;75%)</option>
       </select>
+
     </div>
 
+
     <div class="panel">
+
       <table>
+
         <thead>
           <tr>
             <th>Student</th>
@@ -162,15 +507,74 @@ tr:hover td { background: var(--primary-soft); }
             <th>Today</th>
           </tr>
         </thead>
+
         <tbody id="studentTableBody">
           <!-- rows generated by script below from mockStudents -->
         </tbody>
+
       </table>
+
     </div>
 
   </main>
 
 </div>
+
+
+<!-- =========================================================
+     NOTIFICATIONS MODAL
+     ========================================================= -->
+<div class="modal-overlay" id="notificationsModal">
+  <div class="modal">
+    <button class="modal-close" id="notificationsModalClose">×</button>
+    <h2>🔔 Notifications</h2>
+    
+    <div class="notification-item">
+      <div class="icon-circle">
+        <i class="fa-solid fa-user-plus"></i>
+      </div>
+      <div class="content">
+        <strong>New student enrolled</strong>
+        <span>Rahul K has joined CSE-F class</span>
+      </div>
+      <span class="time">2 min ago</span>
+    </div>
+
+    <div class="notification-item">
+      <div class="icon-circle">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div class="content">
+        <strong>Low attendance alert</strong>
+        <span>5 students have attendance below 75%</span>
+      </div>
+      <span class="time">1 hour ago</span>
+    </div>
+
+    <div class="notification-item">
+      <div class="icon-circle">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <div class="content">
+        <strong>Attendance marked</strong>
+        <span>Today's attendance has been recorded</span>
+      </div>
+      <span class="time">3 hours ago</span>
+    </div>
+
+    <div class="notification-item">
+      <div class="icon-circle">
+        <i class="fa-solid fa-file-pen"></i>
+      </div>
+      <div class="content">
+        <strong>Report generated</strong>
+        <span>Monthly attendance report is ready</span>
+      </div>
+      <span class="time">1 day ago</span>
+    </div>
+  </div>
+</div>
+
 
 <script>
 /*
@@ -194,6 +598,7 @@ tr:hover td { background: var(--primary-soft); }
   so renderStudents() doesn't need to change at all.
   ================================================================
 */
+
 const mockStudents = [
   { name: "Santhosh M", studentId: "CSE325", present: 38, absent: 7, todayStatus: "present" },
   { name: "Santhosh Narayan", studentId: "CSE326", present: 43, absent: 2, todayStatus: "present" },
@@ -265,77 +670,181 @@ const mockStudents = [
   { name: "Sirish Kumar S", studentId: "CSE2026067", present: 44, absent: 1, todayStatus: "present" },
 ];
 
+
 function getInitials(name) {
-  return name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+  return name
+    .split(" ")
+    .map(n => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
+
 function renderStudents(students) {
+
   const tbody = document.getElementById("studentTableBody");
+
   tbody.innerHTML = "";
 
   students.forEach(s => {
+
     const total = s.present + s.absent;
-    const pct = total > 0 ? Math.round((s.present / total) * 100) : 0;
-    const barClass = pct < 60 ? "low" : pct < 75 ? "mid" : "";
+
+    const pct =
+      total > 0
+        ? Math.round((s.present / total) * 100)
+        : 0;
+
+    const barClass =
+      pct < 60
+        ? "low"
+        : pct < 75
+          ? "mid"
+          : "";
 
     const row = document.createElement("tr");
+
     row.innerHTML = `
       <td>
         <div class="student-cell">
-          <div class="avatar">${getInitials(s.name)}</div>
+          <div class="avatar">
+            ${getInitials(s.name)}
+          </div>
+
           <div class="info">
             <strong>${s.name}</strong>
             <span>${s.studentId}</span>
           </div>
         </div>
       </td>
+
       <td>${s.present}</td>
+
       <td>${s.absent}</td>
+
       <td>
         <div class="pct-bar-wrap">
-          <div class="pct-bar"><div class="pct-bar-fill ${barClass}" style="width: ${pct}%;"></div></div>
+          <div class="pct-bar">
+            <div
+              class="pct-bar-fill ${barClass}"
+              style="width: ${pct}%;"
+            ></div>
+          </div>
+
           <span>${pct}%</span>
         </div>
       </td>
+
       <td>
         <span class="status-badge ${s.todayStatus}">
-          <span class="dot"></span>${s.todayStatus === "present" ? "Present" : "Absent"}
+          <span class="dot"></span>
+          ${s.todayStatus === "present" ? "Present" : "Absent"}
         </span>
       </td>
     `;
+
     tbody.appendChild(row);
+
   });
+
 }
+
 
 function loadStudents() {
+
   // MOCK MODE — replace with the fetch() version shown in the comment above
+
   renderStudents(mockStudents);
+
 }
+
 
 // Simple client-side search + filter over the mock data
-document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("filterSelect").addEventListener("change", applyFilters);
+
+document
+  .getElementById("searchInput")
+  .addEventListener("input", applyFilters);
+
+document
+  .getElementById("filterSelect")
+  .addEventListener("change", applyFilters);
+
 
 function applyFilters() {
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  const filter = document.getElementById("filterSelect").value;
+
+  const query =
+    document
+      .getElementById("searchInput")
+      .value
+      .toLowerCase();
+
+  const filter =
+    document
+      .getElementById("filterSelect")
+      .value;
+
 
   let filtered = mockStudents.filter(s =>
-    s.name.toLowerCase().includes(query) || s.studentId.toLowerCase().includes(query)
+    s.name.toLowerCase().includes(query) ||
+    s.studentId.toLowerCase().includes(query)
   );
 
+
   if (filter === "low") {
+
     filtered = filtered.filter(s => {
-      const total = s.present + s.absent;
-      const pct = total > 0 ? (s.present / total) * 100 : 0;
+
+      const total =
+        s.present + s.absent;
+
+      const pct =
+        total > 0
+          ? (s.present / total) * 100
+          : 0;
+
       return pct < 75;
+
     });
+
   }
 
+
   renderStudents(filtered);
+
 }
 
+
 loadStudents();
+
+</script>
+
+
+<!-- =========================================================
+     NOTIFICATIONS MODAL CONTROLS
+     ========================================================= -->
+
+<script>
+
+// Notifications Modal
+const notificationsLink = document.getElementById("notificationsLink");
+const notificationsModal = document.getElementById("notificationsModal");
+const notificationsModalClose = document.getElementById("notificationsModalClose");
+
+notificationsLink.addEventListener("click", function() {
+  notificationsModal.classList.add("show");
+});
+
+notificationsModalClose.addEventListener("click", function() {
+  notificationsModal.classList.remove("show");
+});
+
+notificationsModal.addEventListener("click", function(e) {
+  if (e.target === notificationsModal) {
+    notificationsModal.classList.remove("show");
+  }
+});
+
 </script>
 
 </body>

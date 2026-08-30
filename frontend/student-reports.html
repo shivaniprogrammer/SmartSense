@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="student-sidebar.css">
+<link rel="stylesheet" href="theme.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #0f9fa8;
+  --primary-dark: #087f86;
+  --primary-light: #dff7f8;
+  --primary-soft: #eefafb;
+  --white: #ffffff;
+  --background: #f7fbfc;
+  --text-dark: #14212b;
+  --text-medium: #465963;
+  --text-muted: #72818a;
+  --border: #d9ecee;
+  --green: #1f9d55;
+  --green-bg: #e5f7ec;
+  --amber: #b7791f;
+  --amber-bg: #fff6e0;
+  --red: #e45858;
+  --red-bg: #ffeaea;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
+
+.layout { display: flex; min-height: 100vh; }
+
+.topbar {
+  height: 70px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 5%;
+}
+
+.profile-pill {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--primary-soft); padding: 6px 14px 6px 6px; border-radius: 100px;
+}
+.profile-pill .avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--primary); color: white; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 700;
+}
+.profile-pill span { font-size: 13px; font-weight: 600; }
+
+.main-content { flex: 1; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 40px 5%; }
+
+.page-heading { margin-bottom: 28px; }
+.page-heading h1 { font-size: 26px; margin-bottom: 4px; }
+.page-heading p { color: var(--text-muted); font-size: 13px; }
+
+/* Day tabs */
+.day-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.day-tab {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--text-medium);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+.day-tab:hover {
+  background: var(--primary-soft);
+}
+.day-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+.panel {
+  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; margin-bottom: 20px;
+}
+.panel-heading {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
+}
+.panel-heading h3 { font-size: 16px; }
+.panel-heading .day-summary {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.panel-heading .day-summary strong {
+  color: var(--text-dark);
+}
+
+/* Holiday state */
+.holiday-box {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+}
+.holiday-box i {
+  font-size: 32px;
+  color: var(--primary);
+  margin-bottom: 12px;
+  display: block;
+}
+.holiday-box strong {
+  display: block;
+  font-size: 16px;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+
+/* Class boxes grid */
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.class-box {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--primary-soft);
+}
+.class-box .period-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.class-box .subject {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+}
+.class-box .time {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+  border-radius: 100px; font-size: 11px; font-weight: 600;
+}
+.status-badge.present { background: var(--green-bg); color: var(--green); }
+.status-badge.absent { background: var(--red-bg); color: var(--red); }
+.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+@media (max-width: 700px) {
+  .class-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <div id="sidebar-root"></div>
+
+  <div class="main-content">
+
+    <header class="topbar">
+      <div class="profile-pill">
+        <div class="avatar">S</div>
+        <span>Shivani S.</span>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="page-heading">
+        <h1>Reports</h1>
+        <p>Your class timetable and attendance, day by day</p>
+      </div>
+
+      <div class="day-tabs" id="dayTabs"></div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 id="panelDayTitle">Monday</h3>
+          <div class="day-summary" id="panelDaySummary"></div>
+        </div>
+
+        <div id="panelBody"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/*
+  ================================================================
+  MOCK DATA — replace with a real fetch() call once the backend
+  exposes the student's timetable + per-period attendance for a
+  given day, e.g.:
+
+    async function loadDay(day) {
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/reports/student/" + day, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json(); // { periods: [...] }
+      renderDay(day, data.periods);
+    }
+
+  Each period item should keep this shape so renderDay() doesn't
+  need to change: { period, time, subject, status }
+  status is "present" or "absent".
+  ================================================================
+*/
+
+// Real class timetable: II Year - III Semester, CSE F Section
+// (w.e.f. 06.07.2026). Attendance "status" values are still placeholders
+// until the backend supplies real per-period attendance.
+const timetableByDay = {
+  Monday: [
+    { period: 1, time: "8:15 - 9:05", subject: "Computer Networks", status: "present" },
+    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", status: "present" },
+    { period: "3-5", time: "10:10 - 12:40", subject: "Advanced Data Structures and Algorithms", status: "present" },
+    { period: 6, time: "1:30 - 2:15", subject: "Discrete Mathematics", status: "present" },
+    { period: "7-8", time: "2:15 - 3:45", subject: "OOP using Java - Lab", status: "present" },
+  ],
+  Tuesday: [
+    { period: 1, time: "8:15 - 9:05", subject: "Aptitude Test", status: "present" },
+    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
+    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", status: "present" },
+    { period: 4, time: "11:00 - 11:50", subject: "Discrete Mathematics", status: "absent" },
+    { period: 5, time: "11:50 - 12:40", subject: "Counselling", status: "present" },
+    { period: 6, time: "1:30 - 2:15", subject: "OOP using Java", status: "present" },
+    { period: "7-8", time: "2:15 - 3:45", subject: "Embedded System Design - Lab", status: "present" },
+  ],
+  Wednesday: [
+    { period: 1, time: "8:15 - 9:05", subject: "Fundamentals of AI and ML", status: "present" },
+    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", status: "present" },
+    { period: 3, time: "10:10 - 11:00", subject: "Discrete Mathematics", status: "present" },
+    { period: "4-5", time: "11:00 - 12:40", subject: "OOP using Java - Lab", status: "absent" },
+    { period: 6, time: "1:30 - 2:15", subject: "Advanced Data Structures and Algorithms", status: "present" },
+    { period: "7-8", time: "2:15 - 3:45", subject: "ADSA Lab", status: "present" },
+  ],
+  Thursday: [
+    { period: 1, time: "8:15 - 9:05", subject: "Technical Test", status: "present" },
+    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
+    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", status: "present" },
+    { period: "4-5", time: "11:00 - 12:40", subject: "Career Skill Development III", status: "present" },
+    { period: 6, time: "1:30 - 2:15", subject: "Embedded System Design", status: "present" },
+    { period: 7, time: "2:15 - 3:00", subject: "Discrete Mathematics (Tutorial)", status: "present" },
+    { period: 8, time: "3:00 - 3:45", subject: "Leet Code", status: "present" },
+  ],
+  Friday: [
+    { period: 1, time: "8:15 - 9:05", subject: "Embedded System Design", status: "absent" },
+    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
+    { period: 3, time: "10:10 - 11:00", subject: "OOP using Java", status: "present" },
+    { period: 4, time: "11:00 - 11:50", subject: "Fundamentals of AI and ML", status: "present" },
+    { period: 5, time: "11:50 - 12:40", subject: "Discrete Mathematics", status: "present" },
+    { period: 6, time: "1:30 - 2:15", subject: "NPTEL", status: "present" },
+    { period: "7-8", time: "2:15 - 3:45", subject: "Fundamentals of AI and ML - Lab", status: "present" },
+  ],
+  // No Saturday classes on this timetable - shows as a holiday below
+};
+
+const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const weekendDays = ["Saturday", "Sunday"];
+
+function todayName() {
+  const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return names[new Date().getDay()];
+}
+
+function renderTabs(selectedDay) {
+  const dayTabs = document.getElementById("dayTabs");
+  dayTabs.innerHTML = "";
+
+  dayOrder.forEach(function (day) {
+    const btn = document.createElement("button");
+    btn.className = "day-tab" + (day === selectedDay ? " active" : "");
+    btn.textContent = day;
+    btn.addEventListener("click", function () {
+      renderDay(day);
+    });
+    dayTabs.appendChild(btn);
+  });
+}
+
+function renderDay(day) {
+  renderTabs(day);
+
+  document.getElementById("panelDayTitle").textContent = day;
+
+  const panelBody = document.getElementById("panelBody");
+  const panelDaySummary = document.getElementById("panelDaySummary");
+
+  // Weekend / holiday state (Sunday has no timetable entry at all)
+  if (weekendDays.includes(day) && !timetableByDay[day]) {
+    panelDaySummary.textContent = "";
+    panelBody.innerHTML =
+      '<div class="holiday-box">' +
+        '<i class="fa-solid fa-mug-hot"></i>' +
+        '<strong>Holiday</strong>' +
+        '<span>No classes scheduled on ' + day + '</span>' +
+      '</div>';
+    return;
+  }
+
+  const periods = timetableByDay[day] || [];
+
+  const presentCount = periods.filter(function (p) { return p.status === "present"; }).length;
+  panelDaySummary.innerHTML = '<strong>' + presentCount + '/' + periods.length + '</strong> classes attended';
+
+  const grid = document.createElement("div");
+  grid.className = "class-grid";
+
+  periods.forEach(function (p) {
+    const box = document.createElement("div");
+    box.className = "class-box";
+    box.innerHTML =
+      '<div class="period-tag">Period ' + p.period + '</div>' +
+      '<div class="subject">' + p.subject + '</div>' +
+      '<div class="time">' + p.time + '</div>' +
+      '<span class="status-badge ' + p.status + '">' +
+        '<span class="dot"></span>' +
+        (p.status === "present" ? "Present" : "Absent") +
+      '</span>';
+    grid.appendChild(box);
+  });
+
+  panelBody.innerHTML = "";
+  panelBody.appendChild(grid);
+}
+
+// Default to today's weekday if it's Mon-Sat, otherwise Monday
+const initialDay = dayOrder.includes(todayName()) ? todayName() : "Monday";
+renderDay(initialDay);
+</script>
+
+<script src="student-sidebar.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

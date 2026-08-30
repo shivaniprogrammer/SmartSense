@@ -1,7 +1,35 @@
-   const API_BASE = "/api";
+const API_BASE = "/api";
+const LOW_ATTENDANCE_THRESHOLD = 75; // percent — keep in sync with backend/routes/lowAttendanceRoutes.js
 
 const token = localStorage.getItem("token");
 const storedUser = localStorage.getItem("user");
+
+/*
+  Derives the college register number from a studentId like "CSE352".
+  Rule (from the class register format): fixed 9-digit prefix for this
+  batch/department + the student ID's trailing 3 digits.
+    CSE352 -> "310625104" + "352" -> "310625104352"
+
+  If the studentId doesn't end in exactly 3 digits (e.g. lateral-entry
+  IDs like "CSE2026064"), there's no known mapping, so this returns null
+  and the caller should fall back to a stored register number instead.
+*/
+const REGISTER_NUMBER_PREFIX = "310625104";
+
+function studentIdToRegisterNumber(studentId) {
+    if (!studentId) return null;
+    const match = String(studentId).match(/(\d{3})$/);
+    if (!match) return null;
+    return REGISTER_NUMBER_PREFIX + match[1];
+}
+
+function renderRegisterNumber(profile) {
+    const regNoEl = document.getElementById("studentRegNo");
+    if (!regNoEl || !profile) return;
+
+    const regNo = profile.registerNumber || studentIdToRegisterNumber(profile.studentId);
+    regNoEl.textContent = regNo ? "Reg No: " + regNo : "";
+}
 
 /*
   MOCK for now — swap todaysAttendanceStatus with a real value
@@ -18,10 +46,19 @@ function renderTodayCard() {
 
     document.getElementById("todayDate").textContent = dateString;
 
-    const todaysAttendanceStatus = "present"; // MOCK — "present" or "absent"
-
     const badge = document.getElementById("todayStatusBadge");
     const statusText = document.getElementById("todayStatusText");
+
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+    if (isWeekend) {
+        badge.classList.add("holiday");
+        statusText.textContent = "Holiday";
+        return;
+    }
+
+    const todaysAttendanceStatus = "present"; // MOCK — "present" or "absent"
 
     badge.classList.add(todaysAttendanceStatus);
     statusText.textContent = todaysAttendanceStatus === "present" ? "Present" : "Absent";
@@ -54,6 +91,7 @@ if (user && user.name) {
     studentNameEl.textContent = firstName;
     profileNameEl.textContent = firstName;
     avatarInitialEl.textContent = user.name.charAt(0).toUpperCase();
+    renderRegisterNumber(user);
 }
 
 
@@ -102,8 +140,8 @@ function renderRequests(requests) {
     });
 }
 
-// Load profile, then attendance history and requests
-authFetch("/students/me")
+// Load profile first (needed for name + attendance history lookup)
+const profileLoaded = authFetch("/students/me")
     .then(function ({ data: profile }) {
         user = profile;
         localStorage.setItem("user", JSON.stringify(profile));
@@ -114,44 +152,77 @@ authFetch("/students/me")
             profileNameEl.textContent = firstName;
             avatarInitialEl.textContent = profile.name.charAt(0).toUpperCase();
         }
+        renderRegisterNumber(profile);
 
-        return authFetch("/attendance/history/" + profile._id);
+        return profile;
     })
-    .then(function ({ data: records }) {
-        const total = records.length;
-        const presentCount = records.filter(r => r.status === "present" || r.status === "late").length;
-        const absentCount = total - presentCount;
-        const percent = total > 0 ? Math.round((presentCount / total) * 1000) / 10 : 0;
-
-        document.getElementById("attendancePercent").textContent = percent + "%";
-        document.getElementById("presentDays").textContent = presentCount;
-
-        document.getElementById("donutChart").style.setProperty("--pct", percent);
-        document.getElementById("donutPercent").textContent = percent + "%";
-        document.getElementById("legendPresent").textContent = presentCount;
-        document.getElementById("legendAbsent").textContent = absentCount;
-
-        return authFetch("/requests/mine");
-    })
-    .then(function ({ data: requests }) {
-        const pendingCount = requests.filter(r => r.status === "pending").length;
-        document.getElementById("pendingRequests").textContent = pendingCount;
-        renderRequests(requests);
-         const lastSeen = localStorage.getItem("notifLastSeen") || "0";
-    const hasUnseenUpdate = requests.some(function (r) {
-        return r.status !== "pending" && new Date(r.updatedAt) > new Date(lastSeen);
+    .catch(function (err) {
+        console.error("Failed to load profile:", err);
+        return null;
     });
-    const notifDot = document.getElementById("notifDot");
-    if (notifDot) {
-        notifDot.style.display = hasUnseenUpdate ? "block" : "none";
-    }
 
+// Attendance history — independent of requests, so one failing doesn't block the other
+profileLoaded.then(function (profile) {
+    if (!profile) return;
 
-        
-    })
-    .catch(function () {
-        // silently ignore if unauthorized redirect already fired
-    });
+    authFetch("/attendance/history/" + profile._id)
+        .then(function ({ data: records }) {
+            const total = records.length;
+            const presentCount = records.filter(r => r.status === "present" || r.status === "late").length;
+            const absentCount = total - presentCount;
+            const percent = total > 0 ? Math.round((presentCount / total) * 1000) / 10 : 0;
+
+            document.getElementById("attendancePercent").textContent = percent + "%";
+            document.getElementById("presentDays").textContent = presentCount;
+
+            const lowBanner = document.getElementById("lowAttendanceBanner");
+            const lowText = document.getElementById("lowAttendanceText");
+            if (lowBanner && lowText) {
+                if (total > 0 && percent < LOW_ATTENDANCE_THRESHOLD) {
+                    lowText.textContent = "Your attendance is " + percent + "%, below the required " + LOW_ATTENDANCE_THRESHOLD + "%. Please take steps to improve it.";
+                    lowBanner.classList.add("show");
+                } else {
+                    lowBanner.classList.remove("show");
+                }
+            }
+
+            document.getElementById("donutChart").style.setProperty("--pct", percent);
+            document.getElementById("donutPercent").textContent = percent + "%";
+            document.getElementById("legendPresent").textContent = presentCount;
+            document.getElementById("legendAbsent").textContent = absentCount;
+        })
+        .catch(function (err) {
+            console.error("Failed to load attendance history:", err);
+        });
+});
+
+// Requests — loads regardless of whether attendance history succeeded
+function loadDashboardRequests() {
+    return authFetch("/requests/mine")
+        .then(function ({ data: requests }) {
+            const pendingCount = requests.filter(r => r.status === "pending").length;
+            document.getElementById("pendingRequests").textContent = pendingCount;
+            renderRequests(requests);
+
+            const lastSeen = localStorage.getItem("notifLastSeen") || "0";
+            const hasUnseenUpdate = requests.some(function (r) {
+                return r.status !== "pending" && new Date(r.updatedAt) > new Date(lastSeen);
+            });
+            const notifDot = document.getElementById("notifDot");
+            if (notifDot) {
+                notifDot.style.display = hasUnseenUpdate ? "block" : "none";
+            }
+        })
+        .catch(function (err) {
+            console.error("Failed to load requests:", err);
+            const activityList = document.getElementById("activityList");
+            if (activityList) {
+                activityList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Could not load requests. Is the server running?</p>';
+            }
+        });
+}
+
+loadDashboardRequests();
 
 // Apply Leave/OD modal
 const applyModal = document.getElementById("applyModal");
@@ -218,11 +289,7 @@ applyForm.addEventListener("submit", function (e) {
             modalStatus.classList.add("show", "success");
             applyForm.reset();
 
-            return authFetch("/requests/mine").then(function ({ data: requests }) {
-                const pendingCount = requests.filter(r => r.status === "pending").length;
-                document.getElementById("pendingRequests").textContent = pendingCount;
-                renderRequests(requests);
-
+            return loadDashboardRequests().then(function () {
                 setTimeout(function () {
                     applyModal.classList.remove("show");
                     modalStatus.classList.remove("show", "success");

@@ -1,3 +1,4 @@
+
 // student-sidebar.js
 // Include on every student page:
 //   1. <link rel="stylesheet" href="student-sidebar.css"> in <head>
@@ -12,6 +13,7 @@
   const navItems = [
     { href: "student-dashboard.html", icon: "fa-house", label: "Dashboard" },
     { href: "Student-attendance.html", icon: "fa-calendar-check", label: "Attendance" },
+    { href: "student-reports.html", icon: "fa-chart-column", label: "Reports" },
     { href: "leave-od.html", icon: "fa-file-lines", label: "Leave & OD", dot: true },
   ];
 

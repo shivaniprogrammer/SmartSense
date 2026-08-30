@@ -1,0 +1,375 @@
+/* ==============================
+   SmartSense Theme Selector
+   ============================== */
+
+.theme-selector-wrap {
+    margin: 8px 12px 6px;
+}
+
+
+.theme-selector-btn {
+    width: 100%;
+
+    border: 1px solid rgba(255,255,255,0.25);
+
+    background: rgba(255,255,255,0.10);
+
+    color: white;
+
+    border-radius: 10px;
+
+    padding: 10px 12px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.theme-selector-btn:hover {
+    background: rgba(255,255,255,0.20);
+}
+
+
+.theme-selector-btn i {
+    width: 16px;
+
+    text-align: center;
+}
+
+
+/* ==============================
+   Popup
+   ============================== */
+
+.theme-panel {
+
+    position: fixed;
+
+    z-index: 9999;
+
+    width: 330px;
+
+    max-width: calc(100vw - 24px);
+
+    background: white;
+
+    color: #14212b;
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+
+    padding: 18px;
+
+    display: none;
+}
+
+
+.theme-panel.show {
+    display: block;
+}
+
+
+.theme-panel h3 {
+    margin: 0 0 5px;
+
+    font-size: 17px;
+}
+
+
+.theme-panel p {
+    margin: 0 0 16px;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* ==============================
+   Theme Grid
+   ============================== */
+
+.theme-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 9px;
+}
+
+
+.theme-option {
+
+    border: 2px solid transparent;
+
+    background: transparent;
+
+    padding: 7px 4px;
+
+    border-radius: 11px;
+
+    cursor: pointer;
+
+    color: #374151;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+.theme-option:hover {
+    background: #f3f4f6;
+}
+
+
+.theme-option.selected {
+
+    border-color: var(--primary);
+
+    background: var(--primary-light);
+}
+
+
+/* ==============================
+   Colour preview
+   ============================== */
+
+.theme-swatch {
+
+    height: 30px;
+
+    border-radius: 8px;
+
+    margin-bottom: 5px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--swatch-primary),
+            var(--swatch-dark)
+        );
+
+    position: relative;
+}
+
+
+.theme-swatch::after {
+
+    content: "";
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--swatch-light);
+
+    position: absolute;
+
+    right: 5px;
+
+    bottom: 5px;
+}
+
+
+/* Close button */
+
+.theme-close {
+
+    position: absolute;
+
+    right: 12px;
+
+    top: 9px;
+
+    border: none;
+
+    background: none;
+
+    cursor: pointer;
+
+    font-size: 20px;
+
+    color: #6b7280;
+}
+
+
+/* Popup background */
+
+.theme-backdrop {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 9998;
+
+    display: none;
+}
+
+
+.theme-backdrop.show {
+    display: block;
+}
+
+
+/* ==============================
+   Apply theme everywhere
+   ============================== */
+
+body {
+
+    background: var(--background, var(--bg));
+
+}
+
+
+/* Sidebar */
+
+.sidebar {
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--primary),
+            var(--primary-dark)
+        ) !important;
+}
+
+
+/* Buttons */
+
+button.action-btn,
+button.submit-btn,
+button.modal-submit,
+button.verify-btn {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-dark)
+        ) !important;
+}
+
+
+/* Links */
+
+a {
+    color: var(--primary);
+}
+
+
+/* Focus */
+
+input:focus,
+select:focus,
+textarea:focus {
+
+    border-color: var(--primary) !important;
+
+}
+
+
+/* Attendance donut */
+
+.donut {
+
+    background:
+        conic-gradient(
+            var(--primary) calc(var(--pct) * 1%),
+            var(--border) 0
+        ) !important;
+
+}
+
+
+/* Attendance bars */
+
+.bar {
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--primary),
+            var(--primary-dark)
+        ) !important;
+
+}
+
+
+/* Tables */
+
+th {
+
+    background: var(--primary-soft);
+
+}
+
+
+/* Avatar */
+
+.profile-avatar {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-dark)
+        ) !important;
+
+}
+
+
+/* Today's icon */
+
+.today-icon {
+
+    background: var(--primary-light) !important;
+
+    color: var(--primary) !important;
+
+}
+
+
+/* Active student sidebar */
+
+.sidebar .nav-item.active {
+
+    background: rgba(255,255,255,0.16);
+
+}
+
+
+/* Responsive */
+
+@media (max-width: 600px) {
+
+    .theme-panel {
+
+        width: calc(100vw - 24px);
+
+    }
+
+    .theme-grid {
+
+        grid-template-columns: repeat(3, 1fr);
+
+    }
+
+}
