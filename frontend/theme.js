@@ -157,9 +157,7 @@
         `;
 
         // ✅ FIX: Insert the button BEFORE the logout button
-        // Find any logout link or button
-        const logout = sidebar.querySelector('a[href*="logout"], .logout, a:contains("Logout")');
-        
+     
         // Alternative: Find by text content
         let logoutElement = null;
         const allElements = sidebar.querySelectorAll('a, button, div');

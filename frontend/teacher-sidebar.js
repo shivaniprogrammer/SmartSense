@@ -1,10 +1,4 @@
 // teacher-sidebar.js
-// Include on every teacher page:
-//   1. <link rel="stylesheet" href="teacher-sidebar.css"> in <head>
-//   2. <div id="sidebar-root"></div> where the sidebar should appear
-//   3. <script src="teacher-sidebar.js"></script> before </body>
-// It builds the sidebar once, with real links, and auto-highlights the current page.
-
 (function () {
   const currentPage = window.location.pathname.split("/").pop();
 
@@ -12,7 +6,8 @@
     { href: "teacher-dashboard.html", icon: "fa-house", label: "Dashboard" },
     { href: "teacher-students.html", icon: "fa-user-graduate", label: "Students" },
     { href: "teacher-attendence.html", icon: "fa-calendar-check", label: "Attendance" },
-    { href: "teacher-requests.html", icon: "fa-file-lines", label: "Leave & OD Requests" },
+    { href: "teacher-reports.html", icon: "fa-file-lines", label: "Reports" },
+    { href: "teacher-requests.html", icon: "fa-bell", label: "Leave & OD" },
   ];
 
   const navHtml = navItems.map(function (item) {

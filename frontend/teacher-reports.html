@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="teacher-sidebar.css">
 <meta charset="UTF-8">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,66 +39,7 @@ body {
 
 .layout { display: flex; min-height: 100vh; }
 
-.sidebar {
-  width: 220px;
-  background: linear-gradient(180deg, var(--primary), var(--primary-dark));
-  color: white;
-  padding: 24px 0;
-  display: flex;
-  flex-direction: column;
-}
 
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 20px 24px;
-}
-
-.sidebar-brand .icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: rgba(255,255,255,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-brand h2 { font-size: 15px; }
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 20px;
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.75);
-  text-decoration: none;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
-
-.nav-item.active {
-  background: rgba(255,255,255,0.15);
-  color: white;
-  border-right: 3px solid white;
-}
-
-.nav-item i { width: 16px; text-align: center; }
-
-.notification-badge {
-  background: #ef4444;
-  color: white;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 100px;
-  margin-left: auto;
-}
 
 .main { flex: 1; padding: 32px 4%; }
 
@@ -283,43 +225,7 @@ body {
 <body>
 
 <div class="layout">
-
-  <aside class="sidebar">
-
-    <div class="sidebar-brand">
-      <div class="icon">
-        <i class="fa-solid fa-graduation-cap"></i>
-      </div>
-      <h2>SmartSense</h2>
-    </div>
-
-    <a href="teacher-dashboard.html" class="nav-item">
-      <i class="fa-solid fa-house"></i>
-      Dashboard
-    </a>
-
-    <a href="teacher-students.html" class="nav-item">
-      <i class="fa-solid fa-user-graduate"></i>
-      Students
-    </a>
-
-    <a href="teacher-attendence.html" class="nav-item">
-      <i class="fa-solid fa-calendar-check"></i>
-      Attendance
-    </a>
-
-    <a href="teacher-reports.html" class="nav-item active">
-      <i class="fa-solid fa-file-lines"></i>
-      Reports
-    </a>
-
-    <div class="nav-item" id="notificationsLink">
-      <i class="fa-solid fa-bell"></i>
-      Notifications
-      <span class="notification-badge">3</span>
-    </div>
-
-  </aside>
+<div id="sidebar-root"></div>
 
 
   <main class="main">
@@ -344,19 +250,7 @@ body {
 
 </div>
 
-<div class="modal-overlay" id="notificationsModal">
-  <div class="modal">
-    <button class="modal-close" id="notificationsModalClose">×</button>
-    <h2>🔔 Notifications</h2>
 
-    <div class="notification-item">
-      <div class="icon-circle"><i class="fa-solid fa-triangle-exclamation"></i></div>
-      <div class="content">
-        <strong>Low attendance alert</strong>
-        <span>5 students have attendance below 75%</span>
-      </div>
-      <span class="time">1 hour ago</span>
-    </div>
 
     <div class="notification-item">
       <div class="icon-circle"><i class="fa-solid fa-file-pen"></i></div>
@@ -525,25 +419,8 @@ const initialDay = dayOrder.includes(todayName()) ? todayName() : "Monday";
 renderDay(initialDay);
 </script>
 
-<script>
-const notificationsLink = document.getElementById("notificationsLink");
-const notificationsModal = document.getElementById("notificationsModal");
-const notificationsModalClose = document.getElementById("notificationsModalClose");
-
-notificationsLink.addEventListener("click", function() {
-  notificationsModal.classList.add("show");
-});
-
-notificationsModalClose.addEventListener("click", function() {
-  notificationsModal.classList.remove("show");
-});
-
-notificationsModal.addEventListener("click", function(e) {
-  if (e.target === notificationsModal) {
-    notificationsModal.classList.remove("show");
-  }
-});
-</script>
+<script src="teacher-sidebar.js"></script>
+<script src="theme.js"></script>
 
 </body>
 </html>
