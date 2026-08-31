@@ -15,6 +15,8 @@ const studentSchema = new mongoose.Schema(
     emailVerified: { type: Boolean, default: false },
     otpCode: { type: String },
     otpExpiry: { type: Date },
+    resetOtp: { type: String },
+resetOtpExpiry: { type: Date },
   },
   { timestamps: true }
 );
