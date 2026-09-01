@@ -38,14 +38,13 @@ router.post("/forgot-password", async (req, res) => {
       // Don't reveal whether the account exists - just say "sent" either way
       return res.status(200).json({ message: "If an account exists, a reset code has been sent." });
     }
-
     const otp = generateOtp();
     student.resetOtp = otp;
     student.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await student.save();
 
-    await transporter.sendMail({
-      from: `"SmartSense" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: "SmartSense <onboarding@resend.dev>",
       to: normalizedEmail,
       subject: "Your SmartSense password reset code",
       text: `Your password reset code is ${otp}. It expires in 10 minutes. If you didn't request this, ignore this email.`,
