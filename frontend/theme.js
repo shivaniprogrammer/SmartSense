@@ -119,11 +119,23 @@
     }
 
     function start() {
-        const savedTheme = localStorage.getItem("smartsenseTheme") || "teal";
-        applyTheme(savedTheme);
-        createThemeButton();
-    }
+    const savedTheme = localStorage.getItem("smartsenseTheme") || "teal";
+    applyTheme(savedTheme);
 
+    // Only attempt to create the button once the profile pill actually exists
+    const tryCreate = setInterval(function () {
+        const profilePill = document.querySelector(".profile-pill");
+        if (profilePill) {
+            createThemeButton();
+            clearInterval(tryCreate);
+        }
+    }, 100);
+
+    // Stop trying after 3 seconds either way
+    setTimeout(function () { clearInterval(tryCreate); }, 3000);
+}
+
+document.addEventListener("DOMContentLoaded", start);
     document.addEventListener("DOMContentLoaded", function () {
         start();
         setTimeout(start, 100);
