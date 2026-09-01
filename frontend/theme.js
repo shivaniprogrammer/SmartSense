@@ -2,6 +2,7 @@
 // SmartSense Theme Selector
 // Works on BOTH student and teacher pages
 // Renders as a small palette icon next to the profile pill, top-right.
+// Visibility controlled directly via inline styles - no dependency on CSS classes.
 
 (function () {
 
@@ -19,6 +20,8 @@
         indigo: { name: "Indigo", primary: "#4f46e5", dark: "#4338ca", light: "#e0e7ff", soft: "#eef2ff", bg: "#f8f9ff", border: "#dfe3f5" },
         midnight: { name: "Midnight", primary: "#475569", dark: "#334155", light: "#e2e8f0", soft: "#f1f5f9", bg: "#f8fafc", border: "#dbe2ea" }
     };
+
+    let popupCreated = false;
 
     function applyTheme(themeName) {
         const theme = themes[themeName] || themes.teal;
@@ -44,16 +47,16 @@
             return;
         }
 
-        // Find the profile pill to sit next to - works on student and teacher topbars
         const profilePill = document.querySelector(".profile-pill");
         if (!profilePill || !profilePill.parentElement) {
-            return; // page doesn't have this topbar pattern - skip silently
+            return;
         }
 
         const button = document.createElement("button");
         button.id = "themeButton";
         button.className = "theme-icon-button";
         button.title = "Select theme";
+        button.type = "button";
         button.innerHTML = "🎨";
 
         profilePill.parentElement.insertBefore(button, profilePill);
@@ -62,20 +65,21 @@
     }
 
     function createThemePopup(button) {
-        if (document.getElementById("themePopup")) {
-            return;
-        }
+        if (popupCreated) return;
+        popupCreated = true;
 
         const overlay = document.createElement("div");
         overlay.id = "themeOverlay";
-        overlay.className = "theme-overlay";
+        // Force hidden by default via inline style - not dependent on any CSS file
+        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9998;display:none;";
 
         const popup = document.createElement("div");
         popup.id = "themePopup";
         popup.className = "theme-popup";
+        popup.style.display = "none"; // force hidden by default
 
         popup.innerHTML = `
-            <button class="theme-close" id="themeClose">✕</button>
+            <button type="button" class="theme-close" id="themeClose">✕</button>
             <h2>Select Theme 🎨</h2>
             <p>Choose your SmartSense colour</p>
             <div class="theme-grid" id="themeGrid"></div>
@@ -88,6 +92,7 @@
 
         Object.entries(themes).forEach(function ([key, theme]) {
             const option = document.createElement("button");
+            option.type = "button";
             option.className = "theme-option";
             option.dataset.theme = key;
             option.innerHTML = `
@@ -97,49 +102,41 @@
 
             option.addEventListener("click", function () {
                 applyTheme(key);
-                popup.classList.remove("show");
-                overlay.classList.remove("show");
+                closePopup();
             });
 
             grid.appendChild(option);
         });
 
-        button.addEventListener("click", function () {
-            popup.classList.add("show");
-            overlay.classList.add("show");
-        });
-
-        document.getElementById("themeClose").addEventListener("click", closePopup);
-        overlay.addEventListener("click", closePopup);
+        function openPopup() {
+            popup.style.display = "block";
+            overlay.style.display = "block";
+        }
 
         function closePopup() {
-            popup.classList.remove("show");
-            overlay.classList.remove("show");
+            popup.style.display = "none";
+            overlay.style.display = "none";
         }
+
+        button.addEventListener("click", openPopup);
+        document.getElementById("themeClose").addEventListener("click", closePopup);
+        overlay.addEventListener("click", closePopup);
     }
 
     function start() {
-    const savedTheme = localStorage.getItem("smartsenseTheme") || "teal";
-    applyTheme(savedTheme);
+        const savedTheme = localStorage.getItem("smartsenseTheme") || "teal";
+        applyTheme(savedTheme);
 
-    // Only attempt to create the button once the profile pill actually exists
-    const tryCreate = setInterval(function () {
-        const profilePill = document.querySelector(".profile-pill");
-        if (profilePill) {
-            createThemeButton();
-            clearInterval(tryCreate);
-        }
-    }, 100);
+        const tryCreate = setInterval(function () {
+            const profilePill = document.querySelector(".profile-pill");
+            if (profilePill) {
+                createThemeButton();
+                clearInterval(tryCreate);
+            }
+        }, 100);
 
-    // Stop trying after 3 seconds either way
-    setTimeout(function () { clearInterval(tryCreate); }, 3000);
-}
+        setTimeout(function () { clearInterval(tryCreate); }, 3000);
+    }
 
-document.addEventListener("DOMContentLoaded", start);
-    document.addEventListener("DOMContentLoaded", function () {
-        start();
-        setTimeout(start, 100);
-        setTimeout(start, 300);
-    });
-
+    document.addEventListener("DOMContentLoaded", start);
 })();
