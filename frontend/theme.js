@@ -68,15 +68,12 @@
         if (popupCreated) return;
         popupCreated = true;
 
-        const overlay = document.createElement("div");
-        overlay.id = "themeOverlay";
-        // Force hidden by default via inline style - not dependent on any CSS file
-        overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9998;display:none;";
 
-        const popup = document.createElement("div");
-        popup.id = "themePopup";
-        popup.className = "theme-popup";
-        popup.style.display = "none"; // force hidden by default
+
+         const popup = document.createElement("div");
+popup.id = "themePopup";
+popup.className = "theme-popup";
+popup.style.cssText = "display:none; position:fixed; z-index:9999;"; // force hidden by default
 
         popup.innerHTML = `
             <button type="button" class="theme-close" id="themeClose">✕</button>
@@ -85,7 +82,6 @@
             <div class="theme-grid" id="themeGrid"></div>
         `;
 
-        document.body.appendChild(overlay);
         document.body.appendChild(popup);
 
         const grid = document.getElementById("themeGrid");
@@ -108,19 +104,17 @@
             grid.appendChild(option);
         });
 
-        function openPopup() {
-            popup.style.display = "block";
-            overlay.style.display = "block";
-        }
+      function openPopup() {
+    popup.style.display = "block";
+}
 
-        function closePopup() {
-            popup.style.display = "none";
-            overlay.style.display = "none";
-        }
+function closePopup() {
+    popup.style.display = "none";
+}
 
         button.addEventListener("click", openPopup);
         document.getElementById("themeClose").addEventListener("click", closePopup);
-        overlay.addEventListener("click", closePopup);
+       
     }
 
     function start() {
