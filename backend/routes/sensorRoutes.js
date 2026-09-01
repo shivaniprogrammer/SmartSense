@@ -59,6 +59,8 @@ router.post("/ble-scan", async (req, res) => {
       // 200 (not 404) so the scanner doesn't treat this as a hardware/connection fault.
       return res.status(200).json({ message: "No enrolled student matches this bleId", matched: false });
     }
+    student.lastSeenAt = new Date();
+await student.save();
 
     const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
 
@@ -98,5 +100,56 @@ router.post("/ble-scan", async (req, res) => {
     res.status(500).json({ error: "Server error while processing BLE scan" });
   }
 });
+// ==========================================
+// AUTOMATIC ABSENCE CHECKER
+// ==========================================
+
+// For testing: 2 minutes
+const ABSENCE_TIMEOUT = 2 * 60 * 1000;
+
+// Check every 30 seconds
+setInterval(async () => {
+  try {
+    const cutoffTime = new Date(Date.now() - ABSENCE_TIMEOUT);
+
+    const students = await Student.find({
+      role: "student",
+      bleId: { $exists: true, $ne: null },
+      lastSeenAt: { $ne: null, $lt: cutoffTime },
+    });
+
+    const today = new Date().toISOString().split("T")[0];
+
+    for (const student of students) {
+
+      const attendance = await AttendanceRecord.findOne({
+        student: student._id,
+        date: today,
+      });
+
+      if (!attendance) {
+        continue;
+      }
+
+      if (attendance.status === "present") {
+
+        attendance.status = "absent";
+
+        await attendance.save();
+
+        console.log(
+          `[${new Date().toLocaleTimeString()}] ${student.name} -> ABSENT`
+        );
+
+        sendTelegramMessage(
+          `⚠️ ${student.name} marked absent because Bluetooth was not detected for 2 minutes.`
+        );
+      }
+    }
+
+  } catch (err) {
+    console.error("Absence checker error:", err.message);
+  }
+}, 30 * 1000);
 
 module.exports = router;

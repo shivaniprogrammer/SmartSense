@@ -7,11 +7,12 @@ const studentSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "teacher", "admin"], default: "student" },
+bleId: { type: String, unique: true, sparse: true },
 
-    bleId: { type: String, unique: true, sparse: true },
+// Last time the ESP32 detected this student's Bluetooth device
+lastSeenAt: { type: Date, default: null },
 
-    enrollmentComplete: { type: Boolean, default: false },
-
+enrollmentComplete: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
     otpCode: { type: String },
     otpExpiry: { type: Date },
