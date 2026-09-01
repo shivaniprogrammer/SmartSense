@@ -107,14 +107,20 @@ router.post("/register", async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-
     const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({ error: "An account with this email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ADD THIS BLOCK:
+    if (role === "student") {
+      const existingStudentId = await Student.findOne({ studentId });
+      if (existingStudentId) {
+        return res.status(409).json({ error: "This student ID is already registered" });
+      }
+    }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const otp = role === "student"
       ? generateOtp()
       : undefined;
@@ -152,7 +158,12 @@ router.post("/register", async (req, res) => {
         : "Teacher account created successfully. You can now log in.",
       email: normalizedEmail,
     });
-  } catch (err) {
+   } catch (err) {
+    // REPLACE THE OLD catch BODY WITH THIS:
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0] || "field";
+      return res.status(409).json({ error: `This ${field} is already in use` });
+    }
     console.error(err);
     res.status(500).json({ error: "Server error during registration" });
   }
