@@ -1,26 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
 const generateToken = require("../utils/generateToken");
+const sendEmail = require("../utils/sendEmail");
 
-const { Resend } = require("resend");
-
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 }
+
 async function sendOtpEmail(toEmail, otp) {
-  await resend.emails.send({
-    from: "SmartSense <onboarding@resend.dev>",
-    to: toEmail,
-    subject: "Your verification code",
-    text: `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`,
-    html: `<p>Your SmartSense verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`,
-  });
+  return sendEmail(
+    toEmail,
+    "Your SmartSense verification code",
+    `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`
+  );
 }
 
 // ---- Forgot Password: Step 1 - request a reset code ----
@@ -43,13 +37,15 @@ router.post("/forgot-password", async (req, res) => {
     student.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await student.save();
 
-    await resend.emails.send({
-      from: "SmartSense <onboarding@resend.dev>",
-      to: normalizedEmail,
-      subject: "Your SmartSense password reset code",
-      text: `Your password reset code is ${otp}. It expires in 10 minutes. If you didn't request this, ignore this email.`,
-      html: `<p>Your password reset code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes. If you didn't request this, ignore this email.</p>`,
-    });
+    const emailResult = await sendEmail(
+      normalizedEmail,
+      "Your SmartSense password reset code",
+      `Your password reset code is ${otp}. It expires in 10 minutes. If you didn't request this, ignore this email.`
+    );
+
+    if (!emailResult.success && !emailResult.skipped) {
+      console.error("Failed to send reset email:", emailResult.error);
+    }
 
     res.status(200).json({ message: "If an account exists, a reset code has been sent." });
   } catch (err) {
@@ -96,6 +92,7 @@ router.post("/reset-password", async (req, res) => {
     res.status(500).json({ error: "Server error while resetting password" });
   }
 });
+
 // ---- Register ----
 router.post("/register", async (req, res) => {
   try {
@@ -115,40 +112,46 @@ router.post("/register", async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ error: "An account with this email already exists" });
     }
-const hashedPassword = await bcrypt.hash(password, 10);
 
-const otp = role === "student"
-  ? generateOtp()
-  : undefined;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-const otpExpiry = role === "student"
-  ? new Date(Date.now() + 10 * 60 * 1000)
-  : undefined;
+    const otp = role === "student"
+      ? generateOtp()
+      : undefined;
 
-const student = await Student.create({
+    const otpExpiry = role === "student"
+      ? new Date(Date.now() + 10 * 60 * 1000)
+      : undefined;
+
+    const student = await Student.create({
       name,
       studentId: role === "student" ? studentId : undefined,
       email: normalizedEmail,
       password: hashedPassword,
       role,
-     otpCode: otp,
-otpExpiry,
-emailVerified: role === "teacher",
+      otpCode: otp,
+      otpExpiry,
+      emailVerified: role === "teacher",
     });
-if (role === "student") {
-  try {
-    await sendOtpEmail(normalizedEmail, otp);
-  } catch (mailErr) {
-    console.error("Failed to send OTP email:", mailErr.message);
-  }
-}
 
- res.status(201).json({
-  message: role === "student"
-    ? "Account created. Check your email for the verification code."
-    : "Teacher account created successfully. You can now log in.",
-  email: normalizedEmail,
-});
+    let emailResult = { success: true };
+    if (role === "student") {
+      emailResult = await sendOtpEmail(normalizedEmail, otp);
+      if (!emailResult.success && !emailResult.skipped) {
+        console.error("Failed to send OTP email:", emailResult.error);
+      }
+    }
+
+    const emailActuallySent = role === "student" ? (emailResult.success === true) : true;
+
+    res.status(201).json({
+      message: role === "student"
+        ? (emailActuallySent
+            ? "Account created. Check your email for the verification code."
+            : "Account created, but we couldn't send the verification email right now. Use 'Resend Code' on the next screen to try again.")
+        : "Teacher account created successfully. You can now log in.",
+      email: normalizedEmail,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error during registration" });
@@ -224,7 +227,12 @@ router.post("/resend-otp", async (req, res) => {
     student.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await student.save();
 
-    await sendOtpEmail(normalizedEmail, otp);
+    const emailResult = await sendOtpEmail(normalizedEmail, otp);
+
+    if (!emailResult.success && !emailResult.skipped) {
+      console.error("Failed to send OTP email:", emailResult.error);
+      return res.status(502).json({ error: "Couldn't send the code right now. Please try again in a moment." });
+    }
 
     res.json({ message: "New code sent" });
   } catch (err) {
@@ -249,11 +257,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials for this role" });
     }
 
-   if (role === "student" && !student.emailVerified) {
-  return res.status(403).json({
-    error: "Please verify your email before logging in"
-  });
-}
+    if (role === "student" && !student.emailVerified) {
+      return res.status(403).json({
+        error: "Please verify your email before logging in"
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
