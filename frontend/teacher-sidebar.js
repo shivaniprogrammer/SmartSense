@@ -5,7 +5,7 @@
   const navItems = [
     { href: "teacher-dashboard.html", icon: "fa-house", label: "Dashboard" },
     { href: "teacher-students.html", icon: "fa-user-graduate", label: "Students" },
-    { href: "teacher-attendence.html", icon: "fa-calendar-check", label: "Attendance" },
+    
     { href: "teacher-reports.html", icon: "fa-file-lines", label: "Reports" },
     { href: "teacher-requests.html", icon: "fa-bell", label: "Leave & OD" },
   ];

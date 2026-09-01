@@ -73,7 +73,7 @@
          const popup = document.createElement("div");
 popup.id = "themePopup";
 popup.className = "theme-popup";
-popup.style.cssText = "display:none; position:fixed; z-index:9999;"; // force hidden by default
+popup.style.cssText = "display:none; position:fixed; z-index:9999; top:80px; right:20px; background:#ffffff; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); padding:24px; max-width:360px;"; // force hidden by default
 
         popup.innerHTML = `
             <button type="button" class="theme-close" id="themeClose">✕</button>
