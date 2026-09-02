@@ -10,7 +10,7 @@ const attendanceRecordSchema = new mongoose.Schema(
 
     method: {
       type: String,
-      enum: ["ble", "face", "qr", "manual"],
+      enum: ["ble", "face", "manual"],
       required: true,
     },
 
