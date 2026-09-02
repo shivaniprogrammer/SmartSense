@@ -74,8 +74,8 @@ h1 { font-size: 20px; margin-bottom: 8px; }
 
 <div class="card">
   <div class="icon-badge"><i class="fa-solid fa-envelope-open-text"></i></div>
-  <h1>Verify your email</h1>
-  <p class="subtitle">We sent a 6-digit code to</p>
+  <h1 id="pageTitle">Verify your email</h1>
+  <p class="subtitle" id="pageSubtitle">We sent a 6-digit code to</p>
   <p class="email-display" id="emailDisplay">your email</p>
 
   <div class="otp-inputs" id="otpInputs">
@@ -89,7 +89,7 @@ h1 { font-size: 20px; margin-bottom: 8px; }
 
   <p class="message" id="message"></p>
 
-  <button class="verify-btn" id="verifyBtn">Verify Email</button>
+  <button class="verify-btn" id="verifyBtn">Verify</button>
 
   <p class="resend-row">
     Didn't get the code?
@@ -99,18 +99,32 @@ h1 { font-size: 20px; margin-bottom: 8px; }
 </div>
 
 <script>
-   const API_BASE = "/api";
+const API_BASE = (function() {
+  if (window.location.port === "5000") return "/api";
+  if (window.location.protocol === "file:" || !window.location.port || window.location.port !== "5000") {
+    return "http://" + (window.location.hostname || "localhost") + ":5000/api";
+  }
+  return "/api";
+})();
 
 const params = new URLSearchParams(window.location.search);
 const email = params.get("email") || "";
 const role = params.get("role") || "student";
+const purpose = params.get("purpose") || "register";
+const isLogin = purpose === "login";
 document.getElementById("emailDisplay").textContent = email || "your email";
+document.getElementById("pageTitle").textContent = isLogin ? "Enter login code" : "Verify your email";
+document.getElementById("pageSubtitle").textContent = isLogin
+  ? "Enter the 6-digit login code for"
+  : "We sent a 6-digit code to";
+document.getElementById("verifyBtn").textContent = isLogin ? "Verify & Sign In" : "Verify Email";
 
 const inputs = document.querySelectorAll("#otpInputs input");
 const messageEl = document.getElementById("message");
 const verifyBtn = document.getElementById("verifyBtn");
 const resendLink = document.getElementById("resendLink");
 const resendTimer = document.getElementById("resendTimer");
+const defaultVerifyLabel = isLogin ? "Verify & Sign In" : "Verify Email";
 
 inputs.forEach((input, index) => {
   input.addEventListener("input", () => {
@@ -157,7 +171,8 @@ verifyBtn.addEventListener("click", async () => {
   verifyBtn.textContent = "Verifying...";
 
   try {
-  const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+    const endpoint = isLogin ? "/auth/verify-login-otp" : "/auth/verify-otp";
+    const res = await fetch(`${API_BASE}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp }),
@@ -165,20 +180,30 @@ verifyBtn.addEventListener("click", async () => {
     const data = await res.json();
 
     if (res.ok) {
-      showMessage(data.message || "Email verified!", "success");
-      const redirectPage = role === "teacher" ? "login-teacher.html" : "login-student.html";
-      setTimeout(() => {
-        window.location.href = redirectPage;
-      }, 1200);
+      if (isLogin && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        showMessage("Login verified! Redirecting...", "success");
+        const actualRole = (data.user && data.user.role) || role;
+        setTimeout(() => {
+          window.location.href = actualRole === "teacher" ? "teacher-dashboard.html" : "student-dashboard.html";
+        }, 800);
+      } else {
+        showMessage(data.message || "Email verified!", "success");
+        const redirectPage = role === "teacher" ? "login-teacher.html" : "login-student.html";
+        setTimeout(() => {
+          window.location.href = redirectPage;
+        }, 1200);
+      }
     } else {
       showMessage(data.error || "Verification failed.", "error");
       verifyBtn.disabled = false;
-      verifyBtn.textContent = "Verify Email";
+      verifyBtn.textContent = defaultVerifyLabel;
     }
   } catch (err) {
     showMessage("Could not reach the server. Is your backend running?", "error");
     verifyBtn.disabled = false;
-    verifyBtn.textContent = "Verify Email";
+    verifyBtn.textContent = defaultVerifyLabel;
   }
 });
 
@@ -200,16 +225,25 @@ resendLink.addEventListener("click", async () => {
   if (resendLink.classList.contains("disabled")) return;
 
   try {
-    const res = await fetch(`${API_BASE}/auth/resend-otp`, {
+    const endpoint = isLogin ? "/auth/resend-login-otp" : "/auth/resend-otp";
+    const res = await fetch(`${API_BASE}${endpoint}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
     const data = await res.json();
+    if (data.alreadyVerified || (data.message && data.message.includes("already verified"))) {
+      showMessage("Email is already verified! Redirecting to login...", "success");
+      const redirectPage = role === "teacher" ? "login-teacher.html" : "login-student.html";
+      setTimeout(() => {
+        window.location.href = redirectPage;
+      }, 1200);
+      return;
+    }
     showMessage(data.message || "New code sent.", res.ok ? "success" : "error");
     if (res.ok) startCooldown();
   } catch (err) {
-    showMessage("Could not reach the server.", "error");
+    showMessage("Could not reach the server. Make sure the backend is running.", "error");
   }
 });
 

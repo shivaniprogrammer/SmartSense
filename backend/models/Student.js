@@ -16,8 +16,10 @@ enrollmentComplete: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
     otpCode: { type: String },
     otpExpiry: { type: Date },
+    loginOtp: { type: String },
+    loginOtpExpiry: { type: Date },
     resetOtp: { type: String },
-resetOtpExpiry: { type: Date },
+    resetOtpExpiry: { type: Date },
   },
   { timestamps: true }
 );

@@ -1,4 +1,10 @@
-const API_BASE = "/api";
+const API_BASE = (function() {
+    if (window.location.port === "5000") return "/api";
+    if (window.location.protocol === "file:" || !window.location.port || window.location.port !== "5000") {
+        return "http://" + (window.location.hostname || "localhost") + ":5000/api";
+    }
+    return "/api";
+})();
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -109,6 +115,15 @@ loginForm.addEventListener("submit", function (e) {
             if (status !== 200) {
                 formStatus.textContent = data.error || "Login failed.";
                 formStatus.classList.add("show", "fail");
+                return;
+            }
+
+            if (data.requiresOtp) {
+                formStatus.textContent = data.message || "Check your email for the login code.";
+                formStatus.classList.add("show", "success");
+                window.location.href = "verify-otp.html?email=" + encodeURIComponent(emailInput.value.trim())
+                    + "&role=" + encodeURIComponent(pageRole)
+                    + "&purpose=login";
                 return;
             }
 

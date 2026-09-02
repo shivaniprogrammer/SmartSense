@@ -1,4 +1,10 @@
-   const API_BASE = "/api";
+const API_BASE = (function() {
+    if (window.location.port === "5000") return "/api";
+    if (window.location.protocol === "file:" || !window.location.port || window.location.port !== "5000") {
+        return "http://" + (window.location.hostname || "localhost") + ":5000/api";
+    }
+    return "/api";
+})();
 
 const registerForm = document.getElementById("registerForm");
 const nameInput = document.getElementById("name");
@@ -194,16 +200,18 @@ registerForm.addEventListener("submit", function (e) {
             formStatus.textContent = data.message || "Account created! Redirecting to verification...";
             formStatus.classList.add("show", "success");
 
-            const registeredEmail = emailInput.value.trim();
+            const registeredEmail = (data && data.email) || emailInput.value.trim();
+            const userRole = (data && data.role) || role;
 
             setTimeout(function () {
-             window.location.href = "verify-otp.html?email=" + encodeURIComponent(registeredEmail) + "&role=" + encodeURIComponent(role);
+                window.location.href = "verify-otp.html?email=" + encodeURIComponent(registeredEmail) + "&role=" + encodeURIComponent(userRole) + "&purpose=register";
             }, 1000);
         })
-        .catch(function () {
+        .catch(function (err) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Create Account <i class="fa-solid fa-arrow-right"></i>';
-            formStatus.textContent = "Could not reach the server.";
+            console.error("Registration request failed:", err);
+            formStatus.textContent = "Could not reach the server. Make sure the backend is running on port 5000.";
             formStatus.classList.add("show", "fail");
         });
 });
