@@ -102,22 +102,13 @@ loginForm.addEventListener("submit", function (e) {
         body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value, role: pageRole })
     })
         .then(res => res.json().then(data => ({ status: res.status, data })))
-        .then(({ status, data }) => {
+               .then(({ status, data }) => {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Sign In <i class="fa-solid fa-arrow-right"></i>';
 
             if (status !== 200) {
                 formStatus.textContent = data.error || "Login failed.";
                 formStatus.classList.add("show", "fail");
-                return;
-            }
-
-            if (data.requiresOtp) {
-                formStatus.textContent = data.message || "Check your email for the login code.";
-                formStatus.classList.add("show", "success");
-                window.location.href = "verify-otp.html?email=" + encodeURIComponent(emailInput.value.trim())
-                    + "&role=" + encodeURIComponent(pageRole)
-                    + "&purpose=login";
                 return;
             }
 
@@ -129,7 +120,7 @@ loginForm.addEventListener("submit", function (e) {
             const actualRole = data.user.role;
             window.location.href = actualRole === "teacher" ? "teacher-dashboard.html" : "student-dashboard.html";
         })
-        .catch(function () {
+                .catch(function () {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Sign In <i class="fa-solid fa-arrow-right"></i>';
             formStatus.textContent = "Could not reach the server.";
