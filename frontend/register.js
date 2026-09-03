@@ -174,6 +174,7 @@ registerForm.addEventListener("submit", function (e) {
     if (role === "student") {
         payload.studentId = studentIdInput.value.trim();
     }
+    console.log("Submitting registration with email:", payload.email);
 
     fetch(API_BASE + "/auth/register", {
         method: "POST",
