@@ -1,10 +1,4 @@
-const API_BASE = (function() {
-    if (window.location.port === "5000") return "/api";
-    if (window.location.protocol === "file:" || !window.location.port || window.location.port !== "5000") {
-        return "http://" + (window.location.hostname || "localhost") + ":5000/api";
-    }
-    return "/api";
-})();
+const API_BASE = "/api";
 const loginForm = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
