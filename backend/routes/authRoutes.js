@@ -46,7 +46,6 @@ router.post("/forgot-password", async (req, res) => {
     const student = await Student.findOne({ email: normalizedEmail, role });
 
     if (!student) {
-      // Don't reveal whether the account exists - just say "sent" either way
       return res.status(200).json({ message: "If an account exists, a reset code has been sent." });
     }
     const otp = generateOtp();
@@ -132,7 +131,6 @@ router.post("/register", async (req, res) => {
         return res.status(409).json({ error: "An account with this email already exists" });
       }
 
-      // Existing unverified account: update user credentials and issue fresh OTP
       if (role === "student" && studentId) {
         const idConflict = await Student.findOne({ studentId, email: { $ne: normalizedEmail } });
         if (idConflict) {
@@ -320,105 +318,15 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const otp = generateOtp();
-    student.loginOtp = otp;
-    student.loginOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    await student.save();
-
-    console.log(`[SmartSense OTP] Login OTP for ${normalizedEmail}: ${otp}`);
-    const emailResult = await sendOtpEmail(
-      normalizedEmail,
-      otp,
-      "Your SmartSense login code"
-    );
-    if (!emailDelivered(emailResult)) {
-      console.error("Failed to send login OTP email:", emailResult.error || "email skipped");
-      return res.status(502).json({ error: "Couldn't send the login code. Please try again in a moment." });
-    }
-
-    res.json({
-      requiresOtp: true,
-      email: normalizedEmail,
-      message: "Check your email for the login code.",
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error during login" });
-  }
-});
-
-// ---- Verify login OTP ----
-router.post("/verify-login-otp", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({ error: "email and otp are required" });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const student = await Student.findOne({ email: normalizedEmail });
-
-    if (!student || !student.loginOtp || !student.loginOtpExpiry) {
-      return res.status(400).json({ error: "No pending login code. Please sign in again." });
-    }
-
-    if (student.loginOtpExpiry < new Date()) {
-      return res.status(400).json({ error: "Code has expired. Please sign in again." });
-    }
-
-    if (student.loginOtp !== otp) {
-      return res.status(400).json({ error: "Incorrect code" });
-    }
-
-    student.loginOtp = undefined;
-    student.loginOtpExpiry = undefined;
-    await student.save();
-
     const token = generateToken(student);
     res.json({
-      message: "Login verified",
+      message: "Login successful",
       token,
       user: { id: student._id, name: student.name, email: student.email, role: student.role },
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error during login verification" });
-  }
-});
-
-// ---- Resend login OTP ----
-router.post("/resend-login-otp", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "email is required" });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const student = await Student.findOne({ email: normalizedEmail });
-
-    if (!student || !student.loginOtp) {
-      return res.status(400).json({ error: "No pending login. Please sign in again." });
-    }
-
-    const otp = generateOtp();
-    student.loginOtp = otp;
-    student.loginOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    await student.save();
-
-    console.log(`[SmartSense OTP] Resent login OTP for ${normalizedEmail}: ${otp}`);
-    const emailResult = await sendOtpEmail(normalizedEmail, otp, "Your SmartSense login code");
-    if (!emailDelivered(emailResult)) {
-      console.error("Failed to send login OTP email:", emailResult.error || "email skipped");
-      return res.status(502).json({ error: "Couldn't send the login code. Please try again in a moment." });
-    }
-
-    res.json({ message: "New login code sent" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error while resending login code" });
+    res.status(500).json({ error: "Server error during login" });
   }
 });
 
