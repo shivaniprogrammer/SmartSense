@@ -1,6 +1,6 @@
 const API_BASE = "/api";
-const LOW_ATTENDANCE_THRESHOLD = 75; // percent — keep in sync with backend/routes/lowAttendanceRoutes.js
-
+const SPRING_API_BASE = "http://localhost:8080";
+const LOW_ATTENDANCE_THRESHOLD = 75;
 const token = localStorage.getItem("token");
 const storedUser = localStorage.getItem("user");
 
@@ -160,6 +160,22 @@ const profileLoaded = authFetch("/students/me")
         console.error("Failed to load profile:", err);
         return null;
     });
+    // Load today's attendance from Spring Boot
+function loadTodayAttendance() {
+    return fetch(SPRING_API_BASE + "/attendance/today")
+        .then(function (res) {
+            return res.json();
+        })
+        .then(function (records) {
+            console.log("Today's attendance from Spring Boot:", records);
+            return records;
+        })
+        .catch(function (err) {
+            console.error("Failed to load today's attendance:", err);
+            return [];
+        });
+}
+loadTodayAttendance();
 
 // Attendance history — independent of requests, so one failing doesn't block the other
 profileLoaded.then(function (profile) {
