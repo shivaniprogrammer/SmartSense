@@ -194,10 +194,12 @@ Promise.all([
 // Attendance history — independent of requests, so one failing doesn't block the other
 profileLoaded.then(function (profile) {
     if (!profile) return;
-
-    authFetch("/attendance/history/" + profile._id)
-        .then(function ({ data: records }) {
-            const total = records.length;
+fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
+    .then(function (res) {
+        return res.json();
+    })
+    .then(function (records) {
+        const total = records.length;
             const presentCount = records.filter(r => r.status === "present" || r.status === "late").length;
             const absentCount = total - presentCount;
             const percent = total > 0 ? Math.round((presentCount / total) * 1000) / 10 : 0;
