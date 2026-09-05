@@ -143,23 +143,25 @@ tr:last-child td { border-bottom: none; }
 
       <!-- Summary cards - mock data, not yet wired to backend -->
       <div class="summary-grid">
-        <div class="summary-card percent">
-          <div class="label">Attendance %</div>
-          <div class="value">91%</div>
-        </div>
-        <div class="summary-card present">
-          <div class="label">Days Present</div>
-          <div class="value">20</div>
-        </div>
-        <div class="summary-card late">
-          <div class="label">Days Late</div>
-          <div class="value">2</div>
-        </div>
-        <div class="summary-card absent">
-          <div class="label">Days Absent</div>
-          <div class="value">2</div>
-        </div>
-      </div>
+       <div class="summary-card percent">
+    <div class="label">Attendance %</div>
+    <div id="attendancePercent" class="value">--</div>
+</div>
+
+<div class="summary-card present">
+    <div class="label">Days Present</div>
+    <div id="presentDays" class="value">--</div>
+</div>
+
+<div class="summary-card late">
+    <div class="label">Days Late</div>
+    <div id="lateDays" class="value">--</div>
+</div>
+
+<div class="summary-card absent">
+    <div class="label">Days Absent</div>
+    <div id="absentDays" class="value">--</div>
+</div>
 
       <!-- Attendance history - mock data, not yet wired to backend -->
       <div class="panel">
@@ -177,43 +179,11 @@ tr:last-child td { border-bottom: none; }
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>Jul 29, 2026</td>
-              <td>08:58 AM</td>
-              <td>04:02 PM</td>
-              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-            <tr>
-              <td>Jul 28, 2026</td>
-              <td>09:12 AM</td>
-              <td>04:05 PM</td>
-              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-              <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
-            </tr>
-            <tr>
-              <td>Jul 27, 2026</td>
-              <td>&mdash;</td>
-              <td>&mdash;</td>
-              <td><span class="method-tag">&mdash;</span></td>
-              <td><span class="status-badge absent"><span class="dot"></span>Absent</span></td>
-            </tr>
-            <tr>
-              <td>Jul 26, 2026</td>
-              <td>08:50 AM</td>
-              <td>04:00 PM</td>
-              <td><span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span></td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-            <tr>
-              <td>Jul 25, 2026</td>
-              <td>08:55 AM</td>
-              <td>03:58 PM</td>
-              <td><span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span></td>
-              <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-            </tr>
-          </tbody>
+        <tbody id="attendanceTableBody">
+    <tr>
+        <td colspan="5" style="text-align:center;">Loading attendance...</td>
+    </tr>
+</tbody>
         </table>
       </div>
 
@@ -225,5 +195,213 @@ tr:last-child td { border-bottom: none; }
 
 <script src="student-sidebar.js"></script>
 <script src="theme.js"></script>
+<script>
+const SPRING_API_BASE = "http://localhost:8080";
+
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "login-student.html";
+}
+
+function authFetch(path) {
+    return fetch("/api" + path, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        }
+    }).then(function(res) {
+        return res.json().then(function(data) {
+            return {
+                status: res.status,
+                data: data
+            };
+        });
+    });
+}
+
+function formatDate(dateString) {
+    if (!dateString) return "—";
+
+    const date = new Date(dateString + "T00:00:00");
+
+    return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+}
+
+function formatTime(dateTimeString) {
+    if (!dateTimeString) return "—";
+
+    const date = new Date(dateTimeString);
+
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function getMethodHtml(method) {
+    if (!method) {
+        return '<span class="method-tag">—</span>';
+    }
+
+    if (method.toLowerCase() === "ble") {
+        return '<span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span>';
+    }
+
+    if (method.toLowerCase() === "manual") {
+        return '<span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span>';
+    }
+
+    return '<span class="method-tag">' + method + '</span>';
+}
+
+function getStatusHtml(status) {
+    const cleanStatus = status ? status.toLowerCase() : "absent";
+
+    return `
+        <span class="status-badge ${cleanStatus}">
+            <span class="dot"></span>
+            ${cleanStatus.charAt(0).toUpperCase() + cleanStatus.slice(1)}
+        </span>
+    `;
+}
+
+function loadAttendance(profile) {
+
+    fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
+        .then(function(res) {
+            if (!res.ok) {
+                throw new Error("Spring Boot returned " + res.status);
+            }
+
+            return res.json();
+        })
+        .then(function(records) {
+
+            console.log("Attendance from Spring Boot:", records);
+
+            let presentCount = 0;
+            let lateCount = 0;
+            let absentCount = 0;
+
+            records.forEach(function(record) {
+
+                if (record.status === "present") {
+                    presentCount++;
+                }
+                else if (record.status === "late") {
+                    lateCount++;
+                }
+                else if (record.status === "absent") {
+                    absentCount++;
+                }
+            });
+
+            const total = records.length;
+
+            const attendanceCount = presentCount + lateCount;
+
+            const percentage = total > 0
+                ? Math.round((attendanceCount / total) * 1000) / 10
+                : 0;
+
+            document.getElementById("attendancePercent").textContent =
+                percentage + "%";
+
+            document.getElementById("presentDays").textContent =
+                presentCount;
+
+            document.getElementById("lateDays").textContent =
+                lateCount;
+
+            document.getElementById("absentDays").textContent =
+                absentCount;
+
+            const tableBody =
+                document.getElementById("attendanceTableBody");
+
+            tableBody.innerHTML = "";
+
+            if (records.length === 0) {
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center;">
+                            No attendance records found.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            records.sort(function(a, b) {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            records.forEach(function(record) {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${formatDate(record.date)}</td>
+
+                    <td>${formatTime(record.checkInTime)}</td>
+
+                    <td>${formatTime(record.checkOutTime)}</td>
+
+                    <td>${getMethodHtml(record.method)}</td>
+
+                    <td>${getStatusHtml(record.status)}</td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(function(error) {
+
+            console.error(
+                "Failed to load attendance history:",
+                error
+            );
+
+            document.getElementById("attendanceTableBody").innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align:center;">
+                        Could not load attendance.
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+authFetch("/students/me")
+    .then(function(result) {
+
+        if (result.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "login-student.html";
+            return;
+        }
+
+        const profile = result.data;
+
+        console.log("Logged-in student:", profile);
+
+        loadAttendance(profile);
+    })
+    .catch(function(error) {
+
+        console.error(
+            "Failed to load student profile:",
+            error
+        );
+    });
+</script>
 </body>
 </html>
