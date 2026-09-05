@@ -199,8 +199,10 @@ fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
         return res.json();
     })
     .then(function (records) {
-        const total = records.length;
-            const presentCount = records.filter(r => r.status === "present" || r.status === "late").length;
+       const bleRecords = records.filter(r => r.method === "ble");
+
+const total = bleRecords.length;
+            const presentCount = bleRecords.filter(r => r.status === "present" || r.status === "late").length;
             const absentCount = total - presentCount;
             const percent = total > 0 ? Math.round((presentCount / total) * 1000) / 10 : 0;
 

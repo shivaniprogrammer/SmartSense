@@ -76,10 +76,20 @@ body { font-family: "Inter", sans-serif; background: var(--background); color: v
 .summary-card.late .value { color: var(--amber); }
 .summary-card.absent .value { color: var(--red); }
 .summary-card.percent .value { color: var(--primary); }
-
 .panel {
-  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
-  padding: 24px; margin-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.panel table {
+    width: 100%;
+    min-width: 800px;
 }
 .panel-heading {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
@@ -283,6 +293,11 @@ function loadAttendance(profile) {
         .then(function(records) {
 
             console.log("Attendance from Spring Boot:", records);
+
+
+            records = records.filter(function(record) {
+    return record.method === "ble";
+});
 
             let presentCount = 0;
             let lateCount = 0;
