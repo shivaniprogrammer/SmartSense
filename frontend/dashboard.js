@@ -34,9 +34,9 @@ function renderRegisterNumber(profile) {
 /*
   MOCK for now — swap todaysAttendanceStatus with a real value
   once you fetch the student's actual attendance record for today.
-*/
-function renderTodayCard() {
+*/function renderTodayCard(profile, records) {
     const today = new Date();
+
     const dateString = today.toLocaleDateString("en-US", {
         weekday: "long",
         month: "short",
@@ -49,23 +49,30 @@ function renderTodayCard() {
     const badge = document.getElementById("todayStatusBadge");
     const statusText = document.getElementById("todayStatusText");
 
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const dayOfWeek = today.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
     if (isWeekend) {
+        badge.classList.remove("present", "absent");
         badge.classList.add("holiday");
         statusText.textContent = "Holiday";
         return;
     }
 
-    const todaysAttendanceStatus = "present"; // MOCK — "present" or "absent"
+    badge.classList.remove("present", "absent", "holiday");
 
-    badge.classList.add(todaysAttendanceStatus);
-    statusText.textContent = todaysAttendanceStatus === "present" ? "Present" : "Absent";
+    const studentAttendance = records.find(function (record) {
+        return String(record.student) === String(profile._id);
+    });
+
+    if (studentAttendance) {
+        badge.classList.add("present");
+        statusText.textContent = "Present";
+    } else {
+        badge.classList.add("absent");
+        statusText.textContent = "Absent";
+    }
 }
-
-renderTodayCard();
-
 // Auth guard - redirect to login if no token
 if (!token) {
     window.location.href = "login-student.html";
@@ -175,7 +182,14 @@ function loadTodayAttendance() {
             return [];
         });
 }
-loadTodayAttendance();
+Promise.all([
+    profileLoaded,
+    loadTodayAttendance()
+]).then(function ([profile, records]) {
+    if (!profile) return;
+
+    renderTodayCard(profile, records);
+});
 
 // Attendance history — independent of requests, so one failing doesn't block the other
 profileLoaded.then(function (profile) {
