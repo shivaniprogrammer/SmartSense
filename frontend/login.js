@@ -102,7 +102,7 @@ loginForm.addEventListener("submit", function (e) {
         body: JSON.stringify({ email: emailInput.value.trim(), password: passwordInput.value, role: pageRole })
     })
         .then(res => res.json().then(data => ({ status: res.status, data })))
-               .then(({ status, data }) => {
+        .then(({ status, data }) => {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Sign In <i class="fa-solid fa-arrow-right"></i>';
 
@@ -118,9 +118,23 @@ loginForm.addEventListener("submit", function (e) {
             formStatus.classList.add("show", "success");
 
             const actualRole = data.user.role;
-            window.location.href = actualRole === "teacher" ? "teacher-dashboard.html" : "student-dashboard.html";
+
+            let destination;
+            if (actualRole === "teacher") {
+                // New teacher accounts must pick their faculty role (subject vs Class
+                // Coordinator) before reaching the dashboard. Legacy teacher accounts
+                // (facultySetupComplete undefined/true) go straight to the dashboard,
+                // exactly as before.
+                destination = data.user.facultySetupComplete === false
+                    ? "select-faculty-role.html?email=" + encodeURIComponent(data.user.email)
+                    : "teacher-dashboard.html";
+            } else {
+                destination = "student-dashboard.html";
+            }
+
+            window.location.href = destination;
         })
-                .catch(function () {
+        .catch(function () {
             submitBtn.disabled = false;
             submitBtn.innerHTML = 'Sign In <i class="fa-solid fa-arrow-right"></i>';
             formStatus.textContent = "Could not reach the server.";

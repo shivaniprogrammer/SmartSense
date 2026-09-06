@@ -1,115 +1,36 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
+const SUBJECTS = require("../constants/subjects");
 const generateToken = require("../utils/generateToken");
-const sendEmail = require("../utils/sendEmail");
+const { requireAuth } = require("../middleware/auth");
+
+const CLASS_COORDINATOR_LABEL = "Class Coordinator";
+
+// ---- Mailer setup ----
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 }
 
-async function sendOtpEmail(toEmail, otp, subject = "Your SmartSense verification code") {
-  const text = `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`;
-  const html = `
-    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h2 style="color: #4f46e5; margin: 0; font-size: 24px;">SmartSense</h2>
-        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Smart Classroom Management</p>
-      </div>
-      <div style="padding: 24px; background-color: #f8fafc; border-radius: 10px; text-align: center; border: 1px solid #eef2f6;">
-        <p style="font-size: 15px; color: #1e293b; margin: 0 0 14px 0;">Your verification code is:</p>
-        <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #4f46e5; padding: 8px 0;">
-          ${otp}
-        </div>
-        <p style="font-size: 13px; color: #64748b; margin: 14px 0 0 0;">This code expires in <strong>10 minutes</strong>.</p>
-      </div>
-      <p style="font-size: 12px; color: #94a3b8; margin-top: 24px; text-align: center;">If you did not request this verification code, please ignore this email.</p>
-    </div>
-  `;
-  return sendEmail(toEmail, subject, text, html);
+async function sendOtpEmail(toEmail, otp) {
+  await transporter.sendMail({
+    from: `"SmartSense" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: "Your verification code",
+    text: `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`,
+    html: `<p>Your SmartSense verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`,
+  });
 }
-
-function emailDelivered(emailResult) {
-  return emailResult && emailResult.success === true && !emailResult.skipped;
-}
-
-// ---- Forgot Password: Step 1 - request a reset code ----
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email, role } = req.body;
-    if (!email || !role) {
-      return res.status(400).json({ error: "email and role are required" });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const student = await Student.findOne({ email: normalizedEmail, role });
-
-    if (!student) {
-      return res.status(200).json({ message: "If an account exists, a reset code has been sent." });
-    }
-    const otp = generateOtp();
-    student.resetOtp = otp;
-    student.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    await student.save();
-
-    console.log(`[SmartSense OTP] Password reset code for ${normalizedEmail}: ${otp}`);
-
-    const emailResult = await sendOtpEmail(
-      normalizedEmail,
-      otp,
-      "Your SmartSense password reset code"
-    );
-
-    if (!emailResult.success && !emailResult.skipped) {
-      console.error("Failed to send reset email:", emailResult.error);
-    }
-
-    res.status(200).json({ message: "If an account exists, a reset code has been sent." });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error while processing your request" });
-  }
-});
-
-// ---- Forgot Password: Step 2 - verify code + set new password ----
-router.post("/reset-password", async (req, res) => {
-  try {
-    const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ error: "email, otp and newPassword are required" });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
-    }
-
-    const normalizedEmail = email.toLowerCase().trim();
-    const student = await Student.findOne({ email: normalizedEmail });
-
-    if (!student || !student.resetOtp || !student.resetOtpExpiry) {
-      return res.status(400).json({ error: "No pending reset request. Please request a new code." });
-    }
-
-    if (new Date() > student.resetOtpExpiry) {
-      return res.status(400).json({ error: "Code has expired. Please request a new one." });
-    }
-
-    if (student.resetOtp !== otp) {
-      return res.status(400).json({ error: "Incorrect code. Please try again." });
-    }
-
-    student.password = await bcrypt.hash(newPassword, 10);
-    student.resetOtp = undefined;
-    student.resetOtpExpiry = undefined;
-    await student.save();
-
-    res.json({ message: "Password reset successfully. You can now log in." });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error while resetting password" });
-  }
-});
 
 // ---- Register ----
 router.post("/register", async (req, res) => {
@@ -125,59 +46,19 @@ router.post("/register", async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
     const existingUser = await Student.findOne({ email: normalizedEmail });
     if (existingUser) {
-      if (existingUser.emailVerified) {
-        return res.status(409).json({ error: "An account with this email already exists" });
-      }
-
-      if (role === "student" && studentId) {
-        const idConflict = await Student.findOne({ studentId, email: { $ne: normalizedEmail } });
-        if (idConflict) {
-          return res.status(409).json({ error: "This student ID is already registered to another account" });
-        }
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const otp = generateOtp();
-      const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
-
-      existingUser.name = name.trim();
-      existingUser.password = hashedPassword;
-      existingUser.role = role;
-      existingUser.studentId = role === "student" ? studentId.trim() : undefined;
-      existingUser.otpCode = otp;
-      existingUser.otpExpiry = otpExpiry;
-      existingUser.emailVerified = false;
-      await existingUser.save();
-
-      console.log(`[SmartSense OTP] Fresh registration OTP for unverified ${normalizedEmail}: ${otp}`);
-      const emailResult = await sendOtpEmail(normalizedEmail, otp);
-      const emailActuallySent = emailDelivered(emailResult);
-
-      return res.status(200).json({
-        message: emailActuallySent
-          ? "Verification code sent to your email."
-          : "Account created, but we couldn't send the verification email right now. Use 'Resend Code' on the next screen to try again.",
-        email: normalizedEmail,
-        role: existingUser.role,
-      });
-    }
-
-    if (role === "student") {
-      const existingStudentId = await Student.findOne({ studentId });
-      if (existingStudentId) {
-        return res.status(409).json({ error: "This student ID is already registered" });
-      }
+      return res.status(409).json({ error: "An account with this email already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOtp();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
     const student = await Student.create({
-      name: name.trim(),
-      studentId: role === "student" ? studentId.trim() : undefined,
+      name,
+      studentId: role === "student" ? studentId : undefined,
       email: normalizedEmail,
       password: hashedPassword,
       role,
@@ -186,22 +67,18 @@ router.post("/register", async (req, res) => {
       emailVerified: false,
     });
 
-    console.log(`[SmartSense OTP] Registration OTP for ${normalizedEmail}: ${otp}`);
-    const emailResult = await sendOtpEmail(normalizedEmail, otp);
-    const emailActuallySent = emailDelivered(emailResult);
+    try {
+      await sendOtpEmail(normalizedEmail, otp);
+    } catch (mailErr) {
+      console.error("Failed to send OTP email:", mailErr.message);
+      // Account is still created; user can use "resend code" once mail issue is fixed
+    }
 
     res.status(201).json({
-      message: emailActuallySent
-        ? "Account created. Check your email for the verification code."
-        : "Account created, but we couldn't send the verification email right now. Use 'Resend Code' on the next screen to try again.",
+      message: "Account created. Check your email for the verification code.",
       email: normalizedEmail,
-      role: student.role,
     });
   } catch (err) {
-    if (err.code === 11000) {
-      const field = Object.keys(err.keyPattern || {})[0] || "field";
-      return res.status(409).json({ error: `This ${field} is already in use` });
-    }
     console.error(err);
     res.status(500).json({ error: "Server error during registration" });
   }
@@ -268,7 +145,7 @@ router.post("/resend-otp", async (req, res) => {
     }
 
     if (student.emailVerified) {
-      return res.status(200).json({ message: "Email already verified", alreadyVerified: true });
+      return res.status(200).json({ message: "Email already verified" });
     }
 
     const otp = generateOtp();
@@ -276,18 +153,88 @@ router.post("/resend-otp", async (req, res) => {
     student.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await student.save();
 
-    console.log(`[SmartSense OTP] Resent registration OTP for ${normalizedEmail}: ${otp}`);
-    const emailResult = await sendOtpEmail(normalizedEmail, otp);
-
-    if (!emailDelivered(emailResult)) {
-      console.error("Failed to send OTP email:", emailResult.error || "email skipped");
-      return res.status(502).json({ error: "Couldn't send the code right now. Please try again in a moment." });
-    }
+    await sendOtpEmail(normalizedEmail, otp);
 
     res.json({ message: "New code sent" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error while resending code" });
+  }
+});
+
+// ---- List available subjects + Class Coordinator option ----
+// Shown to a teacher right after OTP verification so they can pick which
+// subject(s) they teach, or choose to be the Class Coordinator instead.
+router.get("/subjects", async (req, res) => {
+  res.json({ subjects: SUBJECTS, coordinatorOption: CLASS_COORDINATOR_LABEL });
+});
+
+// ---- Teacher selects faculty role (subject teacher vs Class Coordinator) ----
+// Called once, right after OTP verification, before the teacher's first login.
+router.post("/select-faculty-role", async (req, res) => {
+  try {
+    const { email, facultyType, subjects } = req.body;
+
+    if (!email || !facultyType) {
+      return res.status(400).json({ error: "email and facultyType are required" });
+    }
+
+    if (!["subject", "coordinator"].includes(facultyType)) {
+      return res.status(400).json({ error: 'facultyType must be "subject" or "coordinator"' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const teacher = await Student.findOne({ email: normalizedEmail, role: "teacher" });
+
+    if (!teacher) {
+      return res.status(404).json({ error: "No teacher account found with this email" });
+    }
+
+    if (!teacher.emailVerified) {
+      return res.status(403).json({ error: "Please verify your email before selecting a faculty role" });
+    }
+
+    if (facultyType === "subject") {
+      const selectedSubjects = Array.isArray(subjects)
+        ? subjects.map((s) => String(s).trim()).filter(Boolean)
+        : [];
+
+      if (selectedSubjects.length === 0) {
+        return res.status(400).json({ error: "Select at least one subject you are responsible for" });
+      }
+
+      teacher.facultyType = "subject";
+      teacher.facultySubjects = selectedSubjects;
+    } else {
+      teacher.facultyType = "coordinator";
+      teacher.facultySubjects = [];
+    }
+
+    teacher.facultySetupComplete = true;
+    await teacher.save();
+
+    res.json({
+      message:
+        facultyType === "coordinator"
+          ? "You're set up as the Class Coordinator."
+          : "Faculty subject(s) saved.",
+      facultyType: teacher.facultyType,
+      facultySubjects: teacher.facultySubjects,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while saving faculty role" });
+  }
+});
+
+// ---- Current user's profile (fresh from DB) ----
+router.get("/me", requireAuth, async (req, res) => {
+  try {
+    const account = await Student.findById(req.user.id).select("-password -otpCode -otpExpiry");
+    if (!account) return res.status(404).json({ error: "Account not found" });
+    res.json({ user: account });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch profile" });
   }
 });
 
@@ -308,9 +255,7 @@ router.post("/login", async (req, res) => {
     }
 
     if (!student.emailVerified) {
-      return res.status(403).json({
-        error: "Please verify your email before logging in"
-      });
+      return res.status(403).json({ error: "Please verify your email before logging in" });
     }
 
     const isMatch = await bcrypt.compare(password, student.password);
@@ -319,11 +264,19 @@ router.post("/login", async (req, res) => {
     }
 
     const token = generateToken(student);
-    res.json({
-      message: "Login successful",
-      token,
-      user: { id: student._id, name: student.name, email: student.email, role: student.role },
-    });
+    const user = { id: student._id, name: student.name, email: student.email, role: student.role };
+
+    if (student.role === "teacher") {
+      user.facultyType = student.facultyType || null;
+      user.facultySubjects = student.facultySubjects || [];
+      // undefined (legacy accounts predating this feature) is treated as "complete"
+      // so existing teachers are never forced through the new setup step.
+      user.facultySetupComplete = student.facultySetupComplete === undefined
+        ? true
+        : student.facultySetupComplete;
+    }
+
+    res.json({ token, user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error during login" });

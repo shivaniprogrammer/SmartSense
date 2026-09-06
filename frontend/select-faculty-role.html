@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Faculty Role | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #eef0ff;
+  --background: #f6f7fb;
+  --white: #ffffff;
+  --text-dark: #1a1d29;
+  --text-muted: #7a7f92;
+  --border: #ececf3;
+  --red: #e0473e;
+  --green: #16a34a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark);
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+
+.card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 20px;
+  padding: 40px 36px; width: 100%; max-width: 520px;
+}
+
+.icon-badge {
+  width: 60px; height: 60px; border-radius: 16px; background: var(--primary-light);
+  color: var(--primary); display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin: 0 auto 20px;
+}
+
+h1 { font-size: 20px; margin-bottom: 8px; text-align: center; }
+.subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 26px; text-align: center; }
+
+.role-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.role-option {
+  border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  cursor: pointer; display: flex; align-items: flex-start; gap: 12px; transition: border-color 0.15s, background 0.15s;
+}
+.role-option:hover { border-color: var(--primary); }
+.role-option.selected { border-color: var(--primary); background: var(--primary-light); }
+.role-option input { margin-top: 3px; accent-color: var(--primary); }
+.role-option .role-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
+.role-option .role-text span { font-size: 12px; color: var(--text-muted); }
+
+#subjectSection { display: none; margin-bottom: 20px; }
+#subjectSection .label {
+  font-size: 12px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; display: block;
+}
+.subject-list {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 260px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px;
+}
+.subject-list label {
+  display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 8px;
+  border-radius: 8px; cursor: pointer;
+}
+.subject-list label:hover { background: var(--primary-light); }
+.subject-list input { accent-color: var(--primary); }
+.loading-subjects { font-size: 12px; color: var(--text-muted); padding: 8px; }
+
+.message { font-size: 12px; margin-bottom: 16px; min-height: 16px; text-align: center; }
+.message.error { color: var(--red); }
+.message.success { color: var(--green); }
+
+.submit-btn {
+  width: 100%; padding: 13px; border: none; border-radius: 10px;
+  background: var(--primary); color: white; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
+.submit-btn:hover { background: var(--primary-dark); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="icon-badge"><i class="fa-solid fa-chalkboard-user"></i></div>
+  <h1>Set up your faculty role</h1>
+  <p class="subtitle">Tell us what you teach so we can show you the right dashboard.</p>
+
+  <div class="role-options">
+    <label class="role-option" id="subjectOptionLabel">
+      <input type="radio" name="facultyType" value="subject" id="facultyTypeSubject" checked>
+      <span class="role-text">
+        <strong>I teach specific subject(s)</strong>
+        <span>Your dashboard will only show attendance for the subject(s) you pick.</span>
+      </span>
+    </label>
+    <label class="role-option" id="coordinatorOptionLabel">
+      <input type="radio" name="facultyType" value="coordinator" id="facultyTypeCoordinator">
+      <span class="role-text">
+        <strong>I am the Class Coordinator</strong>
+        <span>Full access to all subjects and attendance for your class — same as the current Teacher Dashboard.</span>
+      </span>
+    </label>
+  </div>
+
+  <div id="subjectSection">
+    <span class="label">Which subject(s) are you faculty for?</span>
+    <div class="subject-list" id="subjectList">
+      <div class="loading-subjects">Loading subjects...</div>
+    </div>
+  </div>
+
+  <p class="message" id="message"></p>
+
+  <button class="submit-btn" id="submitBtn">Continue to Login</button>
+</div>
+
+<script>
+const API_BASE = "/api/auth";
+
+const params = new URLSearchParams(window.location.search);
+const email = params.get("email") || "";
+
+const subjectOptionLabel = document.getElementById("subjectOptionLabel");
+const coordinatorOptionLabel = document.getElementById("coordinatorOptionLabel");
+const facultyTypeSubject = document.getElementById("facultyTypeSubject");
+const facultyTypeCoordinator = document.getElementById("facultyTypeCoordinator");
+const subjectSection = document.getElementById("subjectSection");
+const subjectList = document.getElementById("subjectList");
+const messageEl = document.getElementById("message");
+const submitBtn = document.getElementById("submitBtn");
+
+if (!email) {
+  window.location.href = "register.html";
+}
+
+function showMessage(text, type) {
+  messageEl.textContent = text;
+  messageEl.className = "message " + (type || "");
+}
+
+function updateSelectedStyles() {
+  subjectOptionLabel.classList.toggle("selected", facultyTypeSubject.checked);
+  coordinatorOptionLabel.classList.toggle("selected", facultyTypeCoordinator.checked);
+  subjectSection.style.display = facultyTypeSubject.checked ? "block" : "none";
+}
+
+facultyTypeSubject.addEventListener("change", updateSelectedStyles);
+facultyTypeCoordinator.addEventListener("change", updateSelectedStyles);
+updateSelectedStyles();
+
+fetch(API_BASE + "/subjects")
+  .then((res) => res.json())
+  .then((data) => {
+    const subjects = data.subjects || [];
+    if (!subjects.length) {
+      subjectList.innerHTML = '<div class="loading-subjects">No subjects found yet.</div>';
+      return;
+    }
+    subjectList.innerHTML = subjects
+      .map(
+        (s) =>
+          `<label><input type="checkbox" class="subjectCheckbox" value="${s.replace(/"/g, "&quot;")}"> ${s}</label>`
+      )
+      .join("");
+  })
+  .catch(() => {
+    subjectList.innerHTML = '<div class="loading-subjects">Could not load subjects. Please refresh.</div>';
+  });
+
+submitBtn.addEventListener("click", () => {
+  const facultyType = facultyTypeSubject.checked ? "subject" : "coordinator";
+  let subjects = [];
+
+  if (facultyType === "subject") {
+    subjects = Array.from(document.querySelectorAll(".subjectCheckbox:checked")).map((cb) => cb.value);
+    if (subjects.length === 0) {
+      showMessage("Select at least one subject you are responsible for.", "error");
+      return;
+    }
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+  fetch(API_BASE + "/select-faculty-role", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, facultyType, subjects }),
+  })
+    .then((res) => res.json().then((data) => ({ status: res.status, data })))
+    .then(({ status, data }) => {
+      if (status !== 200) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Continue to Login";
+        showMessage(data.error || "Something went wrong.", "error");
+        return;
+      }
+      showMessage(data.message || "Saved!", "success");
+      setTimeout(() => {
+        window.location.href = "login-teacher.html";
+      }, 900);
+    })
+    .catch(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Continue to Login";
+      showMessage("Could not reach the server.", "error");
+    });
+});
+</script>
+
+</body>
+</html>

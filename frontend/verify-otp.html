@@ -184,7 +184,12 @@ verifyBtn.addEventListener("click", async () => {
         }, 800);
       } else {
         showMessage(data.message || "Email verified!", "success");
-        const redirectPage = role === "teacher" ? "login-teacher.html" : "login-student.html";
+        // Teachers pick their faculty role (subject vs Class Coordinator) right
+        // after OTP verification; students go straight to login as before.
+        const redirectPage =
+          role === "teacher"
+            ? "select-faculty-role.html?email=" + encodeURIComponent(email)
+            : "login-student.html";
         setTimeout(() => {
           window.location.href = redirectPage;
         }, 1200);

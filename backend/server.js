@@ -15,7 +15,25 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/attendance-tracker";
 
-app.use(cors());
+// Render (and most hosts) sit behind a reverse proxy; this makes req.secure/IP
+// detection behave correctly there.
+app.set("trust proxy", 1);
+
+// Allowed frontend origin(s) for CORS. Set FRONTEND_URL on Render to your deployed
+// frontend URL (comma-separate multiple origins if needed). If it's not set, all
+// origins are allowed, which keeps local development and same-origin deployments
+// (backend serving the frontend itself) working without any extra configuration.
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "frontend")));
 

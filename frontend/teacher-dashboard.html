@@ -120,7 +120,7 @@ tr:last-child td { border-bottom: none; }
     <div class="main-heading">
       <div>
         <h1>Teacher Dashboard</h1>
-        <p>Class CSE-F- live attendance overview</p>
+        <p id="dashboardSubtitle">Class CSE-F- live attendance overview</p>
       </div>
       <div style="display: flex; align-items: center; gap: 14px;">
         <button id="alertBtn" style="padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-dark); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;">
@@ -163,7 +163,7 @@ tr:last-child td { border-bottom: none; }
       </tr>
       <tr>
         <td><div class="student-cell"><div class="avatar">SS</div>Saravanan S</div></td>
-        <td>—</td>
+        <td>â€”</td>
         <td><span class="status-badge unverified"><span class="dot"></span>Unverified</span></td>
       </tr>
     </tbody>
@@ -240,6 +240,28 @@ tr:last-child td { border-bottom: none; }
         });
     });
   }
+
+  fetch(API_BASE + "/auth/me", {
+    headers: { "Authorization": "Bearer " + token }
+  })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      const account = data && data.user;
+      if (!account) return;
+
+      const subtitleEl = document.getElementById("dashboardSubtitle");
+      const isSubjectTeacher = account.facultyType === "subject" && Array.isArray(account.facultySubjects) && account.facultySubjects.length > 0;
+
+      if (isSubjectTeacher) {
+        if (subtitleEl) {
+          subtitleEl.textContent = "Faculty for: " + account.facultySubjects.join(", ");
+        }
+        if (alertBtn) alertBtn.style.display = "none";
+      } else if (account.facultyType === "coordinator" && subtitleEl) {
+        subtitleEl.textContent = "Class Coordinator — Class CSE-F — live attendance overview";
+      }
+    })
+    .catch(function () {});
 })();
 </script>
 </body>

@@ -4,9 +4,8 @@ const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
 const { requireAuth, requireRole } = require("../middleware/auth");
-
+const { loadFacultyScope, requireCoordinatorLevel } = require("../middleware/facultyScope");
 const LOW_ATTENDANCE_THRESHOLD = 75; // percent
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -14,10 +13,8 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
-
 async function sendLowAttendanceEmail(student, percent, threshold) {
   const recipients = [student.email];
-
   try {
     await transporter.sendMail({
       from: `"SmartSense" <${process.env.EMAIL_USER}>`,
@@ -37,32 +34,28 @@ async function sendLowAttendanceEmail(student, percent, threshold) {
     return false;
   }
 }
-
-// Teacher/admin triggers a check across all students; emails anyone below threshold
-router.post("/low-attendance-check", requireAuth, requireRole("teacher", "admin"), async (req, res) => {
+// Teacher/admin triggers a check across all students; emails anyone below threshold.
+// This is a class-wide action, so it's reserved for the Class Coordinator (or admin,
+// or a legacy teacher account with no faculty role set) via requireCoordinatorLevel —
+// a subject-scoped teacher gets a 403 here.
+router.post("/low-attendance-check", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, requireCoordinatorLevel, async (req, res) => {
   try {
     const threshold = req.body.threshold || LOW_ATTENDANCE_THRESHOLD;
     const students = await Student.find({ role: "student" });
-
     const results = [];
-
     for (const student of students) {
       const records = await AttendanceRecord.find({ student: student._id });
       const total = records.length;
-
       if (total === 0) continue; // no attendance data yet, skip
-
       const presentCount = records.filter(
         (r) => r.status === "present" || r.status === "late"
       ).length;
       const percent = Math.round((presentCount / total) * 1000) / 10;
-
       if (percent < threshold) {
         const sent = await sendLowAttendanceEmail(student, percent, threshold);
         results.push({ student: student.name, email: student.email, percent, alertSent: sent });
       }
     }
-
     res.json({
       message: `Checked ${students.length} students. ${results.length} below ${threshold}%.`,
       threshold,
@@ -73,5 +66,4 @@ router.post("/low-attendance-check", requireAuth, requireRole("teacher", "admin"
     res.status(500).json({ error: "Server error while checking attendance" });
   }
 });
-
 module.exports = router;
