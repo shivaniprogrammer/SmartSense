@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
+const Timetable = require("../models/Timetable");
 const sendEmail = require("../utils/sendEmail");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { loadFacultyScope, isSubjectScoped, requireCoordinatorLevel } = require("../middleware/facultyScope");
 
 function todayString() {
   return new Date().toISOString().split("T")[0];
@@ -80,25 +82,140 @@ router.post("/checkout/ble", async (req, res) => {
   }
 });
 
-router.post("/manual", requireAuth, requireRole("teacher", "admin"), async (req, res) => {
+// ---- Which subject+class "sessions" this teacher is allowed to view ----
+router.get("/sessions", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, async (req, res) => {
   try {
-    const { studentId, status, date } = req.body;
+    if (req.user.role === "admin") {
+      const entries = await Timetable.find({});
+      const sessions = uniqueSessions(entries);
+      return res.json({ sessions });
+    }
+
+    if (isSubjectScoped(req.user)) {
+      const entries = await Timetable.find({ subjectCode: { $in: req.user.facultySubjects } });
+      const sessions = uniqueSessions(entries);
+      return res.json({ sessions });
+    }
+
+    if (req.user.facultyType === "coordinator" && req.user.coordinatorClass) {
+      const ownClassEntries = await Timetable.find({ classSection: req.user.coordinatorClass });
+      const ownTeachingElsewhere = await Timetable.find({
+        teacherId: req.user.id,
+        classSection: { $ne: req.user.coordinatorClass },
+      });
+      const sessions = uniqueSessions(ownClassEntries.concat(ownTeachingElsewhere));
+      return res.json({ sessions });
+    }
+
+    res.json({ sessions: [] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error fetching sessions" });
+  }
+});
+
+function uniqueSessions(entries) {
+  const map = new Map();
+  for (const e of entries) {
+    const key = e.subjectCode + "|" + e.classSection;
+    if (!map.has(key)) {
+      map.set(key, { subject: e.subject, subjectCode: e.subjectCode, classSection: e.classSection });
+    }
+  }
+  return Array.from(map.values());
+}
+
+// ---- Attendance for one specific subject+class "session" ----
+router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, async (req, res) => {
+  try {
+    const date = req.query.date || todayString();
+    const { classSection, subject } = req.query;
+
+    if (!classSection || !subject) {
+      return res.status(400).json({ error: "classSection and subject are required" });
+    }
+
+    if (req.user.role !== "admin") {
+      const allowed = await isAllowedForSession(req.user, classSection, subject);
+      if (!allowed) {
+        return res.status(403).json({ error: "You are not assigned to this subject/class." });
+      }
+    }
+
+    const studentsInClass = await Student.find({ role: "student", classSection }).select("_id");
+    const studentIds = studentsInClass.map((s) => s._id);
+
+    const records = await AttendanceRecord.find({
+      date,
+      subject,
+      student: { $in: studentIds },
+    })
+      .populate("student", "name studentId email classSection")
+      .sort({ checkInTime: 1 });
+
+    res.json({ classSection, subject, date, records });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error fetching attendance" });
+  }
+});
+
+// A Coordinator gets full access to their own class (any subject), and — for
+// any OTHER class — only the exact subject/class sessions a real Timetable row
+// proves they personally teach. A subject-scoped teacher likewise only passes
+// for a real Timetable row matching their own subject.
+async function isAllowedForSession(user, classSection, subjectCode) {
+  if (user.facultyType === "coordinator") {
+    if (user.coordinatorClass === classSection) return true;
+    const entry = await Timetable.findOne({
+      subjectCode,
+      classSection,
+      teacherId: user.id,
+    });
+    return !!entry;
+  }
+  if (isSubjectScoped(user)) {
+    if (!user.facultySubjects.includes(subjectCode)) return false;
+    const entry = await Timetable.findOne({
+      subjectCode,
+      classSection,
+      teacherId: user.id,
+    });
+    return !!entry;
+  }
+  return false;
+}
+
+router.post("/manual", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, async (req, res) => {
+  try {
+    const { studentId, status, date, subject, classSection, period } = req.body;
     if (!studentId || !status) {
       return res.status(400).json({ error: "studentId and status are required" });
     }
 
     const targetDate = date || todayString();
 
+    if (req.user.role !== "admin" && subject && classSection) {
+      const allowed = await isAllowedForSession(req.user, classSection, subject);
+      if (!allowed) {
+        return res.status(403).json({ error: "You can only mark attendance for your own subject/class." });
+      }
+    }
+
+    const update = {
+      student: studentId,
+      date: targetDate,
+      status,
+      method: "manual",
+      confidence: "high",
+      checkInTime: new Date(),
+    };
+    if (subject) update.subject = subject;
+    if (period) update.period = period;
+
     const record = await AttendanceRecord.findOneAndUpdate(
       { student: studentId, date: targetDate },
-      {
-        student: studentId,
-        date: targetDate,
-        status,
-        method: "manual",
-        confidence: "high",
-        checkInTime: new Date(),
-      },
+      update,
       { upsert: true, new: true }
     );
 
@@ -109,10 +226,14 @@ router.post("/manual", requireAuth, requireRole("teacher", "admin"), async (req,
   }
 });
 
-router.get("/today", requireAuth, requireRole("teacher", "admin"), async (req, res) => {
+router.get("/today", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, async (req, res) => {
   try {
-    const records = await AttendanceRecord.find({ date: todayString() })
-      .populate("student", "name studentId email")
+    const query = { date: todayString() };
+    if (isSubjectScoped(req.user)) {
+      query.subject = { $in: req.user.facultySubjects };
+    }
+    const records = await AttendanceRecord.find(query)
+      .populate("student", "name studentId email classSection")
       .sort({ checkInTime: 1 });
     res.json(records);
   } catch (err) {
@@ -133,7 +254,7 @@ router.get("/history/:studentId", requireAuth, async (req, res) => {
   }
 });
 
-router.post("/notify-absentees", requireAuth, requireRole("teacher", "admin"), async (req, res) => {
+router.post("/notify-absentees", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, requireCoordinatorLevel, async (req, res) => {
   try {
     const date = todayString();
     const presentStudentIds = (await AttendanceRecord.find({ date })).map((r) => r.student.toString());

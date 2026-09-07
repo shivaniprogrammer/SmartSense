@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assign Classes | SmartSense</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="teacher-sidebar.css">
+<link rel="stylesheet" href="theme.css">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  --primary: #0f9fa8;
+  --primary-dark: #087f86;
+  --primary-light: #dff7f8;
+  --primary-soft: #eefafb;
+  --white: #ffffff;
+  --background: #f7fbfc;
+  --text-dark: #14212b;
+  --text-medium: #465963;
+  --text-muted: #72818a;
+  --border: #d9ecee;
+  --green: #1f9d55;
+  --green-bg: #e5f7ec;
+  --red: #e45858;
+  --red-bg: #ffeaea;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
+
+.layout { display: flex; min-height: 100vh; }
+.main { flex: 1; padding: 32px 4%; max-width: 1100px; }
+
+.main-heading { margin-bottom: 24px; }
+.main-heading h1 { font-size: 24px; margin-bottom: 4px; }
+.main-heading p { color: var(--text-muted); font-size: 13px; }
+
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.5px; padding: 8px 10px; border-bottom: 1px solid var(--border);
+}
+td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+
+.student-cell { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light);
+  color: var(--primary-dark); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+
+select.class-select {
+  padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+  font-family: inherit; font-size: 12px; color: var(--text-dark); background: var(--white);
+}
+
+.assign-btn {
+  padding: 6px 14px; border: none; border-radius: 8px; background: var(--primary);
+  color: white; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.assign-btn:hover { background: var(--primary-dark); }
+.assign-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.current-badge {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 100px;
+  background: var(--green-bg); color: var(--green);
+}
+.current-badge.none { background: var(--red-bg); color: var(--red); }
+
+.empty-note { font-size: 12px; color: var(--text-muted); padding: 16px 0; text-align: center; }
+.access-note { font-size: 13px; color: var(--text-muted); padding: 20px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div id="sidebar-root"></div>
+
+  <main class="main">
+    <div class="main-heading">
+      <h1>Assign Classes</h1>
+      <p id="pageSubtitle">Assign students to your class/section.</p>
+    </div>
+
+    <div class="panel">
+      <div id="content">
+        <p class="empty-note">Loading students...</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="teacher-sidebar.js"></script>
+<script src="theme.js"></script>
+<script>
+(function () {
+  const API_BASE = "/api";
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "login-teacher.html";
+    return;
+  }
+  const authHeaders = { "Authorization": "Bearer " + token };
+  const content = document.getElementById("content");
+  const pageSubtitle = document.getElementById("pageSubtitle");
+
+  let myCoordinatorClass = null;
+
+  function renderAccessDenied(message) {
+    content.innerHTML = `<p class="access-note">${message}</p>`;
+  }
+
+  function renderStudents(students, classSections) {
+    if (!students.length) {
+      content.innerHTML = '<p class="empty-note">No students to show.</p>';
+      return;
+    }
+
+    const optionsHtml = classSections
+      .map((c) => `<option value="${c.code}">${c.label}</option>`)
+      .join("");
+
+    content.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Student</th><th>Register No.</th><th>Current Class</th><th>Assign To</th><th></th></tr>
+        </thead>
+        <tbody>
+          ${students.map((s) => `
+            <tr data-id="${s._id}">
+              <td><div class="student-cell"><div class="avatar">${(s.name || "?").slice(0,2).toUpperCase()}</div>${s.name}</div></td>
+              <td>${s.studentId || "—"}</td>
+              <td>
+                ${s.classSection
+                  ? `<span class="current-badge">${s.classSection}</span>`
+                  : `<span class="current-badge none">Unassigned</span>`}
+              </td>
+              <td>
+                <select class="class-select">
+                  ${optionsHtml}
+                </select>
+              </td>
+              <td>
+                <button class="assign-btn">Assign</button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    // Preselect each row's dropdown to the coordinator's own class for convenience
+    document.querySelectorAll(".class-select").forEach((sel) => {
+      if (myCoordinatorClass) sel.value = myCoordinatorClass;
+    });
+
+    document.querySelectorAll(".assign-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const row = btn.closest("tr");
+        const studentId = row.getAttribute("data-id");
+        const classSection = row.querySelector(".class-select").value;
+
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = "Saving...";
+
+        fetch(`${API_BASE}/students/${studentId}/class`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", ...authHeaders },
+          body: JSON.stringify({ classSection })
+        })
+          .then((res) => res.json().then((data) => ({ status: res.status, data })))
+          .then(({ status, data }) => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            if (status !== 200) {
+              alert(data.error || "Could not assign class.");
+              return;
+            }
+            const badgeCell = row.children[2];
+            badgeCell.innerHTML = `<span class="current-badge">${data.student.classSection}</span>`;
+          })
+          .catch(() => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+            alert("Could not reach the server.");
+          });
+      });
+    });
+  }
+
+  fetch(API_BASE + "/auth/me", { headers: authHeaders })
+    .then((res) => res.json())
+    .then((data) => {
+      const account = data && data.user;
+      if (!account || account.facultyType !== "coordinator" || !account.coordinatorClass) {
+        renderAccessDenied("Only the Class Coordinator can assign student classes.");
+        return;
+      }
+
+      myCoordinatorClass = account.coordinatorClass;
+      pageSubtitle.textContent = `Assign students to ${myCoordinatorClass}.`;
+
+      Promise.all([
+        fetch(API_BASE + "/students/unassigned", { headers: authHeaders }).then((r) => r.json()),
+        fetch(API_BASE + "/students/class-sections", { headers: authHeaders }).then((r) => r.json()),
+      ])
+        .then(([studentsData, classData]) => {
+          renderStudents(studentsData.students || [], classData.classSections || []);
+        })
+        .catch(() => {
+          content.innerHTML = '<p class="empty-note">Could not load students.</p>';
+        });
+    })
+    .catch(() => {
+      renderAccessDenied("Could not verify your account.");
+    });
+})();
+</script>
+</body>
+</html>

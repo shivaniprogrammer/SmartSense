@@ -58,7 +58,7 @@ body { font-family: "Inter", sans-serif; background: var(--background); color: v
 
 .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 20px; }
 
-.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
 .panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
 .panel-heading h3 { font-size: 15px; }
 .panel-heading .link { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; }
@@ -84,6 +84,7 @@ tr:last-child td { border-bottom: none; }
 }
 .status-badge.present { background: var(--green-bg); color: var(--green); }
 .status-badge.late { background: var(--amber-bg); color: var(--amber); }
+.status-badge.absent { background: var(--red-bg); color: var(--red); }
 .status-badge.unverified { background: #f0f0f0; color: var(--text-muted); }
 .status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
@@ -107,6 +108,34 @@ tr:last-child td { border-bottom: none; }
   font-size: 13px; font-weight: 600; text-decoration: none;
 }
 .see-all-btn:hover { background: var(--primary); color: white; }
+
+/* --- Timetable panel --- */
+.day-block { margin-bottom: 16px; }
+.day-block:last-child { margin-bottom: 0; }
+.day-block h4 {
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-muted); margin-bottom: 8px;
+}
+.period-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.period-row:hover { border-color: var(--primary); background: var(--primary-soft); }
+.period-row .time { font-size: 12px; font-weight: 700; color: var(--text-dark); min-width: 90px; }
+.period-row .subject-code {
+  background: var(--primary-light); color: var(--primary-dark); font-size: 11px;
+  font-weight: 700; padding: 4px 10px; border-radius: 100px;
+}
+.period-row .class-name { font-size: 12px; color: var(--text-medium); font-weight: 600; }
+.period-row .room { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.empty-note { font-size: 12px; color: var(--text-muted); padding: 8px 0; }
+
+/* --- Attendance session view --- */
+.session-back {
+  font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px;
+}
 </style>
 </head>
 <body>
@@ -126,12 +155,34 @@ tr:last-child td { border-bottom: none; }
         <button id="alertBtn" style="padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-dark); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;">
           <i class="fa-solid fa-triangle-exclamation" style="color: var(--red);"></i> Send Low Attendance Alerts
         </button>
-        <div class="date-pill">Jul 29, 2026</div>
+        <div class="date-pill" id="datePill">Jul 29, 2026</div>
         <a href="teacher-requests.html" class="bell-icon"><i class="fa-solid fa-bell"></i><span class="dot" id="notifDot"></span></a>
       </div>
     </div>
 
-    <!-- Summary cards - mock data, not yet wired to backend -->
+    <!-- Individual timetable, built from /api/timetable/me -->
+    <div class="panel">
+      <div class="panel-heading">
+        <h3>My Timetable</h3>
+        <span class="link" id="timetableHint" style="cursor: default; color: var(--text-muted);">Tap a period to view its attendance</span>
+      </div>
+      <div id="timetableContainer">
+        <p class="empty-note">Loading your timetable...</p>
+      </div>
+    </div>
+
+    <!-- Attendance for the clicked period/session -->
+    <div class="panel" id="sessionPanel" style="display: none;">
+      <span class="session-back" id="sessionBack"><i class="fa-solid fa-arrow-left"></i> Back to timetable</span>
+      <div class="panel-heading">
+        <h3 id="sessionTitle">Attendance</h3>
+      </div>
+      <div id="sessionContent">
+        <p class="empty-note">Loading attendance...</p>
+      </div>
+    </div>
+
+    <!-- Today's Attendance - mock data, not yet wired to backend -->
     <div class="panel">
   <div class="panel-heading">
     <h3>Today's Attendance</h3>
@@ -200,9 +251,9 @@ tr:last-child td { border-bottom: none; }
   const token = localStorage.getItem("token");
   if (!token) return;
 
-  fetch(API_BASE + "/requests/pending", {
-    headers: { "Authorization": "Bearer " + token }
-  })
+  const authHeaders = { "Authorization": "Bearer " + token };
+
+  fetch(API_BASE + "/requests/pending", { headers: authHeaders })
     .then(function (res) { return res.json(); })
     .then(function (requests) {
       const dot = document.getElementById("notifDot");
@@ -221,10 +272,7 @@ tr:last-child td { border-bottom: none; }
 
       fetch("/api/alerts/low-attendance-check", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + token
-        },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({})
       })
         .then(function (res) { return res.json(); })
@@ -241,9 +289,111 @@ tr:last-child td { border-bottom: none; }
     });
   }
 
-  fetch(API_BASE + "/auth/me", {
-    headers: { "Authorization": "Bearer " + token }
-  })
+  const DAY_LABELS = {
+    MONDAY: "Monday", TUESDAY: "Tuesday", WEDNESDAY: "Wednesday",
+    THURSDAY: "Thursday", FRIDAY: "Friday", SATURDAY: "Saturday"
+  };
+
+  const timetableContainer = document.getElementById("timetableContainer");
+  const sessionPanel = document.getElementById("sessionPanel");
+  const sessionTitle = document.getElementById("sessionTitle");
+  const sessionContent = document.getElementById("sessionContent");
+  const sessionBack = document.getElementById("sessionBack");
+
+  function todayDateLabel() {
+    return new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+  const datePill = document.getElementById("datePill");
+  if (datePill) datePill.textContent = todayDateLabel();
+
+  function renderTimetable(entries) {
+    if (!entries.length) {
+      timetableContainer.innerHTML = '<p class="empty-note">No timetable periods assigned yet. Contact the admin if this looks wrong.</p>';
+      return;
+    }
+
+    const byDay = {};
+    entries.forEach((e) => {
+      if (!byDay[e.day]) byDay[e.day] = [];
+      byDay[e.day].push(e);
+    });
+
+    let html = "";
+    Object.keys(byDay).forEach((day) => {
+      html += `<div class="day-block"><h4>${DAY_LABELS[day] || day}</h4>`;
+      byDay[day].forEach((e) => {
+        html += `
+          <div class="period-row" data-subject="${e.subjectCode}" data-class="${e.classSection}" data-title="${e.subject}">
+            <div class="time">${e.startTime} - ${e.endTime}</div>
+            <div class="subject-code">${e.subjectCode}</div>
+            <div class="class-name">${e.classSection}</div>
+            ${e.room ? `<div class="room"><i class="fa-solid fa-door-open"></i> ${e.room}</div>` : ""}
+          </div>`;
+      });
+      html += `</div>`;
+    });
+
+    timetableContainer.innerHTML = html;
+
+    document.querySelectorAll(".period-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        openSession(row.getAttribute("data-subject"), row.getAttribute("data-class"), row.getAttribute("data-title"));
+      });
+    });
+  }
+
+  function openSession(subjectCode, classSection, subjectTitle) {
+    timetableContainer.closest(".panel").style.display = "none";
+    sessionPanel.style.display = "block";
+    sessionTitle.textContent = `${subjectTitle} — ${classSection}`;
+    sessionContent.innerHTML = '<p class="empty-note">Loading attendance...</p>';
+
+    fetch(`${API_BASE}/attendance?classSection=${encodeURIComponent(classSection)}&subject=${encodeURIComponent(subjectCode)}`, {
+      headers: authHeaders
+    })
+      .then((res) => res.json().then((data) => ({ status: res.status, data })))
+      .then(({ status, data }) => {
+        if (status !== 200) {
+          sessionContent.innerHTML = `<p class="empty-note">${data.error || "Could not load attendance."}</p>`;
+          return;
+        }
+        const records = data.records || [];
+        if (!records.length) {
+          sessionContent.innerHTML = '<p class="empty-note">No attendance recorded yet for this session today.</p>';
+          return;
+        }
+        sessionContent.innerHTML = `
+          <table>
+            <thead><tr><th>Student</th><th>Check-in</th><th>Status</th></tr></thead>
+            <tbody>
+              ${records.map((r) => `
+                <tr>
+                  <td><div class="student-cell"><div class="avatar">${(r.student && r.student.name || "?").slice(0,2).toUpperCase()}</div>${r.student ? r.student.name : "Unknown"}</div></td>
+                  <td>${r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "—"}</td>
+                  <td><span class="status-badge ${r.status}"><span class="dot"></span>${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>`;
+      })
+      .catch(() => {
+        sessionContent.innerHTML = '<p class="empty-note">Could not reach the server.</p>';
+      });
+  }
+
+  sessionBack.addEventListener("click", () => {
+    sessionPanel.style.display = "none";
+    timetableContainer.closest(".panel").style.display = "block";
+  });
+
+  fetch(API_BASE + "/timetable/me", { headers: authHeaders })
+    .then((res) => res.json())
+    .then((data) => renderTimetable(data.timetable || []))
+    .catch(() => {
+      timetableContainer.innerHTML = '<p class="empty-note">Could not load your timetable.</p>';
+    });
+
+  fetch(API_BASE + "/auth/me", { headers: authHeaders })
     .then(function (res) { return res.json(); })
     .then(function (data) {
       const account = data && data.user;
@@ -258,7 +408,7 @@ tr:last-child td { border-bottom: none; }
         }
         if (alertBtn) alertBtn.style.display = "none";
       } else if (account.facultyType === "coordinator" && subtitleEl) {
-        subtitleEl.textContent = "Class Coordinator — Class CSE-F — live attendance overview";
+        subtitleEl.textContent = "Class Coordinator — " + (account.coordinatorClass || "") + " — live attendance overview";
       }
     })
     .catch(function () {});

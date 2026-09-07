@@ -164,12 +164,12 @@ router.post("/resend-otp", async (req, res) => {
 
 // ---- List available subjects + Class Coordinator option ----
 // Shown to a teacher right after OTP verification so they can pick which
-// subject(s) they teach, or choose to be the Class Coordinator instead.
+// subject they teach, or choose to be the Class Coordinator instead.
 router.get("/subjects", async (req, res) => {
   res.json({ subjects: SUBJECTS, coordinatorOption: CLASS_COORDINATOR_LABEL });
 });
 
-// ---- Teacher selects faculty role (subject teacher vs Class Coordinator) ----
+// ---- Teacher selects faculty role (Coordinator vs Other Faculty Teacher) ----
 // Called once, right after OTP verification, before the teacher's first login.
 router.post("/select-faculty-role", async (req, res) => {
   try {
@@ -195,12 +195,23 @@ router.post("/select-faculty-role", async (req, res) => {
     }
 
     if (facultyType === "subject") {
+      // A faculty teacher (not the Class Coordinator) picks exactly ONE subject.
       const selectedSubjects = Array.isArray(subjects)
         ? subjects.map((s) => String(s).trim()).filter(Boolean)
+        : typeof subjects === "string" && subjects.trim()
+        ? [subjects.trim()]
         : [];
 
       if (selectedSubjects.length === 0) {
-        return res.status(400).json({ error: "Select at least one subject you are responsible for" });
+        return res.status(400).json({ error: "Select the subject you are responsible for" });
+      }
+      if (selectedSubjects.length > 1) {
+        return res.status(400).json({ error: "Select only one subject" });
+      }
+
+      const validCodes = SUBJECTS.map((s) => s.code);
+      if (!validCodes.includes(selectedSubjects[0])) {
+        return res.status(400).json({ error: "Unknown subject" });
       }
 
       teacher.facultyType = "subject";
@@ -217,7 +228,7 @@ router.post("/select-faculty-role", async (req, res) => {
       message:
         facultyType === "coordinator"
           ? "You're set up as the Class Coordinator."
-          : "Faculty subject(s) saved.",
+          : "Faculty subject saved.",
       facultyType: teacher.facultyType,
       facultySubjects: teacher.facultySubjects,
     });
