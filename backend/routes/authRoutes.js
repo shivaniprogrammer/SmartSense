@@ -65,6 +65,10 @@ router.post("/register", async (req, res) => {
       email: normalizedEmail,
     });
   } catch (err) {
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0] || "field";
+      return res.status(409).json({ error: `This ${field} is already in use` });
+    }
     console.error(err);
     res.status(500).json({ error: "Server error during registration" });
   }
