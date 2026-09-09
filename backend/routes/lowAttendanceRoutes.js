@@ -1,39 +1,36 @@
 const express = require("express");
 const router = express.Router();
-const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { loadFacultyScope, requireCoordinatorLevel } = require("../middleware/facultyScope");
+const sendEmail = require("../utils/sendEmail");
+
 const LOW_ATTENDANCE_THRESHOLD = 75; // percent
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+
 async function sendLowAttendanceEmail(student, percent, threshold) {
-  const recipients = [student.email];
-  try {
-    await transporter.sendMail({
-      from: `"SmartSense" <${process.env.EMAIL_USER}>`,
-      to: recipients.join(","),
-      subject: `Attendance Alert: ${student.name} is at ${percent}%`,
-      text: `${student.name}'s attendance has dropped to ${percent}%, below the required ${threshold}%. Please take action to improve attendance.`,
-      html: `
-        <p>This is an automated attendance alert.</p>
-        <p><strong>${student.name}</strong> (${student.studentId}) currently has an attendance of
-        <strong>${percent}%</strong>, which is below the required ${threshold}%.</p>
-        <p>Please take steps to improve attendance going forward.</p>
-      `,
-    });
-    return true;
-  } catch (err) {
-    console.error(`Failed to send low-attendance email to ${student.email}:`, err.message);
-    return false;
+  const text = `${student.name}'s attendance has dropped to ${percent}%, below the required ${threshold}%. Please take action to improve attendance.`;
+  const html = `
+    <p>This is an automated attendance alert.</p>
+    <p><strong>${student.name}</strong> (${student.studentId}) currently has an attendance of
+    <strong>${percent}%</strong>, which is below the required ${threshold}%.</p>
+    <p>Please take steps to improve attendance going forward.</p>
+  `;
+
+  const result = await sendEmail(
+    student.email,
+    `Attendance Alert: ${student.name} is at ${percent}%`,
+    text,
+    html
+  );
+
+  if (!result.success && !result.skipped) {
+    console.error(`Failed to send low-attendance email to ${student.email}:`, result.error);
   }
+
+  return result.success === true;
 }
+
 // Teacher/admin triggers a check across all students; emails anyone below threshold.
 // This is a class-wide action, so it's reserved for the Class Coordinator (or admin,
 // or a legacy teacher account with no faculty role set) via requireCoordinatorLevel —
@@ -66,4 +63,5 @@ router.post("/low-attendance-check", requireAuth, requireRole("teacher", "admin"
     res.status(500).json({ error: "Server error while checking attendance" });
   }
 });
+
 module.exports = router;

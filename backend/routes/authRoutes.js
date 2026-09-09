@@ -1,35 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 const Student = require("../models/Student");
 const SUBJECTS = require("../constants/subjects");
 const generateToken = require("../utils/generateToken");
+const sendEmail = require("../utils/sendEmail");
 const { requireAuth } = require("../middleware/auth");
 
 const CLASS_COORDINATOR_LABEL = "Class Coordinator";
-
-// ---- Mailer setup ----
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 }
 
 async function sendOtpEmail(toEmail, otp) {
-  await transporter.sendMail({
-    from: `"SmartSense" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: "Your verification code",
-    text: `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`,
-    html: `<p>Your SmartSense verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`,
-  });
+  const text = `Your SmartSense verification code is ${otp}. It expires in 10 minutes.`;
+  const html = `<p>Your SmartSense verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`;
+  return sendEmail(toEmail, "Your verification code", text, html);
 }
 
 // ---- Register ----
@@ -67,10 +54,9 @@ router.post("/register", async (req, res) => {
       emailVerified: false,
     });
 
-    try {
-      await sendOtpEmail(normalizedEmail, otp);
-    } catch (mailErr) {
-      console.error("Failed to send OTP email:", mailErr.message);
+    const emailResult = await sendOtpEmail(normalizedEmail, otp);
+    if (!emailResult.success && !emailResult.skipped) {
+      console.error("Failed to send OTP email:", emailResult.error);
       // Account is still created; user can use "resend code" once mail issue is fixed
     }
 
@@ -153,7 +139,11 @@ router.post("/resend-otp", async (req, res) => {
     student.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     await student.save();
 
-    await sendOtpEmail(normalizedEmail, otp);
+    const emailResult = await sendOtpEmail(normalizedEmail, otp);
+    if (!emailResult.success && !emailResult.skipped) {
+      console.error("Failed to resend OTP email:", emailResult.error);
+      return res.status(502).json({ error: "Couldn't send the code right now. Please try again in a moment." });
+    }
 
     res.json({ message: "New code sent" });
   } catch (err) {
@@ -163,14 +153,11 @@ router.post("/resend-otp", async (req, res) => {
 });
 
 // ---- List available subjects + Class Coordinator option ----
-// Shown to a teacher right after OTP verification so they can pick which
-// subject they teach, or choose to be the Class Coordinator instead.
 router.get("/subjects", async (req, res) => {
   res.json({ subjects: SUBJECTS, coordinatorOption: CLASS_COORDINATOR_LABEL });
 });
 
 // ---- Teacher selects faculty role (Coordinator vs Other Faculty Teacher) ----
-// Called once, right after OTP verification, before the teacher's first login.
 router.post("/select-faculty-role", async (req, res) => {
   try {
     const { email, facultyType, subjects } = req.body;
@@ -195,7 +182,6 @@ router.post("/select-faculty-role", async (req, res) => {
     }
 
     if (facultyType === "subject") {
-      // A faculty teacher (not the Class Coordinator) picks exactly ONE subject.
       const selectedSubjects = Array.isArray(subjects)
         ? subjects.map((s) => String(s).trim()).filter(Boolean)
         : typeof subjects === "string" && subjects.trim()
@@ -280,8 +266,6 @@ router.post("/login", async (req, res) => {
     if (student.role === "teacher") {
       user.facultyType = student.facultyType || null;
       user.facultySubjects = student.facultySubjects || [];
-      // undefined (legacy accounts predating this feature) is treated as "complete"
-      // so existing teachers are never forced through the new setup step.
       user.facultySetupComplete = student.facultySetupComplete === undefined
         ? true
         : student.facultySetupComplete;
