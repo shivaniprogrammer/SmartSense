@@ -1,5 +1,5 @@
 const API_BASE = "/api";
-const SPRING_API_BASE = "http://localhost:8080";
+const SPRING_API_BASE = "http://localhost:8081";
 const LOW_ATTENDANCE_THRESHOLD = 75;
 const token = localStorage.getItem("token");
 const storedUser = localStorage.getItem("user");
@@ -199,13 +199,21 @@ fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
         return res.json();
     })
     .then(function (records) {
-       const bleRecords = records.filter(r => r.method === "ble");
+    const bleRecords = records.filter(r => r.method === "ble");
 
 const total = bleRecords.length;
-            const presentCount = bleRecords.filter(r => r.status === "present" || r.status === "late").length;
-            const absentCount = total - presentCount;
-            const percent = total > 0 ? Math.round((presentCount / total) * 1000) / 10 : 0;
 
+const presentCount = bleRecords.filter(
+    r => r.status === "present" || r.status === "late"
+).length;
+
+const absentCount = bleRecords.filter(
+    r => r.status === "absent"
+).length;
+
+const percent = total > 0
+    ? Math.round((presentCount / total) * 1000) / 10
+    : 0;
             document.getElementById("attendancePercent").textContent = percent + "%";
             document.getElementById("presentDays").textContent = presentCount;
 
