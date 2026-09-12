@@ -159,17 +159,17 @@ tr:last-child td { border-bottom: none; }
 </div>
 
 <div class="summary-card present">
-    <div class="label">Days Present</div>
+    <div class="label">Periods Present</div>
     <div id="presentDays" class="value">--</div>
 </div>
 
 <div class="summary-card late">
-    <div class="label">Days Late</div>
+<div class="label">Periods Late</div>
     <div id="lateDays" class="value">--</div>
 </div>
 
 <div class="summary-card absent">
-    <div class="label">Days Absent</div>
+    <div class="label">Periods Late</div>
     <div id="absentDays" class="value">--</div>
 </div>
 
@@ -181,17 +181,18 @@ tr:last-child td { border-bottom: none; }
 
         <table>
           <thead>
-            <tr>
-              <th>Date</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Method</th>
-              <th>Status</th>
-            </tr>
+           <tr>
+    <th>Date</th>
+    <th>Period</th>
+    <th>Check-in</th>
+    <th>Check-out</th>
+    <th>Method</th>
+    <th>Status</th>
+</tr>
           </thead>
         <tbody id="attendanceTableBody">
     <tr>
-        <td colspan="5" style="text-align:center;">Loading attendance...</td>
+        <td colspan="6" style="text-align:center;">Loading attendance...</td>
     </tr>
 </tbody>
         </table>
@@ -354,24 +355,27 @@ function loadAttendance(profile) {
                 return;
             }
 
-            records.sort(function(a, b) {
-                return new Date(b.date) - new Date(a.date);
-            });
+           records.sort(function(a, b) {
+    const dateDifference = new Date(b.date) - new Date(a.date);
+
+    if (dateDifference !== 0) {
+        return dateDifference;
+    }
+
+    return (b.period || 0) - (a.period || 0);
+});
 
             records.forEach(function(record) {
 
                 const row = document.createElement("tr");
 
                 row.innerHTML = `
-                    <td>${formatDate(record.date)}</td>
-
-                    <td>${formatTime(record.checkInTime)}</td>
-
-                    <td>${formatTime(record.checkOutTime)}</td>
-
-                    <td>${getMethodHtml(record.method)}</td>
-
-                    <td>${getStatusHtml(record.status)}</td>
+<td>${formatDate(record.date)}</td>
+<td>${record.period || "—"}</td>
+<td>${formatTime(record.checkInTime)}</td>
+<td>${formatTime(record.checkOutTime)}</td>
+<td>${getMethodHtml(record.method)}</td>
+<td>${getStatusHtml(record.status)}</td>
                 `;
 
                 tableBody.appendChild(row);
@@ -386,7 +390,7 @@ function loadAttendance(profile) {
 
             document.getElementById("attendanceTableBody").innerHTML = `
                 <tr>
-                    <td colspan="5" style="text-align:center;">
+<td colspan="6" style="text-align:center;">
                         Could not load attendance.
                     </td>
                 </tr>
