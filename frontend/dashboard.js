@@ -61,9 +61,9 @@ function renderRegisterNumber(profile) {
 
     badge.classList.remove("present", "absent", "holiday");
 
-    const studentAttendance = records.find(function (record) {
-        return String(record.student) === String(profile._id);
-    });
+   const studentAttendance = records.find(function (record) {
+    return record.status === "present" || record.status === "late";
+});
 
     if (studentAttendance) {
         badge.classList.add("present");
@@ -194,7 +194,7 @@ Promise.all([
 // Attendance history — independent of requests, so one failing doesn't block the other
 profileLoaded.then(function (profile) {
     if (!profile) return;
-fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
+fetch(SPRING_API_BASE + "/attendance/student-id/" + profile.studentId)
     .then(function (res) {
         return res.json();
     })
