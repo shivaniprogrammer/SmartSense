@@ -216,7 +216,7 @@ if (!token) {
 }
 
 function authFetch(path) {
-    return fetch("/api" + path, {
+    return fetch("https://smartsense-4.onrender.com/api" + path, {
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + token
@@ -283,7 +283,7 @@ function getStatusHtml(status) {
 
 function loadAttendance(profile) {
 
-    fetch(SPRING_API_BASE + "/attendance/student/" + profile._id)
+    fetch(SPRING_API_BASE + "/attendance/student-id/" + profile.studentId)
         .then(function(res) {
             if (!res.ok) {
                 throw new Error("Spring Boot returned " + res.status);
