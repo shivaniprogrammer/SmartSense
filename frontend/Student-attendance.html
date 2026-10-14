@@ -207,7 +207,7 @@ tr:last-child td { border-bottom: none; }
 <script src="student-sidebar.js"></script>
 <script src="theme.js"></script>
 <script>
-const SPRING_API_BASE = "http://localhost:8081";
+const SPRING_API_BASE = "http://localhost:8080";
 
 const token = localStorage.getItem("token");
 
@@ -216,7 +216,7 @@ if (!token) {
 }
 
 function authFetch(path) {
-    return fetch("https://smartsense-4.onrender.com/api" + path, {
+    return fetch(SPRING_API_BASE + "/api" + path,{
         headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + token
@@ -282,8 +282,14 @@ function getStatusHtml(status) {
 }
 
 function loadAttendance(profile) {
-
-    fetch(SPRING_API_BASE + "/attendance/student-id/" + profile.studentId)
+fetch(
+    "http://localhost:8080/attendance/student-id/" + profile.studentId,
+    {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    }
+)
         .then(function(res) {
             if (!res.ok) {
                 throw new Error("Spring Boot returned " + res.status);
@@ -296,9 +302,7 @@ function loadAttendance(profile) {
             console.log("Attendance from Spring Boot:", records);
 
 
-            records = records.filter(function(record) {
-    return record.method === "ble";
-});
+       
 
             let presentCount = 0;
             let lateCount = 0;
@@ -400,27 +404,33 @@ function loadAttendance(profile) {
 
 authFetch("/students/me")
     .then(function(result) {
-
-        if (result.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "login-student.html";
-            return;
+        if (!result.status || result.status < 200 || result.status >= 300) {
+            throw new Error(
+                "Student profile request failed: HTTP " + result.status
+            );
         }
 
         const profile = result.data;
 
-        console.log("Logged-in student:", profile);
+        if (!profile || !profile.studentId) {
+            throw new Error("Student profile does not contain studentId.");
+        }
 
+        console.log("Logged-in student:", profile);
         loadAttendance(profile);
     })
     .catch(function(error) {
+        console.error("Failed to load student profile:", error);
 
-        console.error(
-            "Failed to load student profile:",
-            error
-        );
+        document.getElementById("attendanceTableBody").innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;">
+                    Could not load student profile. Please check the server and log in again.
+                </td>
+            </tr>
+        `;
     });
+
 </script>
 </body>
 </html>

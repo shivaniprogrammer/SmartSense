@@ -1,5 +1,5 @@
 const API_BASE = "/api";
-const SPRING_API_BASE = "http://localhost:8081";
+const SPRING_API_BASE = "http://localhost:8080";
 const LOW_ATTENDANCE_THRESHOLD = 75;
 const token = localStorage.getItem("token");
 const storedUser = localStorage.getItem("user");
@@ -167,75 +167,90 @@ const profileLoaded = authFetch("/students/me")
         console.error("Failed to load profile:", err);
         return null;
     });
-    // Load today's attendance from Spring Boot
-function loadTodayAttendance() {
-    return fetch(SPRING_API_BASE + "/attendance/today")
-        .then(function (res) {
-            return res.json();
-        })
-        .then(function (records) {
-            console.log("Today's attendance from Spring Boot:", records);
-            return records;
-        })
-        .catch(function (err) {
-            console.error("Failed to load today's attendance:", err);
-            return [];
-        });
-}
-Promise.all([
-    profileLoaded,
-    loadTodayAttendance()
-]).then(function ([profile, records]) {
-    if (!profile) return;
-
-    renderTodayCard(profile, records);
-});
-
-// Attendance history — independent of requests, so one failing doesn't block the other
-profileLoaded.then(function (profile) {
-    if (!profile) return;
-fetch(SPRING_API_BASE + "/attendance/student-id/" + profile.studentId)
-    .then(function (res) {
-        return res.json();
+   
+function loadTodayAttendance(profile) {
+    return fetch(
+        "http://localhost:8080/attendance/student-id/" + profile.studentId,
+        {
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        }
+    )
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("HTTP error: " + response.status);
+        }
+        return response.json();
     })
     .then(function (records) {
-    const bleRecords = records.filter(r => r.method === "ble");
+        console.log("Attendance records:", records);
 
-const total = bleRecords.length;
+        // Keep BLE records only
+        const bleRecords = records.filter(
+            r => (r.method || "").toLowerCase() === "ble"
+        );
 
-const presentCount = bleRecords.filter(
-    r => r.status === "present" || r.status === "late"
-).length;
+        const total = bleRecords.length;
 
-const absentCount = bleRecords.filter(
-    r => r.status === "absent"
-).length;
+        const presentCount = bleRecords.filter(
+            r => r.status === "present" || r.status === "late"
+        ).length;
 
-const percent = total > 0
-    ? Math.round((presentCount / total) * 1000) / 10
-    : 0;
-            document.getElementById("attendancePercent").textContent = percent + "%";
-            document.getElementById("presentDays").textContent = presentCount;
+        const absentCount = bleRecords.filter(
+            r => r.status === "absent"
+        ).length;
 
-            const lowBanner = document.getElementById("lowAttendanceBanner");
-            const lowText = document.getElementById("lowAttendanceText");
-            if (lowBanner && lowText) {
-                if (total > 0 && percent < LOW_ATTENDANCE_THRESHOLD) {
-                    lowText.textContent = "Your attendance is " + percent + "%, below the required " + LOW_ATTENDANCE_THRESHOLD + "%. Please take steps to improve it.";
-                    lowBanner.classList.add("show");
-                } else {
-                    lowBanner.classList.remove("show");
-                }
+        const percent = total > 0
+            ? Math.round((presentCount / total) * 1000) / 10
+            : 0;
+
+        document.getElementById("attendancePercent").textContent =
+            percent + "%";
+        document.getElementById("presentDays").textContent = presentCount;
+
+        const lowBanner = document.getElementById("lowAttendanceBanner");
+        const lowText = document.getElementById("lowAttendanceText");
+
+        if (lowBanner && lowText) {
+            if (total > 0 && percent < LOW_ATTENDANCE_THRESHOLD) {
+                lowText.textContent =
+                    "Your attendance is " + percent +
+                    "%, below the required " +
+                    LOW_ATTENDANCE_THRESHOLD +
+                    "%. Please take steps to improve it.";
+                lowBanner.classList.add("show");
+            } else {
+                lowBanner.classList.remove("show");
             }
+        }
 
-            document.getElementById("donutChart").style.setProperty("--pct", percent);
-            document.getElementById("donutPercent").textContent = percent + "%";
-            document.getElementById("legendPresent").textContent = presentCount;
-            document.getElementById("legendAbsent").textContent = absentCount;
-        })
-        .catch(function (err) {
-            console.error("Failed to load attendance history:", err);
-        });
+        const donutChart = document.getElementById("donutChart");
+        const donutPercent = document.getElementById("donutPercent");
+        const legendPresent = document.getElementById("legendPresent");
+        const legendAbsent = document.getElementById("legendAbsent");
+
+        if (donutChart) {
+            donutChart.style.setProperty("--pct", percent);
+        }
+        if (donutPercent) donutPercent.textContent = percent + "%";
+        if (legendPresent) legendPresent.textContent = presentCount;
+        if (legendAbsent) legendAbsent.textContent = absentCount;
+
+        return records;
+    })
+    .catch(function (err) {
+        console.error("Failed to load attendance:", err);
+        return [];
+    });
+}
+
+profileLoaded.then(function (profile) {
+    if (!profile) return;
+
+    return loadTodayAttendance(profile).then(function (records) {
+        renderTodayCard(profile, records);
+    });
 });
 
 // Requests — loads regardless of whether attendance history succeeded
