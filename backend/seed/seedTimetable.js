@@ -13,13 +13,13 @@
 // duplicates.
 
 const path = require("path");
+require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
 require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Student = require("../models/Student");
 const Timetable = require("../models/Timetable");
-
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/attendance-tracker";
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/attendance-tracker";
 const DEFAULT_PASSWORD = "Teacher@123"; // change these accounts' passwords after first login if needed
 
 // ---- Teachers, matching the course-allotment sheet ----
