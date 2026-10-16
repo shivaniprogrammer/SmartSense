@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../SmartSense"
+		},
+		{
+			"name": "SmartSense_ESP32",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "SmartSense"
+	}
+}

@@ -2,3 +2,5 @@
 node_modules/ 
 *.log 
 .env 
+SmartSense_ESP32/.pio/
+SmartSense_ESP32/.vscode/
