@@ -170,7 +170,7 @@ const profileLoaded = authFetch("/students/me")
    
 function loadTodayAttendance(profile) {
     return fetch(
-        "http://localhost:8080/attendance/student-id/" + profile.studentId,
+      "http://localhost:8081/attendance/student-id/" + profile.studentId,
         {
             headers: {
                 "Authorization": "Bearer " + token
