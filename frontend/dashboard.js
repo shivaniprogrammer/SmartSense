@@ -1,362 +1,247 @@
+/* dashboard.js: student dashboard.
+   API contracts are unchanged: GET /api/students/me, GET /api/requests/mine, POST /api/requests,
+   GET {ATTENDANCE_API_BASE}/attendance/student-id/:studentId */
+
 const API_BASE = "/api";
-const SPRING_API_BASE = "http://localhost:8080";
+
+// !! CONFIRM THIS PORT. Your old dashboard.js used 8081, Student-attendance.html used 8080.
+const ATTENDANCE_API_BASE = "http://localhost:8080";
+
 const LOW_ATTENDANCE_THRESHOLD = 75;
-const token = localStorage.getItem("token");
-const storedUser = localStorage.getItem("user");
-
-/*
-  Derives the college register number from a studentId like "CSE352".
-  Rule (from the class register format): fixed 9-digit prefix for this
-  batch/department + the student ID's trailing 3 digits.
-    CSE352 -> "310625104" + "352" -> "310625104352"
-
-  If the studentId doesn't end in exactly 3 digits (e.g. lateral-entry
-  IDs like "CSE2026064"), there's no known mapping, so this returns null
-  and the caller should fall back to a stored register number instead.
-*/
+// false = count every record (same as the Attendance page). true = count BLE records only (old dashboard behaviour).
+const COUNT_BLE_ONLY = false;
 const REGISTER_NUMBER_PREFIX = "310625104";
 
-function studentIdToRegisterNumber(studentId) {
-    if (!studentId) return null;
-    const match = String(studentId).match(/(\d{3})$/);
-    if (!match) return null;
-    return REGISTER_NUMBER_PREFIX + match[1];
-}
+const token = localStorage.getItem("token");
+if (!token) { window.location.href = "login-student.html"; }
 
-function renderRegisterNumber(profile) {
-    const regNoEl = document.getElementById("studentRegNo");
-    if (!regNoEl || !profile) return;
-
-    const regNo = profile.registerNumber || studentIdToRegisterNumber(profile.studentId);
-    regNoEl.textContent = regNo ? "Reg No: " + regNo : "";
-}
-
-/*
-  MOCK for now — swap todaysAttendanceStatus with a real value
-  once you fetch the student's actual attendance record for today.
-*/function renderTodayCard(profile, records) {
-    const today = new Date();
-
-    const dateString = today.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-    });
-
-    document.getElementById("todayDate").textContent = dateString;
-
-    const badge = document.getElementById("todayStatusBadge");
-    const statusText = document.getElementById("todayStatusText");
-
-    const dayOfWeek = today.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-
-    if (isWeekend) {
-        badge.classList.remove("present", "absent");
-        badge.classList.add("holiday");
-        statusText.textContent = "Holiday";
-        return;
-    }
-
-    badge.classList.remove("present", "absent", "holiday");
-
-   const studentAttendance = records.find(function (record) {
-    return record.status === "present" || record.status === "late";
-});
-
-    if (studentAttendance) {
-        badge.classList.add("present");
-        statusText.textContent = "Present";
-    } else {
-        badge.classList.add("absent");
-        statusText.textContent = "Absent";
-    }
-}
-// Auth guard - redirect to login if no token
-if (!token) {
-    window.location.href = "login-student.html";
-}
-
-// Add this near the other modal listeners (after the applyBtn.addEventListener block)
-
-const leaveOdNavBtn = document.getElementById("leaveOdNavBtn");
-if (leaveOdNavBtn) {
-    leaveOdNavBtn.addEventListener("click", function () {
-        applyModal.classList.add("show");
-    });
-}
-
-let user = storedUser ? JSON.parse(storedUser) : null;
-
-const studentNameEl = document.getElementById("studentName");
-const profileNameEl = document.getElementById("profileName");
-const avatarInitialEl = document.getElementById("avatarInitial");
-
-if (user && user.name) {
-    const firstName = user.name.split(" ")[0];
-    studentNameEl.textContent = firstName;
-    profileNameEl.textContent = firstName;
-    avatarInitialEl.textContent = user.name.charAt(0).toUpperCase();
-    renderRegisterNumber(user);
-}
-
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const isoDate = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const showDate = (v) => { const d = new Date(v); return isNaN(d) ? esc(v) : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); };
 
 function authFetch(path, options = {}) {
     return fetch(API_BASE + path, {
         ...options,
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token,
-            ...(options.headers || {})
-        }
-    }).then(res => {
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, ...(options.headers || {}) }
+    }).then((res) => {
         if (res.status === 401) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             window.location.href = "login-student.html";
             return Promise.reject(new Error("Unauthorized"));
         }
-        return res.json().then(data => ({ status: res.status, data }));
+        return res.json().then((data) => ({ status: res.status, data }));
     });
 }
 
-function renderRequests(requests) {
-    const activityList = document.getElementById("activityList");
-    activityList.innerHTML = "";
+/* ---------- profile ---------- */
+function studentIdToRegisterNumber(studentId) {
+    const m = String(studentId || "").match(/(\d{3})$/);
+    return m ? REGISTER_NUMBER_PREFIX + m[1] : null;
+}
 
-    if (!requests.length) {
-        activityList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">No requests yet.</p>';
-        return;
+function renderProfile(p) {
+    if (!p) return;
+    if (p.name) {
+        const first = p.name.split(" ")[0];
+        $("studentName").textContent = first;
+        $("profileName").textContent = first;
+        $("avatarInitial").textContent = p.name.charAt(0).toUpperCase();
     }
-
-    const statusIcon = { pending: "fa-hourglass-half", approved: "fa-check", rejected: "fa-xmark" };
-    const statusClass = { pending: "notification", approved: "attendance", rejected: "notification" };
-
-    requests.forEach(function (r) {
-        const row = document.createElement("div");
-        row.className = "activity-item";
-        row.innerHTML = `
-            <div class="activity-icon ${statusClass[r.status]}"><i class="fa-solid ${statusIcon[r.status]}"></i></div>
-            <div>
-                <h5>${r.type === "od" ? "On Duty" : "Leave"} request (${r.status})</h5>
-                <p>${r.fromDate} to ${r.toDate} — ${r.reason}</p>
-            </div>
-        `;
-        activityList.appendChild(row);
-    });
+    const reg = p.registerNumber || studentIdToRegisterNumber(p.studentId);
+    $("studentRegNo").textContent = reg ? "Reg No: " + reg : "";
 }
 
-// Load profile first (needed for name + attendance history lookup)
-const profileLoaded = authFetch("/students/me")
-    .then(function ({ data: profile }) {
-        user = profile;
-        localStorage.setItem("user", JSON.stringify(profile));
+try { renderProfile(JSON.parse(localStorage.getItem("user") || "null")); } catch (e) {}
 
-        if (profile.name) {
-            const firstName = profile.name.split(" ")[0];
-            studentNameEl.textContent = firstName;
-            profileNameEl.textContent = firstName;
-            avatarInitialEl.textContent = profile.name.charAt(0).toUpperCase();
-        }
-        renderRegisterNumber(profile);
+/* ---------- timetable (today / up next) ---------- */
+function renderTimetable() {
+    const now = new Date(), dow = now.getDay(), weekday = dow >= 1 && dow <= 5;
+    const di = weekday ? dow - 1 : 0, slots = SS.TT[di], mins = now.getHours() * 60 + now.getMinutes();
+    const upIdx = weekday ? slots.findIndex((s) => SS.endMin(s[2]) > mins) : 0;
+    const up = slots[upIdx < 0 ? 0 : upIdx], n = SS.info(up[0]);
 
-        return profile;
-    })
-    .catch(function (err) {
-        console.error("Failed to load profile:", err);
-        return null;
-    });
-   
-function loadTodayAttendance(profile) {
-    return fetch(
-      "http://localhost:8081/attendance/student-id/" + profile.studentId,
-        {
-            headers: {
-                "Authorization": "Bearer " + token
-            }
-        }
-    )
-    .then(function (response) {
-        if (!response.ok) {
-            throw new Error("HTTP error: " + response.status);
-        }
-        return response.json();
-    })
-    .then(function (records) {
-        console.log("Attendance records:", records);
+    let label;
+    if (!weekday) label = "No classes today · first class on Monday";
+    else if (upIdx < 0) label = "Classes are over for today · first class on Monday";
+    else label = SS.startMin(up[1]) <= mins ? "In progress" : "Up next";
 
-        // Keep BLE records only
-        const bleRecords = records.filter(
-            r => (r.method || "").toLowerCase() === "ble"
-        );
-
-        const total = bleRecords.length;
-
-        const presentCount = bleRecords.filter(
-            r => r.status === "present" || r.status === "late"
-        ).length;
-
-        const absentCount = bleRecords.filter(
-            r => r.status === "absent"
-        ).length;
-
-        const percent = total > 0
-            ? Math.round((presentCount / total) * 1000) / 10
-            : 0;
-
-        document.getElementById("attendancePercent").textContent =
-            percent + "%";
-        document.getElementById("presentDays").textContent = presentCount;
-
-        const lowBanner = document.getElementById("lowAttendanceBanner");
-        const lowText = document.getElementById("lowAttendanceText");
-
-        if (lowBanner && lowText) {
-            if (total > 0 && percent < LOW_ATTENDANCE_THRESHOLD) {
-                lowText.textContent =
-                    "Your attendance is " + percent +
-                    "%, below the required " +
-                    LOW_ATTENDANCE_THRESHOLD +
-                    "%. Please take steps to improve it.";
-                lowBanner.classList.add("show");
-            } else {
-                lowBanner.classList.remove("show");
-            }
-        }
-
-        const donutChart = document.getElementById("donutChart");
-        const donutPercent = document.getElementById("donutPercent");
-        const legendPresent = document.getElementById("legendPresent");
-        const legendAbsent = document.getElementById("legendAbsent");
-
-        if (donutChart) {
-            donutChart.style.setProperty("--pct", percent);
-        }
-        if (donutPercent) donutPercent.textContent = percent + "%";
-        if (legendPresent) legendPresent.textContent = presentCount;
-        if (legendAbsent) legendAbsent.textContent = absentCount;
-
-        return records;
-    })
-    .catch(function (err) {
-        console.error("Failed to load attendance:", err);
-        return [];
-    });
+    $("nextCard").innerHTML = "<small>" + label + "</small><strong>" + esc(n.name) + "</strong><small>" +
+        SS.timeLabel(up[1], up[2]) + (n.lab ? "" : " · Room " + SS.room) + " · " + esc(n.faculty) + "</small>";
+    $("ttHeading").textContent = weekday ? "Today’s timetable" : "Monday’s timetable";
+    $("todayList").innerHTML = slots.map((s, i) => {
+        const x = SS.info(s[0]);
+        return '<div class="tt-row' + (weekday && i === upIdx ? " now" : "") + '"><div><b>' + esc(x.name) + "</b><small>" +
+            esc(x.faculty) + '</small></div><span class="tm">' + SS.timeLabel(s[1], s[2]) + "</span></div>";
+    }).join("");
 }
 
-profileLoaded.then(function (profile) {
-    if (!profile) return;
+/* ---------- attendance ---------- */
+function setAttendanceUnavailable(msg) {
+    ["attendancePercent", "presentDays", "absentDays", "legendPresent", "legendAbsent", "donutPercent"].forEach((id) => { $(id).textContent = "--"; });
+    $("donutChart").style.setProperty("--pct", 0);
+    const note = $("attendanceNote");
+    note.textContent = msg;
+    note.className = "note err";
+    renderTodayStatus([], false);
+}
 
-    return loadTodayAttendance(profile).then(function (records) {
-        renderTodayCard(profile, records);
-    });
-});
+function renderTodayStatus(records, loaded) {
+    const today = new Date(), dow = today.getDay();
+    $("todayDate").textContent = today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", year: "numeric" });
+    const badge = $("todayStatusBadge"), text = $("todayStatusText");
+    badge.classList.remove("present", "absent", "holiday");
 
-// Requests — loads regardless of whether attendance history succeeded
-function loadDashboardRequests() {
-    return authFetch("/requests/mine")
-        .then(function ({ data: requests }) {
-            const pendingCount = requests.filter(r => r.status === "pending").length;
-            document.getElementById("pendingRequests").textContent = pendingCount;
-            renderRequests(requests);
+    if (dow === 0 || dow === 6) { badge.classList.add("holiday"); text.textContent = "Holiday"; return; }
+    if (!loaded) { text.textContent = "--"; return; }
 
-            const lastSeen = localStorage.getItem("notifLastSeen") || "0";
-            const hasUnseenUpdate = requests.some(function (r) {
-                return r.status !== "pending" && new Date(r.updatedAt) > new Date(lastSeen);
-            });
-            const notifDot = document.getElementById("notifDot");
-            if (notifDot) {
-                notifDot.style.display = hasUnseenUpdate ? "block" : "none";
-            }
+    const todays = records.filter((r) => String(r.date || "").slice(0, 10) === isoDate(today));
+    if (!todays.length) { text.textContent = "Not marked yet"; return; }
+    if (todays.some((r) => r.status === "present" || r.status === "late")) { badge.classList.add("present"); text.textContent = "Present"; }
+    else { badge.classList.add("absent"); text.textContent = "Absent"; }
+}
+
+function loadAttendance(profile) {
+    return fetch(ATTENDANCE_API_BASE + "/attendance/student-id/" + encodeURIComponent(profile.studentId), {
+        headers: { "Authorization": "Bearer " + token }
+    })
+        .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
+        .then((all) => {
+            if (!Array.isArray(all)) throw new Error("Unexpected response");
+            const records = COUNT_BLE_ONLY ? all.filter((r) => (r.method || "").toLowerCase() === "ble") : all;
+            const total = records.length;
+            const present = records.filter((r) => r.status === "present" || r.status === "late").length;
+            const absent = records.filter((r) => r.status === "absent").length;
+            const pct = total ? Math.round((present / total) * 1000) / 10 : 0;
+
+            $("attendancePercent").textContent = total ? pct + "%" : "--";
+            $("presentDays").textContent = present;
+            $("absentDays").textContent = absent;
+            $("legendPresent").textContent = present;
+            $("legendAbsent").textContent = absent;
+            $("donutPercent").textContent = total ? pct + "%" : "--";
+            $("donutChart").style.setProperty("--pct", pct);
+
+            const note = $("attendanceNote");
+            note.className = "note";
+            note.textContent = total ? total + " periods recorded" : "No attendance records yet.";
+
+            const banner = $("lowAttendanceBanner");
+            if (total && pct < LOW_ATTENDANCE_THRESHOLD) {
+                $("lowAttendanceText").textContent = "Your attendance is " + pct + "%, below the required " + LOW_ATTENDANCE_THRESHOLD + "%. Please take steps to improve it.";
+                banner.classList.add("show");
+            } else banner.classList.remove("show");
+
+            renderTodayStatus(records, true);
         })
-        .catch(function (err) {
-            console.error("Failed to load requests:", err);
-            const activityList = document.getElementById("activityList");
-            if (activityList) {
-                activityList.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem;">Could not load requests. Is the server running?</p>';
-            }
+        .catch((err) => {
+            console.error("Failed to load attendance:", err);
+            setAttendanceUnavailable("Could not load attendance (" + err.message + "). Check that the attendance server is running at " + ATTENDANCE_API_BASE + ".");
         });
 }
 
-loadDashboardRequests();
-
-// Apply Leave/OD modal
-const applyModal = document.getElementById("applyModal");
-const applyBtn = document.getElementById("applyBtn");
-const cancelModalBtn = document.getElementById("cancelModalBtn");
-const applyForm = document.getElementById("applyForm");
-const modalStatus = document.getElementById("modalStatus");
-const modalSubmitBtn = document.getElementById("modalSubmitBtn");
-
-applyBtn.addEventListener("click", function () {
-    applyModal.classList.add("show");
-    const notifNavBtn = document.getElementById("notifNavBtn");
-if (notifNavBtn) {
-    notifNavBtn.addEventListener("click", function () {
-        localStorage.setItem("notifLastSeen", new Date().toISOString());
-        const dot = document.getElementById("notifDot");
-        if (dot) dot.style.display = "none";
-    });
+/* ---------- requests ---------- */
+function renderRequests(requests) {
+    const list = $("activityList");
+    if (!requests.length) { list.innerHTML = '<p class="note">No requests yet.</p>'; return; }
+    const icon = { pending: "fa-hourglass-half", approved: "fa-check", rejected: "fa-xmark" };
+    list.innerHTML = requests.slice(0, 4).map((r) => {
+        const st = ["pending", "approved", "rejected"].includes(r.status) ? r.status : "pending";
+        return '<div class="activity-item"><div class="activity-icon ' + st + '"><i class="fa-solid ' + icon[st] + '"></i></div><div>' +
+            "<h5>" + (r.type === "od" ? "On Duty" : "Leave") + '<span class="badge ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></h5>" +
+            "<p>" + showDate(r.fromDate) + " to " + showDate(r.toDate) + " · " + esc(r.reason) + "</p></div></div>";
+    }).join("");
 }
-});
 
-cancelModalBtn.addEventListener("click", function () {
-    applyModal.classList.remove("show");
-});
+function loadRequests() {
+    return authFetch("/requests/mine")
+        .then(({ status, data }) => {
+            if (status !== 200 || !Array.isArray(data)) throw new Error("HTTP " + status);
+            $("pendingRequests").textContent = data.filter((r) => r.status === "pending").length;
+            renderRequests(data);
+        })
+        .catch((err) => {
+            console.error("Failed to load requests:", err);
+            $("pendingRequests").textContent = "--";
+            $("activityList").innerHTML = '<p class="note err">Could not load requests. Is the server running?</p>';
+        });
+}
 
-applyModal.addEventListener("click", function (e) {
-    if (e.target === applyModal) applyModal.classList.remove("show");
-});
+/* ---------- start ---------- */
+renderTimetable();
+renderTodayStatus([], false);
+loadRequests();
 
-applyForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const type = document.getElementById("requestType").value;
-    const fromDate = document.getElementById("fromDate").value;
-    const toDate = document.getElementById("toDate").value;
-    const reason = document.getElementById("reason").value.trim();
-
-    modalStatus.classList.remove("show", "success", "fail");
-
-    if (!fromDate || !toDate || !reason) {
-        modalStatus.textContent = "Please fill in all fields.";
-        modalStatus.classList.add("show", "fail");
-        return;
-    }
-
-    modalSubmitBtn.disabled = true;
-    modalSubmitBtn.textContent = "Submitting...";
-
-    authFetch("/requests", {
-        method: "POST",
-        body: JSON.stringify({ type, fromDate, toDate, reason })
+authFetch("/students/me")
+    .then(({ status, data }) => {
+        if (status !== 200 || !data) throw new Error("HTTP " + status);
+        localStorage.setItem("user", JSON.stringify(data));
+        renderProfile(data);
+        return loadAttendance(data);
     })
-        .then(function ({ status, data }) {
-            modalSubmitBtn.disabled = false;
-            modalSubmitBtn.textContent = "Submit";
+    .catch((err) => {
+        console.error("Failed to load profile:", err);
+        setAttendanceUnavailable("Could not load your profile. Please log in again.");
+    });
 
-            if (status !== 201) {
-                modalStatus.textContent = data.error || "Something went wrong.";
-                modalStatus.classList.add("show", "fail");
+/* ---------- Apply Leave / OD ---------- */
+const modal = $("applyModal"), form = $("applyForm"), mStatus = $("modalStatus"), submitBtn = $("modalSubmitBtn");
+let submitting = false;
+
+const openModal = () => modal.classList.add("show");
+const closeModal = () => { if (!submitting) modal.classList.remove("show"); };
+$("applyBtn").addEventListener("click", openModal);
+$("cancelModalBtn").addEventListener("click", closeModal);
+modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+function setErrors(e) {
+    $("fromErr").textContent = e.from || "";
+    $("toErr").textContent = e.to || "";
+    $("reasonErr").textContent = e.reason || "";
+}
+
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (submitting) return;                              // duplicate-submit guard
+
+    const type = $("requestType").value, fromDate = $("fromDate").value, toDate = $("toDate").value, reason = $("reason").value.trim();
+    const err = {};
+    if (!fromDate) err.from = "Choose a start date.";
+    if (!toDate) err.to = "Choose an end date.";
+    else if (fromDate && toDate < fromDate) err.to = "End date can’t be before the start date.";
+    if (reason.length < 5) err.reason = "Please give a short reason (at least 5 characters).";
+    setErrors(err);
+    mStatus.className = "modal-status";
+    if (Object.keys(err).length) return;
+
+    submitting = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    authFetch("/requests", { method: "POST", body: JSON.stringify({ type, fromDate, toDate, reason }) })
+        .then(({ status, data }) => {
+            if (status !== 201) {                         // only a real 201 counts as success
+                mStatus.textContent = (data && data.error) || "Something went wrong. Please try again.";
+                mStatus.className = "modal-status show fail";
                 return;
             }
-
-            modalStatus.textContent = data.message;
-            modalStatus.classList.add("show", "success");
-            applyForm.reset();
-
-            return loadDashboardRequests().then(function () {
-                setTimeout(function () {
-                    applyModal.classList.remove("show");
-                    modalStatus.classList.remove("show", "success");
-                }, 1200);
+            mStatus.textContent = (type === "od" ? "OD" : "Leave") + " application submitted successfully!";
+            mStatus.className = "modal-status show success";
+            form.reset();
+            return loadRequests().then(() => { // shows the status the backend actually returned
+                setTimeout(() => { submitting = false; closeModal(); mStatus.className = "modal-status"; }, 1500);
             });
         })
-        .catch(function () {
-            modalSubmitBtn.disabled = false;
-            modalSubmitBtn.textContent = "Submit";
-            modalStatus.textContent = "Could not reach the server.";
-            modalStatus.classList.add("show", "fail");
+        .catch((err2) => {
+            if (err2 && err2.message === "Unauthorized") return;
+            mStatus.textContent = "Could not reach the server. Your application was not sent, so please try again.";
+            mStatus.className = "modal-status show fail";
+        })
+        .finally(() => {
+            submitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit";
         });
 });

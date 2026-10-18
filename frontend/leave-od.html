@@ -2,337 +2,177 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leave & OD | SmartSense</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Leave &amp; OD | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="student-sidebar.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-light: #eef0ff;
-  --background: #f6f7fb;
-  --white: #ffffff;
-  --text-dark: #1a1d29;
-  --text-muted: #7a7f92;
-  --border: #ececf3;
-  --red: #e0473e;
-  --red-bg: #fdeceb;
-  --green: #16a34a;
-  --green-bg: #e8f8ee;
-  --amber: #b45309;
-  --amber-bg: #fef3e2;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
-
-.layout { display: flex; min-height: 100vh; }
-.main { flex: 1; padding: 32px 4%; max-width: 900px; }
-
-.page-header { margin-bottom: 24px; }
-.page-header h1 { font-size: 22px; margin-bottom: 4px; }
-.page-header p { font-size: 13px; color: var(--text-muted); }
-
-.card {
-  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
-  padding: 28px; margin-bottom: 24px;
-}
-.card h2 { font-size: 15px; margin-bottom: 18px; }
-
-.form-row { display: flex; gap: 14px; margin-bottom: 16px; }
-.form-group { flex: 1; margin-bottom: 16px; }
-.form-row .form-group { margin-bottom: 0; }
-
-label {
-  display: block; font-size: 12px; font-weight: 600; color: var(--text-muted);
-  margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em;
-}
-
-select, input[type="date"], textarea {
-  width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 10px;
-  font-family: inherit; font-size: 14px; outline: none; color: var(--text-dark);
-}
-select:focus, input[type="date"]:focus, textarea:focus { border-color: var(--primary); }
-textarea { resize: vertical; min-height: 80px; }
-
-.error-msg { display: none; color: var(--red); font-size: 12px; margin-top: 5px; }
-.error-msg.show { display: block; }
-.error { border-color: var(--red) !important; }
-
-.submit-btn {
-  width: 100%; padding: 13px; border: none; border-radius: 10px;
-  background: var(--primary); color: white; font-size: 14px; font-weight: 700; cursor: pointer;
-}
-.submit-btn:hover { background: var(--primary-dark); }
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.form-status { display: none; padding: 11px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 18px; }
-.form-status.show { display: block; }
-.form-status.success { background: var(--green-bg); color: var(--green); }
-.form-status.fail { background: var(--red-bg); color: var(--red); }
-
-.request-item {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  padding: 16px 0; border-bottom: 1px solid var(--border); gap: 12px;
-}
-.request-item:last-child { border-bottom: none; }
-.request-main { flex: 1; }
-.request-type { font-size: 13px; font-weight: 700; text-transform: capitalize; margin-bottom: 3px; }
-.request-dates { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-.request-reason { font-size: 13px; color: var(--text-dark); }
-.request-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-style: italic; }
-
-.status-badge {
-  font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 100px;
-  text-transform: capitalize; white-space: nowrap; height: fit-content;
-}
-.status-pending { background: var(--amber-bg); color: var(--amber); }
-.status-approved { background: var(--green-bg); color: var(--green); }
-.status-rejected { background: var(--red-bg); color: var(--red); }
-
-.empty-state, .loading-state { text-align: center; padding: 30px 0; color: var(--text-muted); font-size: 13px; }
+.two{display:grid;grid-template-columns:minmax(320px,1fr) 1.4fr;gap:18px;align-items:start}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 15px inherit;font-family:inherit;padding:8px 16px;border-radius:99px;cursor:pointer}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.req{display:flex;justify-content:space-between;gap:14px;padding:16px 0;border-top:1px solid var(--border)}
+.req:first-child{border-top:0}
+.req .ty{font-size:18px;font-weight:700}.req .dt{font-size:15px;color:var(--text-muted);margin:2px 0 6px}
+.req .rs{font-size:16px}.req .nt{font-size:15px;color:var(--text-muted);margin-top:6px;font-style:italic}
+.req .badge{margin:0;height:fit-content;font-size:15px;padding:4px 14px}
+.empty{text-align:center;color:var(--text-muted);padding:28px 0}
+.submit-btn{width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;font:700 18px inherit;font-family:inherit;cursor:pointer;transition:.2s}
+.submit-btn:hover{filter:brightness(1.07)}.submit-btn:disabled{opacity:.6;cursor:not-allowed}
+.spin{display:inline-block;width:16px;height:16px;border:3px solid #fff6;border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;vertical-align:-3px;margin-right:8px}@keyframes s{to{transform:rotate(360deg)}}
+.form-status{display:none;padding:14px 16px;border-radius:12px;font-size:17px;font-weight:700;margin-bottom:14px}
+.form-status.show{display:block}.form-status.success{background:var(--green-bg);color:var(--green)}.form-status.fail{background:var(--red-bg);color:var(--red)}
+.bad{border-color:var(--red)!important}
+@media(max-width:1100px){.two{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <div class="layout">
-
   <div id="sidebar-root"></div>
 
-  <main class="main">
-
-    <div class="page-header">
-      <h1>Leave & OD Requests</h1>
-      <p>Submit a new request or check the status of your past ones.</p>
-    </div>
-
-    <div class="card">
-      <h2>Submit a New Request</h2>
-
-      <div class="form-status" id="formStatus"></div>
-
-      <form id="requestForm" novalidate>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="type">Type</label>
-            <select id="type">
-              <option value="leave">Leave</option>
-              <option value="od">On Duty (OD)</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="fromDate">From</label>
-            <input type="date" id="fromDate">
-            <span class="error-msg" id="fromDateError"></span>
-          </div>
-          <div class="form-group">
-            <label for="toDate">To</label>
-            <input type="date" id="toDate">
-            <span class="error-msg" id="toDateError"></span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="reason">Reason</label>
-          <textarea id="reason" placeholder="Briefly explain the reason for this request..."></textarea>
-          <span class="error-msg" id="reasonError"></span>
-        </div>
-
-        <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2>Your Requests</h2>
-      <div id="requestsList">
-        <div class="loading-state">Loading your requests...</div>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p>Submit a request or track the status of your past ones</p><h1>Leave &amp; OD</h1></div>
+      <div class="topbar-right">
+        <div class="profile-pill"><div class="profile-avatar" id="avatarInitial">S</div><span id="profileName">Student</span></div>
       </div>
     </div>
 
-  </main>
+    <div class="two">
+      <div class="panel">
+        <div class="panel-heading"><h4>New application</h4></div>
+        <div class="form-status" id="formStatus" role="status"></div>
+        <form id="requestForm" novalidate>
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type"><option value="leave">Leave</option><option value="od">On Duty (OD)</option></select>
+          </div>
+          <div class="date-row">
+            <div class="form-group"><label for="fromDate">From</label><input type="date" id="fromDate"><div class="field-err" id="fromErr"></div></div>
+            <div class="form-group"><label for="toDate">To</label><input type="date" id="toDate"><div class="field-err" id="toErr"></div></div>
+          </div>
+          <div class="form-group">
+            <label for="reason">Reason</label>
+            <textarea id="reason" placeholder="Briefly explain the reason..."></textarea>
+            <div class="field-err" id="reasonErr"></div>
+          </div>
+          <button type="submit" class="submit-btn" id="submitBtn">Submit application</button>
+        </form>
+      </div>
 
+      <div class="panel">
+        <div class="panel-heading"><h4>Application history</h4></div>
+        <div class="chips" id="chips"></div>
+        <div id="requestsList"><p class="empty">Loading your requests...</p></div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script src="student-sidebar.js"></script>
-<script src="theme.js"></script>
 <script>
-   const API_BASE = "/api";
+const API_BASE = "/api";
 const token = localStorage.getItem("token");
+if (!token) window.location.href = "login-student.html";
 
-if (!token) {
-  window.location.href = "login-student.html";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const showDate = (v) => { const d = new Date(v); return isNaN(d) ? esc(v) : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); };
+const STATUSES = ["pending", "approved", "rejected"];
+
+try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
+
+function authFetch(path, options = {}) {
+  return fetch(API_BASE + path, { ...options, headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, ...(options.headers || {}) } })
+    .then((res) => {
+      if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-student.html"; return Promise.reject(new Error("Unauthorized")); }
+      return res.json().then((data) => ({ status: res.status, data }));
+    });
 }
 
-const requestForm = document.getElementById("requestForm");
-const typeInput = document.getElementById("type");
-const fromDateInput = document.getElementById("fromDate");
-const toDateInput = document.getElementById("toDate");
-const reasonInput = document.getElementById("reason");
-const fromDateError = document.getElementById("fromDateError");
-const toDateError = document.getElementById("toDateError");
-const reasonError = document.getElementById("reasonError");
-const formStatus = document.getElementById("formStatus");
-const submitBtn = document.getElementById("submitBtn");
-const requestsList = document.getElementById("requestsList");
+/* ---------- history ---------- */
+let REQUESTS = [], filter = "all";
 
-function setError(input, errorEl, message) {
-  input.classList.add("error");
-  errorEl.textContent = message;
-  errorEl.classList.add("show");
-}
+function renderList() {
+  const counts = { all: REQUESTS.length };
+  STATUSES.forEach((s) => { counts[s] = REQUESTS.filter((r) => r.status === s).length; });
+  $("chips").innerHTML = ["all"].concat(STATUSES).map((s) =>
+    '<button class="chip' + (s === filter ? " on" : "") + '" data-f="' + s + '" type="button">' + s.charAt(0).toUpperCase() + s.slice(1) + " (" + counts[s] + ")</button>").join("");
+  document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { filter = b.dataset.f; renderList(); }));
 
-function clearError(input, errorEl) {
-  input.classList.remove("error");
-  errorEl.classList.remove("show");
-  errorEl.textContent = "";
-}
-
-function validateForm() {
-  let valid = true;
-
-  if (!fromDateInput.value) {
-    setError(fromDateInput, fromDateError, "From date is required.");
-    valid = false;
-  } else {
-    clearError(fromDateInput, fromDateError);
-  }
-
-  if (!toDateInput.value) {
-    setError(toDateInput, toDateError, "To date is required.");
-    valid = false;
-  } else if (fromDateInput.value && toDateInput.value < fromDateInput.value) {
-    setError(toDateInput, toDateError, "To date cannot be before from date.");
-    valid = false;
-  } else {
-    clearError(toDateInput, toDateError);
-  }
-
-  if (!reasonInput.value.trim()) {
-    setError(reasonInput, reasonError, "Please provide a reason.");
-    valid = false;
-  } else {
-    clearError(reasonInput, reasonError);
-  }
-
-  return valid;
-}
-
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-}
-
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-function renderRequests(requests) {
-  if (!requests.length) {
-    requestsList.innerHTML = '<div class="empty-state">You haven\'t submitted any requests yet.</div>';
-    return;
-  }
-
-  requestsList.innerHTML = requests.map(function (r) {
-    const noteHtml = r.reviewNote ? '<div class="request-note">Note: ' + escapeHtml(r.reviewNote) + '</div>' : "";
-    return (
-      '<div class="request-item">' +
-        '<div class="request-main">' +
-          '<div class="request-type">' + escapeHtml(r.type) + '</div>' +
-          '<div class="request-dates">' + formatDate(r.fromDate) + ' &mdash; ' + formatDate(r.toDate) + '</div>' +
-          '<div class="request-reason">' + escapeHtml(r.reason) + '</div>' +
-          noteHtml +
-        '</div>' +
-        '<span class="status-badge status-' + r.status + '">' + escapeHtml(r.status) + '</span>' +
-      '</div>'
-    );
+  const list = filter === "all" ? REQUESTS : REQUESTS.filter((r) => r.status === filter);
+  if (!list.length) { $("requestsList").innerHTML = '<p class="empty">' + (REQUESTS.length ? "No " + filter + " requests." : "You haven’t submitted any requests yet.") + "</p>"; return; }
+  $("requestsList").innerHTML = list.map((r) => {
+    const st = STATUSES.includes(r.status) ? r.status : "pending";
+    return '<div class="req"><div><div class="ty">' + (r.type === "od" ? "On Duty (OD)" : "Leave") + '</div><div class="dt">' + showDate(r.fromDate) + " — " + showDate(r.toDate) +
+      '</div><div class="rs">' + esc(r.reason) + "</div>" + (r.reviewNote ? '<div class="nt">Note: ' + esc(r.reviewNote) + "</div>" : "") +
+      '</div><span class="badge ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></div>";
   }).join("");
 }
 
 function loadRequests() {
-  fetch(API_BASE + "/requests/mine", {
-    headers: { "Authorization": "Bearer " + token }
-  })
-    .then(function (res) {
-      if (res.status === 401) {
-        window.location.href = "login-student.html";
-        return;
-      }
-      return res.json();
+  return authFetch("/requests/mine")
+    .then(({ status, data }) => {
+      if (status !== 200 || !Array.isArray(data)) throw new Error("HTTP " + status);
+      REQUESTS = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      renderList();
+      // the student has now seen every update: clear the sidebar dot
+      localStorage.setItem("notifLastSeen", new Date().toISOString());
+      const dot = document.getElementById("notifDot");
+      if (dot) dot.classList.remove("show");
     })
-    .then(function (requests) {
-      if (requests) {
-        requests.sort(function (a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-        renderRequests(requests);
-      }
-    })
-    .catch(function () {
-      requestsList.innerHTML = '<div class="empty-state">Could not load your requests. Is the server running?</div>';
-    });
+    .catch((e) => { if (e.message !== "Unauthorized") $("requestsList").innerHTML = '<p class="empty" style="color:var(--red);font-weight:600">Could not load your requests. Is the server running?</p>'; });
 }
 
-requestForm.addEventListener("submit", function (e) {
-  e.preventDefault();
+/* ---------- form ---------- */
+const form = $("requestForm"), fStatus = $("formStatus"), btn = $("submitBtn");
+let submitting = false;
 
-  formStatus.classList.remove("show", "success", "fail");
+function validate(v) {
+  const e = {};
+  if (!v.fromDate) e.from = "From date is required.";
+  if (!v.toDate) e.to = "To date is required.";
+  else if (v.fromDate && v.toDate < v.fromDate) e.to = "To date can’t be before the from date.";
+  if (v.reason.length < 5) e.reason = "Please give a short reason (at least 5 characters).";
+  $("fromErr").textContent = e.from || ""; $("toErr").textContent = e.to || ""; $("reasonErr").textContent = e.reason || "";
+  $("fromDate").classList.toggle("bad", !!e.from); $("toDate").classList.toggle("bad", !!e.to); $("reason").classList.toggle("bad", !!e.reason);
+  return Object.keys(e).length === 0;
+}
 
-  if (!validateForm()) {
-    formStatus.textContent = "Please fix the errors above.";
-    formStatus.classList.add("show", "fail");
-    return;
-  }
+form.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  if (submitting) return;                                  // duplicate-submit guard
+  const v = { type: $("type").value, fromDate: $("fromDate").value, toDate: $("toDate").value, reason: $("reason").value.trim() };
+  fStatus.className = "form-status";
+  if (!validate(v)) return;
 
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Submitting...";
+  submitting = true; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Submitting...';
 
-  fetch(API_BASE + "/requests", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({
-      type: typeInput.value,
-      fromDate: fromDateInput.value,
-      toDate: toDateInput.value,
-      reason: reasonInput.value.trim()
-    })
-  })
-    .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
-    .then(function (result) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Request";
-
-      if (result.status !== 201) {
-        formStatus.textContent = result.data.error || "Could not submit request.";
-        formStatus.classList.add("show", "fail");
+  authFetch("/requests", { method: "POST", body: JSON.stringify(v) })
+    .then(({ status, data }) => {
+      if (status !== 201) {                                // only a real 201 is success
+        fStatus.textContent = (data && data.error) || "Could not submit your application. Please try again.";
+        fStatus.className = "form-status show fail";
         return;
       }
-
-      formStatus.textContent = "Request submitted for teacher approval.";
-      formStatus.classList.add("show", "success");
-      requestForm.reset();
-      loadRequests();
+      fStatus.textContent = (v.type === "od" ? "OD" : "Leave") + " application submitted successfully!";
+      fStatus.className = "form-status show success";
+      form.reset(); filter = "all";
+      return loadRequests();                               // history shows the status the backend returned
     })
-    .catch(function () {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Request";
-      formStatus.textContent = "Could not reach the server.";
-      formStatus.classList.add("show", "fail");
-    });
+    .catch((e) => {
+      if (e && e.message === "Unauthorized") return;
+      fStatus.textContent = "Could not reach the server. Your application was not sent, so please try again.";
+      fStatus.className = "form-status show fail";
+    })
+    .finally(() => { submitting = false; btn.disabled = false; btn.textContent = "Submit application"; });
 });
 
 loadRequests();
 </script>
-
+<script src="theme.js"></script>
 </body>
 </html>

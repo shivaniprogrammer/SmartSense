@@ -1,436 +1,185 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Attendance | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="student-sidebar.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-medium: #465963;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
-
-.layout { display: flex; min-height: 100vh; }
-
-.topbar {
-  height: 70px;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 5%;
-}
-
-.profile-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--primary-soft); padding: 6px 14px 6px 6px; border-radius: 100px;
-}
-.profile-pill .avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--primary); color: white; display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 700;
-}
-.profile-pill span { font-size: 13px; font-weight: 600; }
-
-.main-content { flex: 1; }
-.container { max-width: 1400px; margin: 0 auto; padding: 40px 5%; }
-
-.page-heading { margin-bottom: 28px; }
-.page-heading h1 { font-size: 26px; margin-bottom: 4px; }
-.page-heading p { color: var(--text-muted); font-size: 13px; }
-
-.summary-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px;
-}
-.summary-card {
-  background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 18px;
-}
-.summary-card .label { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
-.summary-card .value { font-size: 24px; font-weight: 700; }
-.summary-card.present .value { color: var(--green); }
-.summary-card.late .value { color: var(--amber); }
-.summary-card.absent .value { color: var(--red); }
-.summary-card.percent .value { color: var(--primary); }
-.panel {
-    width: 100%;
-    max-width: 100%;
-     min-width: 1000px;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-    overflow-x: auto;
-}
-
-.panel table {
-    width: 100%;
-    min-width: 800px;
-}
-.panel-heading {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
-}
-.panel-heading h3 { font-size: 16px; }
-.panel-heading .filter {
-  font-size: 12px; color: var(--text-muted); border: 1px solid var(--border);
-  padding: 6px 12px; border-radius: 8px; cursor: pointer;
-}
-
-table { width: 100%; border-collapse: collapse; }
-th {
-  text-align: left; font-size: 11px; color: var(--text-muted); text-transform: uppercase;
-  letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 1px solid var(--border);
-}
-td { padding: 14px 12px; font-size: 13px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
-
-.status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-  border-radius: 100px; font-size: 11px; font-weight: 600;
-}
-.status-badge.present { background: var(--green-bg); color: var(--green); }
-.status-badge.late { background: var(--amber-bg); color: var(--amber); }
-.status-badge.absent { background: var(--red-bg); color: var(--red); }
-
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-.method-tag {
-  font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;
-}
-
-@media (max-width: 700px) {
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
-  table { font-size: 11px; }
-  th, td { padding: 8px 6px; }
-}
+.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.subj .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.subj .head b{font-size:18px}
+.pill{display:inline-block;padding:3px 14px;border-radius:99px;font-size:15px;font-weight:700}
+.pill.good{background:var(--green-bg);color:var(--green)}.pill.low{background:var(--amber-bg);color:var(--amber)}.pill.late{background:var(--amber-bg);color:var(--amber)}.pill.present{background:var(--green-bg);color:var(--green)}.pill.absent{background:var(--red-bg);color:var(--red)}
+.meter{height:11px;border-radius:99px;background:var(--border);overflow:hidden;margin:8px 0 4px}
+.meter span{display:block;height:100%;border-radius:99px;background:var(--primary)}
+.meter.w span{background:linear-gradient(90deg,#F59E0B,#EF4444)}
+.subj small{color:var(--text-muted);font-size:15px}.subj small.warn{color:var(--amber);font-weight:600;display:block}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.filters input,.filters select{flex:1;min-width:160px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.btn{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font:600 16px inherit;font-family:inherit;cursor:pointer}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:17px}
+th{text-align:left;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:12px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:14px 10px;border-bottom:1px solid var(--border)}tr:last-child td{border-bottom:0}
+.msg{text-align:center;color:var(--text-muted);padding:22px 10px}.msg.err{color:var(--red);font-weight:600}
+.sec{margin-top:18px}
 </style>
 </head>
 <body>
-
 <div class="layout">
-
   <div id="sidebar-root"></div>
 
-  <div class="main-content">
-
-    <header class="topbar">
-      <div class="profile-pill">
-        <div class="avatar">S</div>
-        <span>Shivani S.</span>
-      </div>
-    </header>
-
-    <div class="container">
-
-      <div class="page-heading">
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div>
+        <p>Your attendance record</p>
         <h1>My Attendance</h1>
-        <p>Your attendance record for this month</p>
       </div>
-
-      <!-- Summary cards - mock data, not yet wired to backend -->
-      <div class="summary-grid">
-       <div class="summary-card percent">
-    <div class="label">Attendance %</div>
-    <div id="attendancePercent" class="value">--</div>
-</div>
-
-<div class="summary-card present">
-    <div class="label">Periods Present</div>
-    <div id="presentDays" class="value">--</div>
-</div>
-
-<div class="summary-card late">
-<div class="label">Periods Late</div>
-    <div id="lateDays" class="value">--</div>
-</div>
-
-<div class="summary-card absent">
-   <div class="label">Periods Absent</div>
-    <div id="absentDays" class="value">--</div>
-</div>
-
-      <!-- Attendance history - mock data, not yet wired to backend -->
-      <div class="panel">
-        <div class="panel-heading">
-          <h3>Attendance History</h3>
+      <div class="topbar-right">
+        <div class="profile-pill">
+          <div class="profile-avatar" id="avatarInitial">S</div>
+          <span id="profileName">Student</span>
         </div>
-
-        <table>
-          <thead>
-           <tr>
-    <th>Date</th>
-    <th>Period</th>
-    <th>Check-in</th>
-    <th>Check-out</th>
-    <th>Method</th>
-    <th>Status</th>
-</tr>
-          </thead>
-        <tbody id="attendanceTableBody">
-    <tr>
-        <td colspan="6" style="text-align:center;">Loading attendance...</td>
-    </tr>
-</tbody>
-        </table>
       </div>
-
     </div>
 
-  </div>
+    <div class="low-attendance-banner" id="lowBanner"><i class="fa-solid fa-triangle-exclamation"></i><span id="lowText"></span></div>
 
+    <div class="stats-grid">
+      <div class="stat-card"><div class="icon"><i class="fa-solid fa-chart-pie"></i></div><p>Attendance</p><h3 id="attendancePercent">--</h3></div>
+      <div class="stat-card"><div class="icon present"><i class="fa-solid fa-user-check"></i></div><p>Periods Present</p><h3 id="presentDays">--</h3></div>
+      <div class="stat-card"><div class="icon pending"><i class="fa-solid fa-clock"></i></div><p>Periods Late</p><h3 id="lateDays">--</h3></div>
+      <div class="stat-card"><div class="icon absent"><i class="fa-solid fa-user-xmark"></i></div><p>Periods Absent</p><h3 id="absentDays">--</h3></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-heading"><h4>Subject-wise attendance</h4></div>
+      <div class="subj-grid" id="subjGrid"><p class="msg">Loading...</p></div>
+    </div>
+
+    <div class="panel sec">
+      <div class="panel-heading"><h4>Attendance history</h4><span class="note" id="count"></span></div>
+      <div class="filters">
+        <input type="date" id="fFrom" aria-label="From date">
+        <input type="date" id="fTo" aria-label="To date">
+        <select id="fSubj" aria-label="Subject"><option value="">All subjects</option></select>
+        <button class="btn" id="fClear" type="button">Clear</button>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Date</th><th>Period</th><th>Subject</th><th>Check-in</th><th>Check-out</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="7" class="msg">Loading attendance...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script src="student-sidebar.js"></script>
-<script src="theme.js"></script>
+<script src="timetable-data.js"></script>
 <script>
-const SPRING_API_BASE = "http://localhost:8080";
+const API_BASE = "/api";                                   // Node server: profile
+// !! Same port as in dashboard.js. Change both if the attendance server uses another port.
+const ATTENDANCE_API_BASE = "http://localhost:8080";
+const LOW = 75;
 
 const token = localStorage.getItem("token");
+if (!token) window.location.href = "login-student.html";
 
-if (!token) {
-    window.location.href = "login-student.html";
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pct = (a, t) => Math.round((a / t) * 1000) / 10;
+const ok = (r) => r.status === "present" || r.status === "late";
+let ALL = [];
+
+function fmtDate(s) { if (!s) return "—"; const d = new Date(String(s).slice(0, 10) + "T00:00:00"); return isNaN(d) ? esc(s) : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); }
+function fmtTime(s) { if (!s) return "—"; const d = new Date(s); return isNaN(d) ? "—" : d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }); }
+function methodHtml(m) {
+  const k = (m || "").toLowerCase();
+  if (k === "ble") return '<i class="fa-brands fa-bluetooth-b"></i> BLE';
+  if (k === "manual") return '<i class="fa-solid fa-user-check"></i> Manual';
+  return m ? esc(m) : "—";
 }
 
-function authFetch(path) {
-    return fetch(SPRING_API_BASE + "/api" + path,{
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + token
-        }
-    }).then(function(res) {
-        return res.json().then(function(data) {
-            return {
-                status: res.status,
-                data: data
-            };
-        });
-    });
+// subject for a record, from the college timetable: weekday of the date + period number
+function subjectOf(r) {
+  const d = new Date(String(r.date || "").slice(0, 10) + "T00:00:00"), dow = d.getDay(), p = Number(r.period);
+  if (!(dow >= 1 && dow <= 5) || !p) return null;
+  const slot = SS.TT[dow - 1].find((s) => p >= s[1] && p <= s[2]);
+  return slot ? slot[0].replace(" LAB", "") : null;
+}
+const subjName = (code) => (SS.CRS[code] || [code])[0];
+
+function showError(msg) {
+  ["attendancePercent", "presentDays", "lateDays", "absentDays"].forEach((i) => { $(i).textContent = "--"; });
+  $("subjGrid").innerHTML = '<p class="msg err">' + esc(msg) + "</p>";
+  $("rows").innerHTML = '<tr><td colspan="7" class="msg err">' + esc(msg) + "</td></tr>";
 }
 
-function formatDate(dateString) {
-    if (!dateString) return "—";
-
-    const date = new Date(dateString + "T00:00:00");
-
-    return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-    });
+function renderSummary() {
+  const p = ALL.filter((r) => r.status === "present").length, l = ALL.filter((r) => r.status === "late").length, a = ALL.filter((r) => r.status === "absent").length;
+  const t = ALL.length, per = t ? pct(p + l, t) : 0;
+  $("attendancePercent").textContent = t ? per + "%" : "--";
+  $("presentDays").textContent = p; $("lateDays").textContent = l; $("absentDays").textContent = a;
+  const b = $("lowBanner");
+  if (t && per < LOW) { $("lowText").textContent = "Your overall attendance is " + per + "%, below the required " + LOW + "%."; b.classList.add("show"); } else b.classList.remove("show");
 }
 
-function formatTime(dateTimeString) {
-    if (!dateTimeString) return "—";
-
-    const date = new Date(dateTimeString);
-
-    return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
+function renderSubjects() {
+  const g = {};
+  ALL.forEach((r) => { const c = subjectOf(r); if (!c) return; g[c] = g[c] || { a: 0, t: 0 }; g[c].t++; if (ok(r)) g[c].a++; });
+  const keys = Object.keys(g).sort((x, y) => subjName(x).localeCompare(subjName(y)));
+  $("fSubj").innerHTML = '<option value="">All subjects</option>' + keys.map((k) => '<option value="' + esc(k) + '">' + esc(subjName(k)) + "</option>").join("");
+  if (!keys.length) { $("subjGrid").innerHTML = '<p class="msg">No subject data yet. Subjects are matched using the date and period of each record.</p>'; return; }
+  $("subjGrid").innerHTML = keys.map((k) => {
+    const s = g[k], p = pct(s.a, s.t), low = p < LOW, need = Math.max(0, Math.ceil(3 * s.t - 4 * s.a));
+    return '<div class="subj"><div class="head"><b>' + esc(subjName(k)) + '</b><span class="pill ' + (low ? "low" : "good") + '">' + p + '%</span></div>' +
+      '<div class="meter ' + (low ? "w" : "") + '"><span style="width:' + Math.min(p, 100) + '%"></span></div>' +
+      "<small>" + s.a + "/" + s.t + " classes attended</small>" +
+      (low ? '<small class="warn">Shortage: attend the next ' + need + " classes in a row to reach " + LOW + "%.</small>" : "") + "</div>";
+  }).join("");
 }
 
-function getMethodHtml(method) {
-    if (!method) {
-        return '<span class="method-tag">—</span>';
-    }
-
-    if (method.toLowerCase() === "ble") {
-        return '<span class="method-tag"><i class="fa-solid fa-bluetooth-b"></i> BLE</span>';
-    }
-
-    if (method.toLowerCase() === "manual") {
-        return '<span class="method-tag"><i class="fa-solid fa-user-check"></i> Manual</span>';
-    }
-
-    return '<span class="method-tag">' + method + '</span>';
+function renderRows() {
+  const from = $("fFrom").value, to = $("fTo").value, sub = $("fSubj").value;
+  const list = ALL.filter((r) => { const d = String(r.date || "").slice(0, 10); return (!from || d >= from) && (!to || d <= to) && (!sub || subjectOf(r) === sub); })
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || (Number(b.period) || 0) - (Number(a.period) || 0));
+  $("count").textContent = "Showing " + list.length + " of " + ALL.length;
+  if (!list.length) { $("rows").innerHTML = '<tr><td colspan="7" class="msg">' + (ALL.length ? "No records match these filters." : "No attendance records found.") + "</td></tr>"; return; }
+  $("rows").innerHTML = list.map((r) => {
+    const c = subjectOf(r), st = ["present", "late", "absent"].includes(r.status) ? r.status : "absent";
+    return "<tr><td>" + fmtDate(r.date) + "</td><td>" + esc(r.period || "—") + "</td><td>" + (c ? esc(subjName(c)) : "—") + "</td><td>" + fmtTime(r.checkInTime) + "</td><td>" + fmtTime(r.checkOutTime) + "</td><td>" + methodHtml(r.method) + '</td><td><span class="pill ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></td></tr>";
+  }).join("");
 }
 
-function getStatusHtml(status) {
-    const cleanStatus = status ? status.toLowerCase() : "absent";
+["fFrom", "fTo", "fSubj"].forEach((i) => $(i).addEventListener("change", renderRows));
+$("fClear").addEventListener("click", () => { ["fFrom", "fTo", "fSubj"].forEach((i) => { $(i).value = ""; }); renderRows(); });
 
-    return `
-        <span class="status-badge ${cleanStatus}">
-            <span class="dot"></span>
-            ${cleanStatus.charAt(0).toUpperCase() + cleanStatus.slice(1)}
-        </span>
-    `;
-}
-
-function loadAttendance(profile) {
-fetch(
-    "http://localhost:8080/attendance/student-id/" + profile.studentId,
-    {
-        headers: {
-            "Authorization": "Bearer " + token
-        }
-    }
-)
-        .then(function(res) {
-            if (!res.ok) {
-                throw new Error("Spring Boot returned " + res.status);
-            }
-
-            return res.json();
-        })
-        .then(function(records) {
-
-            console.log("Attendance from Spring Boot:", records);
-
-
-       
-
-            let presentCount = 0;
-            let lateCount = 0;
-            let absentCount = 0;
-
-            records.forEach(function(record) {
-
-                if (record.status === "present") {
-                    presentCount++;
-                }
-                else if (record.status === "late") {
-                    lateCount++;
-                }
-                else if (record.status === "absent") {
-                    absentCount++;
-                }
-            });
-
-            const total = records.length;
-
-            const attendanceCount = presentCount + lateCount;
-
-            const percentage = total > 0
-                ? Math.round((attendanceCount / total) * 1000) / 10
-                : 0;
-
-            document.getElementById("attendancePercent").textContent =
-                percentage + "%";
-
-            document.getElementById("presentDays").textContent =
-                presentCount;
-
-            document.getElementById("lateDays").textContent =
-                lateCount;
-
-            document.getElementById("absentDays").textContent =
-                absentCount;
-
-            const tableBody =
-                document.getElementById("attendanceTableBody");
-
-            tableBody.innerHTML = "";
-
-            if (records.length === 0) {
-
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align:center;">
-                            No attendance records found.
-                        </td>
-                    </tr>
-                `;
-
-                return;
-            }
-
-           records.sort(function(a, b) {
-    const dateDifference = new Date(b.date) - new Date(a.date);
-
-    if (dateDifference !== 0) {
-        return dateDifference;
-    }
-
-    return (b.period || 0) - (a.period || 0);
-});
-
-            records.forEach(function(record) {
-
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-<td>${formatDate(record.date)}</td>
-<td>${record.period || "—"}</td>
-<td>${formatTime(record.checkInTime)}</td>
-<td>${formatTime(record.checkOutTime)}</td>
-<td>${getMethodHtml(record.method)}</td>
-<td>${getStatusHtml(record.status)}</td>
-                `;
-
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(function(error) {
-
-            console.error(
-                "Failed to load attendance history:",
-                error
-            );
-
-            document.getElementById("attendanceTableBody").innerHTML = `
-                <tr>
-<td colspan="6" style="text-align:center;">
-                        Could not load attendance.
-                    </td>
-                </tr>
-            `;
-        });
-}
-
-authFetch("/students/me")
-    .then(function(result) {
-        if (!result.status || result.status < 200 || result.status >= 300) {
-            throw new Error(
-                "Student profile request failed: HTTP " + result.status
-            );
-        }
-
-        const profile = result.data;
-
-        if (!profile || !profile.studentId) {
-            throw new Error("Student profile does not contain studentId.");
-        }
-
-        console.log("Logged-in student:", profile);
-        loadAttendance(profile);
-    })
-    .catch(function(error) {
-        console.error("Failed to load student profile:", error);
-
-        document.getElementById("attendanceTableBody").innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align:center;">
-                    Could not load student profile. Please check the server and log in again.
-                </td>
-            </tr>
-        `;
-    });
-
+fetch(API_BASE + "/students/me", { headers: { "Authorization": "Bearer " + token } })
+  .then((res) => {
+    if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-student.html"; throw new Error("Unauthorized"); }
+    if (!res.ok) throw new Error("Profile request failed (HTTP " + res.status + ")");
+    return res.json();
+  })
+  .then((p) => {
+    if (!p || !p.studentId) throw new Error("Profile has no studentId");
+    if (p.name) { $("profileName").textContent = p.name.split(" ")[0]; $("avatarInitial").textContent = p.name.charAt(0).toUpperCase(); }
+    return fetch(ATTENDANCE_API_BASE + "/attendance/student-id/" + encodeURIComponent(p.studentId), { headers: { "Authorization": "Bearer " + token } })
+      .then((res) => { if (!res.ok) throw new Error("Attendance server returned HTTP " + res.status); return res.json(); })
+      .catch((e) => { throw new Error(e.message === "Failed to fetch" ? "Could not reach the attendance server at " + ATTENDANCE_API_BASE + ". Is it running?" : e.message); });
+  })
+  .then((records) => {
+    if (!Array.isArray(records)) throw new Error("Unexpected attendance response");
+    ALL = records; renderSummary(); renderSubjects(); renderRows();
+  })
+  .catch((e) => { if (e.message !== "Unauthorized") { console.error(e); showError(e.message); } });
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

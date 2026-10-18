@@ -2,362 +2,150 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Reports | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="student-sidebar.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-medium: #465963;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
-
-.layout { display: flex; min-height: 100vh; }
-
-.topbar {
-  height: 70px;
-  background: var(--white);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 5%;
-}
-
-.profile-pill {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--primary-soft); padding: 6px 14px 6px 6px; border-radius: 100px;
-}
-.profile-pill .avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--primary); color: white; display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 700;
-}
-.profile-pill span { font-size: 13px; font-weight: 600; }
-
-.main-content { flex: 1; }
-
-.container { max-width: 1100px; margin: 0 auto; padding: 40px 5%; }
-
-.page-heading { margin-bottom: 28px; }
-.page-heading h1 { font-size: 26px; margin-bottom: 4px; }
-.page-heading p { color: var(--text-muted); font-size: 13px; }
-
-/* Day tabs */
-.day-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-.day-tab {
-  border: 1px solid var(--border);
-  background: var(--white);
-  color: var(--text-medium);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 18px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-.day-tab:hover {
-  background: var(--primary-soft);
-}
-.day-tab.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
-.panel {
-  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
-  padding: 24px; margin-bottom: 20px;
-}
-.panel-heading {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;
-}
-.panel-heading h3 { font-size: 16px; }
-.panel-heading .day-summary {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.panel-heading .day-summary strong {
-  color: var(--text-dark);
-}
-
-/* Holiday state */
-.holiday-box {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--text-muted);
-}
-.holiday-box i {
-  font-size: 32px;
-  color: var(--primary);
-  margin-bottom: 12px;
-  display: block;
-}
-.holiday-box strong {
-  display: block;
-  font-size: 16px;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-
-/* Class boxes grid */
-.class-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 16px;
-}
-
-.class-box {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  background: var(--primary-soft);
-}
-.class-box .period-tag {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--primary-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-.class-box .subject {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-.class-box .time {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
-.status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-  border-radius: 100px; font-size: 11px; font-weight: 600;
-}
-.status-badge.present { background: var(--green-bg); color: var(--green); }
-.status-badge.absent { background: var(--red-bg); color: var(--red); }
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-@media (max-width: 700px) {
-  .class-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-}
+.weekbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.weekbar b{font-size:18px;min-width:230px;text-align:center}
+.btn{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:10px 16px;font:600 16px inherit;font-family:inherit;cursor:pointer;color:var(--text-dark)}
+.btn:hover{border-color:var(--primary)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 17px inherit;font-family:inherit;padding:11px 22px;border-radius:99px;cursor:pointer;transition:.15s}
+.tab:hover{background:var(--primary-soft)}.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.sum{color:var(--text-muted);font-size:16px}.sum b{color:var(--text-dark)}
+.cls-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.cls{border:1px solid var(--border);border-radius:16px;padding:18px;background:var(--primary-soft);border-left:5px solid var(--primary)}
+.cls.lab{border-left-color:#3B82F6}
+.cls .pt{font-size:13px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.cls .sj{font-size:19px;font-weight:700;line-height:1.3;margin-bottom:4px}
+.cls .tm{font-size:16px;color:var(--text-muted)}.cls .fc{font-size:15px;color:var(--text-muted);margin-bottom:12px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:99px;font-size:15px;font-weight:700}
+.pill.present{background:var(--green-bg);color:var(--green)}.pill.late,.pill.partial{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}.pill.none,.pill.upcoming{background:var(--border);color:var(--text-medium)}
+.hol{text-align:center;padding:50px 16px;color:var(--text-muted)}.hol i{font-size:36px;color:var(--primary);display:block;margin-bottom:12px}.hol strong{display:block;font-size:20px;color:var(--text-dark);margin-bottom:4px}
+.msg{padding:14px 16px;border-radius:12px;margin-bottom:14px;font-weight:600;display:none}.msg.show{display:block;background:var(--red-bg);color:var(--red)}
 </style>
 </head>
 <body>
-
 <div class="layout">
-
   <div id="sidebar-root"></div>
-
-  <div class="main-content">
-
-    <header class="topbar">
-      <div class="profile-pill">
-        <div class="avatar">S</div>
-        <span>Shivani S.</span>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p>Your class timetable and attendance, day by day</p><h1>Reports</h1></div>
+      <div class="topbar-right">
+        <div class="profile-pill"><div class="profile-avatar" id="avatarInitial">S</div><span id="profileName">Student</span></div>
       </div>
-    </header>
-
-    <div class="container">
-
-      <div class="page-heading">
-        <h1>Reports</h1>
-        <p>Your class timetable and attendance, day by day</p>
-      </div>
-
-      <div class="day-tabs" id="dayTabs"></div>
-
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 id="panelDayTitle">Monday</h3>
-          <div class="day-summary" id="panelDaySummary"></div>
-        </div>
-
-        <div id="panelBody"></div>
-      </div>
-
     </div>
 
-  </div>
+    <div class="msg" id="err"></div>
 
+    <div class="weekbar">
+      <button class="btn" id="prev" type="button">&larr; Previous week</button>
+      <b id="weekLabel"></b>
+      <button class="btn" id="next" type="button">Next week &rarr;</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+
+    <div class="panel">
+      <div class="panel-heading"><h4 id="dayTitle"></h4><div class="sum" id="daySum"></div></div>
+      <div id="body"></div>
+    </div>
+  </main>
 </div>
 
+<script src="student-sidebar.js"></script>
+<script src="timetable-data.js"></script>
 <script>
-/*
-  ================================================================
-  MOCK DATA — replace with a real fetch() call once the backend
-  exposes the student's timetable + per-period attendance for a
-  given day, e.g.:
+const API_BASE = "/api";
+// !! Same port as in dashboard.js and Student-attendance.html
+const ATTENDANCE_API_BASE = "http://localhost:8080";
 
-    async function loadDay(day) {
-      const token = localStorage.getItem("token");
-      const res = await fetch("/api/reports/student/" + day, {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const data = await res.json(); // { periods: [...] }
-      renderDay(day, data.periods);
-    }
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "login-student.html";
 
-  Each period item should keep this shape so renderDay() doesn't
-  need to change: { period, time, subject, status }
-  status is "present" or "absent".
-  ================================================================
-*/
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const short = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-// Real class timetable: II Year - III Semester, CSE F Section
-// (w.e.f. 06.07.2026). Attendance "status" values are still placeholders
-// until the backend supplies real per-period attendance.
-const timetableByDay = {
-  Monday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Computer Networks", status: "present" },
-    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", status: "present" },
-    { period: "3-5", time: "10:10 - 12:40", subject: "Advanced Data Structures and Algorithms", status: "present" },
-    { period: 6, time: "1:30 - 2:15", subject: "Discrete Mathematics", status: "present" },
-    { period: "7-8", time: "2:15 - 3:45", subject: "OOP using Java - Lab", status: "present" },
-  ],
-  Tuesday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Aptitude Test", status: "present" },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
-    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", status: "present" },
-    { period: 4, time: "11:00 - 11:50", subject: "Discrete Mathematics", status: "absent" },
-    { period: 5, time: "11:50 - 12:40", subject: "Counselling", status: "present" },
-    { period: 6, time: "1:30 - 2:15", subject: "OOP using Java", status: "present" },
-    { period: "7-8", time: "2:15 - 3:45", subject: "Embedded System Design - Lab", status: "present" },
-  ],
-  Wednesday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Fundamentals of AI and ML", status: "present" },
-    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", status: "present" },
-    { period: 3, time: "10:10 - 11:00", subject: "Discrete Mathematics", status: "present" },
-    { period: "4-5", time: "11:00 - 12:40", subject: "OOP using Java - Lab", status: "absent" },
-    { period: 6, time: "1:30 - 2:15", subject: "Advanced Data Structures and Algorithms", status: "present" },
-    { period: "7-8", time: "2:15 - 3:45", subject: "ADSA Lab", status: "present" },
-  ],
-  Thursday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Technical Test", status: "present" },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
-    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", status: "present" },
-    { period: "4-5", time: "11:00 - 12:40", subject: "Career Skill Development III", status: "present" },
-    { period: 6, time: "1:30 - 2:15", subject: "Embedded System Design", status: "present" },
-    { period: 7, time: "2:15 - 3:00", subject: "Discrete Mathematics (Tutorial)", status: "present" },
-    { period: 8, time: "3:00 - 3:45", subject: "Leet Code", status: "present" },
-  ],
-  Friday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Embedded System Design", status: "absent" },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", status: "present" },
-    { period: 3, time: "10:10 - 11:00", subject: "OOP using Java", status: "present" },
-    { period: 4, time: "11:00 - 11:50", subject: "Fundamentals of AI and ML", status: "present" },
-    { period: 5, time: "11:50 - 12:40", subject: "Discrete Mathematics", status: "present" },
-    { period: 6, time: "1:30 - 2:15", subject: "NPTEL", status: "present" },
-    { period: "7-8", time: "2:15 - 3:45", subject: "Fundamentals of AI and ML - Lab", status: "present" },
-  ],
-  // No Saturday classes on this timetable - shows as a holiday below
-};
+const today = new Date(); today.setHours(0, 0, 0, 0);
+const monday0 = new Date(today); monday0.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+let weekOffset = 0, sel = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : 4;
+let REC = null;                                            // "date|period" -> status ; null until loaded
 
-const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const weekendDays = ["Saturday", "Sunday"];
+const dateOf = (i) => { const d = new Date(monday0); d.setDate(d.getDate() + weekOffset * 7 + i); return d; };
 
-function todayName() {
-  const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return names[new Date().getDay()];
+function slotStatus(date, s) {
+  const n = s[2] - s[1] + 1, list = [];
+  for (let p = s[1]; p <= s[2]; p++) { const st = REC[iso(date) + "|" + p]; if (st) list.push(st); }
+  if (!list.length) return { k: date > today ? "upcoming" : "none", t: date > today ? "Upcoming" : "Not marked" };
+  const att = list.filter((x) => x === "present" || x === "late").length;
+  if (att === n) return list.includes("late") ? { k: "late", t: "Late" } : { k: "present", t: "Present" };
+  if (att === 0 && list.length === n) return { k: "absent", t: "Absent" };
+  return { k: "partial", t: att + "/" + n + " attended" };
 }
 
-function renderTabs(selectedDay) {
-  const dayTabs = document.getElementById("dayTabs");
-  dayTabs.innerHTML = "";
+function render() {
+  const mon = dateOf(0), sat = dateOf(5);
+  $("weekLabel").textContent = short(mon) + " – " + short(sat) + " " + sat.getFullYear();
+  $("next").disabled = weekOffset >= 0;
+  $("tabs").innerHTML = DAY_NAMES.map((n, i) => '<button class="tab' + (i === sel ? " on" : "") + '" data-i="' + i + '" type="button">' + n + "</button>").join("");
+  document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { sel = +b.dataset.i; render(); }));
 
-  dayOrder.forEach(function (day) {
-    const btn = document.createElement("button");
-    btn.className = "day-tab" + (day === selectedDay ? " active" : "");
-    btn.textContent = day;
-    btn.addEventListener("click", function () {
-      renderDay(day);
-    });
-    dayTabs.appendChild(btn);
-  });
-}
+  const date = dateOf(sel);
+  $("dayTitle").textContent = DAY_NAMES[sel] + ", " + date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
-function renderDay(day) {
-  renderTabs(day);
-
-  document.getElementById("panelDayTitle").textContent = day;
-
-  const panelBody = document.getElementById("panelBody");
-  const panelDaySummary = document.getElementById("panelDaySummary");
-
-  // Weekend / holiday state (Sunday has no timetable entry at all)
-  if (weekendDays.includes(day) && !timetableByDay[day]) {
-    panelDaySummary.textContent = "";
-    panelBody.innerHTML =
-      '<div class="holiday-box">' +
-        '<i class="fa-solid fa-mug-hot"></i>' +
-        '<strong>Holiday</strong>' +
-        '<span>No classes scheduled on ' + day + '</span>' +
-      '</div>';
+  if (sel === 5) {
+    $("daySum").textContent = "";
+    $("body").innerHTML = '<div class="hol"><i class="fa-solid fa-mug-hot"></i><strong>Holiday</strong>No classes on Saturday</div>';
     return;
   }
+  if (!REC) { $("daySum").textContent = ""; $("body").innerHTML = '<p class="note">Loading attendance...</p>'; return; }
 
-  const periods = timetableByDay[day] || [];
-
-  const presentCount = periods.filter(function (p) { return p.status === "present"; }).length;
-  panelDaySummary.innerHTML = '<strong>' + presentCount + '/' + periods.length + '</strong> classes attended';
-
-  const grid = document.createElement("div");
-  grid.className = "class-grid";
-
-  periods.forEach(function (p) {
-    const box = document.createElement("div");
-    box.className = "class-box";
-    box.innerHTML =
-      '<div class="period-tag">Period ' + p.period + '</div>' +
-      '<div class="subject">' + p.subject + '</div>' +
-      '<div class="time">' + p.time + '</div>' +
-      '<span class="status-badge ' + p.status + '">' +
-        '<span class="dot"></span>' +
-        (p.status === "present" ? "Present" : "Absent") +
-      '</span>';
-    grid.appendChild(box);
-  });
-
-  panelBody.innerHTML = "";
-  panelBody.appendChild(grid);
+  let attended = 0, marked = 0;
+  const cards = SS.TT[sel].map((s) => {
+    const n = SS.info(s[0]), st = slotStatus(date, s);
+    if (st.k !== "none" && st.k !== "upcoming") { marked++; if (st.k === "present" || st.k === "late") attended++; }
+    return '<div class="cls' + (n.lab ? " lab" : "") + '"><div class="pt">Period ' + (s[1] === s[2] ? s[1] : s[1] + "–" + s[2]) + '</div><div class="sj">' + esc(n.name) +
+      '</div><div class="tm">' + SS.timeLabel(s[1], s[2]) + '</div><div class="fc">' + esc(n.lab ? "Lab session" : n.faculty + " · Room " + SS.room) +
+      '</div><span class="pill ' + st.k + '">' + st.t + "</span></div>";
+  }).join("");
+  $("daySum").innerHTML = marked ? "<b>" + attended + "/" + marked + "</b> classes attended" : "No attendance marked yet";
+  $("body").innerHTML = '<div class="cls-grid">' + cards + "</div>";
 }
 
-// Default to today's weekday if it's Mon-Sat, otherwise Monday
-const initialDay = dayOrder.includes(todayName()) ? todayName() : "Monday";
-renderDay(initialDay);
-</script>
+function fail(msg) { const e = $("err"); e.textContent = msg; e.classList.add("show"); REC = {}; render(); }
 
-<script src="student-sidebar.js"></script>
+$("prev").addEventListener("click", () => { weekOffset--; render(); });
+$("next").addEventListener("click", () => { if (weekOffset < 0) { weekOffset++; render(); } });
+render();
+
+fetch(API_BASE + "/students/me", { headers: { "Authorization": "Bearer " + token } })
+  .then((res) => {
+    if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-student.html"; throw new Error("Unauthorized"); }
+    if (!res.ok) throw new Error("Profile request failed (HTTP " + res.status + ")");
+    return res.json();
+  })
+  .then((p) => {
+    if (!p || !p.studentId) throw new Error("Profile has no studentId");
+    if (p.name) { $("profileName").textContent = p.name.split(" ")[0]; $("avatarInitial").textContent = p.name.charAt(0).toUpperCase(); }
+    return fetch(ATTENDANCE_API_BASE + "/attendance/student-id/" + encodeURIComponent(p.studentId), { headers: { "Authorization": "Bearer " + token } })
+      .then((res) => { if (!res.ok) throw new Error("Attendance server returned HTTP " + res.status); return res.json(); })
+      .catch((e) => { throw new Error(e.message === "Failed to fetch" ? "Could not reach the attendance server at " + ATTENDANCE_API_BASE + ". Is it running?" : e.message); });
+  })
+  .then((records) => {
+    if (!Array.isArray(records)) throw new Error("Unexpected attendance response");
+    REC = {};
+    records.forEach((r) => { REC[String(r.date).slice(0, 10) + "|" + Number(r.period)] = r.status; });
+    render();
+  })
+  .catch((e) => { if (e.message !== "Unauthorized") { console.error(e); fail(e.message); } });
+</script>
 <script src="theme.js"></script>
 </body>
 </html>
