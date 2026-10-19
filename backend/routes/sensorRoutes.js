@@ -43,31 +43,52 @@ router.get("/sensor-data/recent", async (req, res) => {
   }
 });
 
-// ---- BLE scan -> marks the matching student present for today ----
 router.post("/ble-scan", async (req, res) => {
   try {
-    const { bleId } = req.body;
+    const { bleId, status } = req.body;
 
     if (!bleId) {
       return res.status(400).json({ error: "bleId is required" });
     }
 
-    const student = await Student.findOne({ bleId });
+    // Try the address as sent, then upper and lower case
+    const student =
+      (await Student.findOne({ bleId })) ||
+      (await Student.findOne({ bleId: bleId.toUpperCase() })) ||
+      (await Student.findOne({ bleId: bleId.toLowerCase() }));
 
     if (!student) {
-      // Not an error from the reader's point of view -- just an unrecognized/unenrolled device.
-      // 200 (not 404) so the scanner doesn't treat this as a hardware/connection fault.
       return res.status(200).json({ message: "No enrolled student matches this bleId", matched: false });
     }
-    student.lastSeenAt = new Date();
-await student.save();
 
-    const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
-
+    // Use Indian date so scans before 5:30 AM don't land on yesterday
+    const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+    const timeText = new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
     const existing = await AttendanceRecord.findOne({ student: student._id, date: today });
 
+    // ESP32 says the device went silent
+    if (status === "absent") {
+      if (existing && existing.status === "present") {
+        existing.status = "absent";
+        existing.checkOutTime = new Date();
+        await existing.save();
+        sendTelegramMessage(`⚠️ ${student.name} marked absent at ${timeText} (Bluetooth not detected).`);
+      }
+      return res.status(200).json({ message: "absent noted", matched: true, student: student.name });
+    }
+
+    // Normal "present" scan
+    student.lastSeenAt = new Date();
+    await student.save();
+
     if (existing) {
-      // Already marked today -- don't overwrite checkInTime on every re-scan.
+      if (existing.status === "absent") {
+        existing.status = "present";
+        existing.checkOutTime = null;
+        await existing.save();
+        sendTelegramMessage(`✅ ${student.name} is back, marked present at ${timeText}`);
+        return res.status(200).json({ message: `${student.name} marked present again`, matched: true, student: student.name, record: existing });
+      }
       return res.status(200).json({
         message: `${student.name} already marked present today`,
         matched: true,
@@ -76,7 +97,7 @@ await student.save();
       });
     }
 
-     const record = await AttendanceRecord.create({
+    const record = await AttendanceRecord.create({
       student: student._id,
       date: today,
       checkInTime: new Date(),
@@ -85,16 +106,10 @@ await student.save();
       confidence: "high",
     });
 
-    console.log(`[${new Date().toLocaleTimeString()}] BLE scan matched ${student.name} (${bleId}) -> marked present`);
+    console.log(`[${timeText}] BLE scan matched ${student.name} (${bleId}) -> marked present`);
+    sendTelegramMessage(`✅ ${student.name} marked present at ${timeText}`);
 
-    sendTelegramMessage(`✅ ${student.name} marked present at ${new Date().toLocaleTimeString()}`);
-
-    res.status(201).json({
-      message: `${student.name} marked present`,
-      matched: true,
-      student: student.name,
-      record,
-    });
+    res.status(201).json({ message: `${student.name} marked present`, matched: true, student: student.name, record });
   } catch (err) {
     console.error("Error processing BLE scan:", err.message);
     res.status(500).json({ error: "Server error while processing BLE scan" });
