@@ -5,7 +5,7 @@
 const API_BASE = "/api";
 
 // !! CONFIRM THIS PORT. Your old dashboard.js used 8081, Student-attendance.html used 8080.
-const ATTENDANCE_API_BASE = "http://localhost:8080";
+const ATTENDANCE_API_BASE = "https://smartsense-java-backend.onrender.com";
 
 const LOW_ATTENDANCE_THRESHOLD = 75;
 // false = count every record (same as the Attendance page). true = count BLE records only (old dashboard behaviour).
