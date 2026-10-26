@@ -99,15 +99,10 @@ function renderTodayStatus(records, loaded) {
     if (!todays.length) { text.textContent = "Not marked yet"; return; }
     if (todays.some((r) => r.status === "present" || r.status === "late")) { badge.classList.add("present"); text.textContent = "Present"; }
     else { badge.classList.add("absent"); text.textContent = "Absent"; }
-}
-
-function loadAttendance(profile) {
-    return fetch(ATTENDANCE_API_BASE + "/attendance/student-id/" + encodeURIComponent(profile.studentId), {
-        headers: { "Authorization": "Bearer " + token }
-    })
-        .then((res) => { if (!res.ok) throw new Error("HTTP " + res.status); return res.json(); })
-        .then((all) => {
-            if (!Array.isArray(all)) throw new Error("Unexpected response");
+}function loadAttendance(profile) {
+    return authFetch("/attendance/history/" + profile._id)
+        .then(({ status, data: all }) => {
+            if (status !== 200 || !Array.isArray(all)) throw new Error("HTTP " + status);
             const records = COUNT_BLE_ONLY ? all.filter((r) => (r.method || "").toLowerCase() === "ble") : all;
             const total = records.length;
             const present = records.filter((r) => r.status === "present" || r.status === "late").length;
@@ -136,7 +131,7 @@ function loadAttendance(profile) {
         })
         .catch((err) => {
             console.error("Failed to load attendance:", err);
-            setAttendanceUnavailable("Could not load attendance (" + err.message + "). Check that the attendance server is running at " + ATTENDANCE_API_BASE + ".");
+            setAttendanceUnavailable("Could not load attendance (" + err.message + ").");
         });
 }
 
@@ -177,7 +172,9 @@ authFetch("/students/me")
         if (status !== 200 || !data) throw new Error("HTTP " + status);
         localStorage.setItem("user", JSON.stringify(data));
         renderProfile(data);
-        return loadAttendance(data);
+               loadAttendance(data);
+        setInterval(() => loadAttendance(data), 10000);
+        return;
     })
     .catch((err) => {
         console.error("Failed to load profile:", err);

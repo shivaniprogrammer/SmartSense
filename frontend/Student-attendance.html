@@ -160,25 +160,28 @@ function renderRows() {
 
 ["fFrom", "fTo", "fSubj"].forEach((i) => $(i).addEventListener("change", renderRows));
 $("fClear").addEventListener("click", () => { ["fFrom", "fTo", "fSubj"].forEach((i) => { $(i).value = ""; }); renderRows(); });
+function loadAll() {
+  return fetch(API_BASE + "/students/me", { headers: { "Authorization": "Bearer " + token } })
+    .then((res) => {
+      if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-student.html"; throw new Error("Unauthorized"); }
+      if (!res.ok) throw new Error("Profile request failed (HTTP " + res.status + ")");
+      return res.json();
+    })
+    .then((p) => {
+      if (!p || !p._id) throw new Error("Profile has no id");
+      if (p.name) { $("profileName").textContent = p.name.split(" ")[0]; $("avatarInitial").textContent = p.name.charAt(0).toUpperCase(); }
+      return fetch(API_BASE + "/attendance/history/" + encodeURIComponent(p._id), { headers: { "Authorization": "Bearer " + token } })
+        .then((res) => { if (!res.ok) throw new Error("Attendance request failed (HTTP " + res.status + ")"); return res.json(); });
+    })
+    .then((records) => {
+      if (!Array.isArray(records)) throw new Error("Unexpected attendance response");
+      ALL = records; renderSummary(); renderSubjects(); renderRows();
+    })
+    .catch((e) => { if (e.message !== "Unauthorized") { console.error(e); showError(e.message); } });
+}
 
-fetch(API_BASE + "/students/me", { headers: { "Authorization": "Bearer " + token } })
-  .then((res) => {
-    if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-student.html"; throw new Error("Unauthorized"); }
-    if (!res.ok) throw new Error("Profile request failed (HTTP " + res.status + ")");
-    return res.json();
-  })
-  .then((p) => {
-    if (!p || !p.studentId) throw new Error("Profile has no studentId");
-    if (p.name) { $("profileName").textContent = p.name.split(" ")[0]; $("avatarInitial").textContent = p.name.charAt(0).toUpperCase(); }
-    return fetch(ATTENDANCE_API_BASE + "/attendance/student-id/" + encodeURIComponent(p.studentId), { headers: { "Authorization": "Bearer " + token } })
-      .then((res) => { if (!res.ok) throw new Error("Attendance server returned HTTP " + res.status); return res.json(); })
-      .catch((e) => { throw new Error(e.message === "Failed to fetch" ? "Could not reach the attendance server at " + ATTENDANCE_API_BASE + ". Is it running?" : e.message); });
-  })
-  .then((records) => {
-    if (!Array.isArray(records)) throw new Error("Unexpected attendance response");
-    ALL = records; renderSummary(); renderSubjects(); renderRows();
-  })
-  .catch((e) => { if (e.message !== "Unauthorized") { console.error(e); showError(e.message); } });
+loadAll();
+setInterval(loadAll, 10000);
 </script>
 <script src="theme.js"></script>
 </body>
