@@ -83,7 +83,7 @@ const dateOf = (i) => { const d = new Date(monday0); d.setDate(d.getDate() + wee
 function slotStatus(date, s) {
   const n = s[2] - s[1] + 1, list = [];
   for (let p = s[1]; p <= s[2]; p++) { const st = REC[iso(date) + "|" + p]; if (st) list.push(st); }
-  if (!list.length) return { k: date > today ? "upcoming" : "none", t: date > today ? "Upcoming" : "Not marked" };
+if (!list.length) return date > today ? { k: "upcoming", t: "Upcoming" } : { k: "absent", t: "Absent" };
   const att = list.filter((x) => x === "present" || x === "late").length;
   if (att === n) return list.includes("late") ? { k: "late", t: "Late" } : { k: "present", t: "Present" };
   if (att === 0 && list.length === n) return { k: "absent", t: "Absent" };
