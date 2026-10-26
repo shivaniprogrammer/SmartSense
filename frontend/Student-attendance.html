@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,9 +106,24 @@ function methodHtml(m) {
   return m ? esc(m) : "—";
 }
 
+// period number for a record: uses r.period when the backend set it,
+// otherwise works it out from the check-in time (converted to IST).
+// A check-in during a break counts for the next period; after the last period it has no period.
+function periodOf(r) {
+  const p = Number(r.period);
+  if (p >= 1 && p <= 8) return p;
+  if (!r.checkInTime) return null;
+  const t = new Date(r.checkInTime);
+  if (isNaN(t)) return null;
+  const ist = new Date(t.getTime() + 330 * 60000);          // UTC + 5:30
+  const m = ist.getUTCHours() * 60 + ist.getUTCMinutes();
+  for (let i = 1; i <= 8; i++) { if (m < SS.endMin(i)) return i; }
+  return null;
+}
+
 // subject for a record, from the college timetable: weekday of the date + period number
 function subjectOf(r) {
-  const d = new Date(String(r.date || "").slice(0, 10) + "T00:00:00"), dow = d.getDay(), p = Number(r.period);
+  const d = new Date(String(r.date || "").slice(0, 10) + "T00:00:00"), dow = d.getDay(), p = periodOf(r);
   if (!(dow >= 1 && dow <= 5) || !p) return null;
   const slot = SS.TT[dow - 1].find((s) => p >= s[1] && p <= s[2]);
   return slot ? slot[0].replace(" LAB", "") : null;
@@ -149,12 +163,12 @@ function renderSubjects() {
 function renderRows() {
   const from = $("fFrom").value, to = $("fTo").value, sub = $("fSubj").value;
   const list = ALL.filter((r) => { const d = String(r.date || "").slice(0, 10); return (!from || d >= from) && (!to || d <= to) && (!sub || subjectOf(r) === sub); })
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || (Number(b.period) || 0) - (Number(a.period) || 0));
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || (periodOf(b) || 0) - (periodOf(a) || 0));
   $("count").textContent = "Showing " + list.length + " of " + ALL.length;
   if (!list.length) { $("rows").innerHTML = '<tr><td colspan="7" class="msg">' + (ALL.length ? "No records match these filters." : "No attendance records found.") + "</td></tr>"; return; }
   $("rows").innerHTML = list.map((r) => {
     const c = subjectOf(r), st = ["present", "late", "absent"].includes(r.status) ? r.status : "absent";
-    return "<tr><td>" + fmtDate(r.date) + "</td><td>" + esc(r.period || "—") + "</td><td>" + (c ? esc(subjName(c)) : "—") + "</td><td>" + fmtTime(r.checkInTime) + "</td><td>" + fmtTime(r.checkOutTime) + "</td><td>" + methodHtml(r.method) + '</td><td><span class="pill ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></td></tr>";
+    return "<tr><td>" + fmtDate(r.date) + "</td><td>" + esc(periodOf(r) || "—") + "</td><td>" + (c ? esc(subjName(c)) : "—") + "</td><td>" + fmtTime(r.checkInTime) + "</td><td>" + fmtTime(r.checkOutTime) + "</td><td>" + methodHtml(r.method) + '</td><td><span class="pill ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></td></tr>";
   }).join("");
 }
 
