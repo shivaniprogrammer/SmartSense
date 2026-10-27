@@ -12,7 +12,7 @@
 <style>
 .btn{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:10px 16px;font:600 16px inherit;font-family:inherit;cursor:pointer;color:var(--text-dark);transition:.2s}
 .btn:hover{border-color:var(--primary)}.btn:disabled{opacity:.5;cursor:not-allowed}
-.demo-note{background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:16px}
+
 .weekbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.weekbar b{font-size:18px;min-width:230px;text-align:center}
 .weekbar input{padding:10px 12px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
@@ -50,8 +50,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       <div><p id="sub">Class timetable and attendance, period by period</p><h1>Reports</h1></div>
       <div class="topbar-right"><div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div></div>
     </div>
-    <div class="demo-note" id="demoNote" hidden>Demo mode: the attendance numbers below are sample values, not from the server. The timetable is the real CSE F timetable. Set DEMO to false in teacher-sample.js to use real data.</div>
-
+    
     <div id="listView">
       <div class="weekbar">
         <button class="btn" id="prev" type="button">&larr; Previous week</button>
@@ -97,7 +96,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     const a = d && d.user; if (a && a.coordinatorClass) { myClass = a.coordinatorClass; head(); }
   }).catch(() => {});
   function head() { $("sub").textContent = "Class " + myClass + " timetable and attendance, period by period"; }
-  head(); $("demoNote").hidden = !DEMO;
+  head();
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const monday0 = new Date(today); monday0.setDate(today.getDate() - ((today.getDay() + 6) % 7));
