@@ -101,9 +101,9 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 <script>
 (function () {
   /* ====== SETTINGS ======
-     true  = show clearly-labelled SAMPLE attendance (BLE is only enrolled for a few students right now).
-     false = use the real server endpoints only.                                                   */
-  const USE_DEMO_DATA = TS.DEMO;                           // switch lives in teacher-sample.js
+     true  = show clearly-labelled SAMPLE attendance.
+     false = use the real server endpoints only (LIVE DATA).                                       */
+  const USE_DEMO_DATA = false;
   const MY_CLASS = "CSE F";                                // used until the account reports its own coordinatorClass
 
   const API_BASE = "/api";
@@ -112,6 +112,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const num = (v) => (v == null ? "--" : v);
 
   function api(path, options) {
     options = options || {};
@@ -261,8 +262,14 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     const items = []; for (let i = 6; i >= 0; i--) { const x = new Date(todayD); x.setDate(x.getDate() - i); const w = x.getDay(), v = w === 0 || w === 6 ? 0 : sampleDay(iso(x)); items.push({ label: dayLabel(iso(x)), n: v ? v.present + v.late : 0 }); }
     renderTrend(items);
   } else {
-    api("/reports/summary").then(({ data }) => { S.total = data.totalStudents; S.present = data.presentToday; S.late = data.lateToday; S.absent = data.absentToday; renderStats(); }).catch(() => {});
-    api("/reports/weekly-trend").then(({ data }) => renderTrend(Array.isArray(data) ? data.map((x) => ({ label: dayLabel(x.date), n: x.presentCount })) : [])).catch(() => { $("trend").innerHTML = '<p class="empty err">Could not load the weekly trend.</p>'; });
+    api("/reports/summary").then(({ status: s, data }) => {
+      if (s !== 200 || !data) throw new Error("HTTP " + s);
+      S.total = num(data.totalStudents); S.present = num(data.presentToday); S.late = num(data.lateToday); S.absent = num(data.absentToday); renderStats();
+    }).catch((e) => { if (e.message !== "Unauthorized") toast("Could not load today's attendance summary (" + e.message + ").", false); });
+    api("/reports/weekly-trend").then(({ status: s, data }) => {
+      if (s !== 200 || !Array.isArray(data)) throw new Error("HTTP " + s);
+      renderTrend(data.map((x) => ({ label: dayLabel(x.date), n: x.presentCount })));
+    }).catch((e) => { if (e.message !== "Unauthorized") $("trend").innerHTML = '<p class="empty err">Could not load the weekly trend (' + esc(e.message) + ").</p>"; });
   }
   showNote();
 

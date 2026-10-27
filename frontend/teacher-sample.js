@@ -22,7 +22,7 @@
   const stOf = (v) => (v < 80 ? "present" : v < 88 ? "late" : "absent");
 
   window.TS = {
-    DEMO: true,                                            // <-- the one switch
+    DEMO: false,                                            // <-- the one switch
     N: N,
     students: STUDENTS,
     // one period of one class on one date (deterministic, so numbers don't change on refresh)
