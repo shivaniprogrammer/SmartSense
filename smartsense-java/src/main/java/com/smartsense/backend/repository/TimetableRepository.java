@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface TimetableRepository extends MongoRepository<Timetable, String> {
 
+    List<Timetable> findByTeacherId(String teacherId);
     List<Timetable> findBySubjectCodeIn(List<String> subjectCodes);
 
     List<Timetable> findByClassSection(String classSection);
