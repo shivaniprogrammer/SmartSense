@@ -1,426 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="teacher-sidebar.css">
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Reports | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+<link rel="stylesheet" href="teacher-sidebar.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: "Inter", sans-serif;
-  background: var(--background);
-  color: var(--text-dark);
-}
-
-.layout { display: flex; min-height: 100vh; }
-
-
-
-.main { flex: 1; padding: 32px 4%; }
-
-.main-heading { margin-bottom: 24px; }
-.main-heading h1 { font-size: 24px; margin-bottom: 4px; }
-.main-heading p { color: var(--text-muted); font-size: 13px; }
-
-/* Day tabs */
-.day-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-.day-tab {
-  border: 1px solid var(--border);
-  background: var(--white);
-  color: var(--text-dark);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 18px;
-  border-radius: 100px;
-  cursor: pointer;
-  transition: 0.15s ease;
-}
-.day-tab:hover { background: var(--primary-soft); }
-.day-tab.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: white;
-}
-
-.panel {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-}
-.panel-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-.panel-heading h3 { font-size: 16px; }
-.panel-heading .day-summary { font-size: 12px; color: var(--text-muted); }
-.panel-heading .day-summary strong { color: var(--text-dark); }
-
-.holiday-box {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--text-muted);
-}
-.holiday-box i {
-  font-size: 32px;
-  color: var(--primary);
-  margin-bottom: 12px;
-  display: block;
-}
-.holiday-box strong {
-  display: block;
-  font-size: 16px;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-
-.class-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.class-box {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  background: var(--primary-soft);
-}
-.class-box .period-tag {
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--primary-dark);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-.class-box .subject {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-.class-box .time {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-}
-
-.pct-bar-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.pct-bar { flex: 1; height: 6px; background: var(--border); border-radius: 100px; overflow: hidden; }
-.pct-bar-fill { height: 100%; background: var(--primary); border-radius: 100px; }
-.pct-bar-fill.low { background: var(--red); }
-.pct-bar-fill.mid { background: var(--amber); }
-.pct-bar-wrap span { font-size: 12px; font-weight: 700; }
-
-.count-row {
-  display: flex;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-.count-row .present-count { color: var(--green); font-weight: 700; }
-.count-row .absent-count { color: var(--red); font-weight: 700; }
-
-/* Notification Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 9998;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-.modal-overlay.show { display: flex; }
-.modal {
-  background: white;
-  border-radius: 18px;
-  padding: 32px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.modal-close {
-  position: absolute;
-  top: 12px;
-  right: 15px;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 50%;
-  background: #f1f3f4;
-  color: #555;
-  font-size: 18px;
-  cursor: pointer;
-}
-.modal-close:hover { background: #e5e7eb; }
-.modal h2 { font-size: 20px; margin-bottom: 16px; color: var(--text-dark); }
-.notification-item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-.notification-item:last-child { border-bottom: none; }
-.notification-item .icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.notification-item .content { flex: 1; }
-.notification-item .content strong { display: block; font-size: 13px; color: var(--text-dark); }
-.notification-item .content span { font-size: 12px; color: var(--text-muted); }
-.notification-item .time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
-
-@media (max-width: 900px) {
-  .sidebar { display: none; }
-}
+.btn{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:10px 16px;font:600 16px inherit;font-family:inherit;cursor:pointer;color:var(--text-dark);transition:.2s}
+.btn:hover{border-color:var(--primary)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.demo-note{background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:16px}
+.weekbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}.weekbar b{font-size:18px;min-width:230px;text-align:center}
+.weekbar input{padding:10px 12px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 17px inherit;font-family:inherit;padding:11px 22px;border-radius:99px;cursor:pointer;transition:.15s}
+.tab:hover{background:var(--primary-soft)}.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.sum{color:var(--text-muted);font-size:16px}.sum b{color:var(--text-dark)}
+.periods{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:16px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit}
+.period.lab{border-left-color:#3B82F6}.period:hover{box-shadow:0 8px 22px rgba(11,31,58,.1);transform:translateY(-1px)}.period.static{cursor:default}.period.static:hover{box-shadow:none;transform:none}
+.period .pt{font-size:13px;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.5px}
+.period .sj{font-size:20px;font-weight:700;line-height:1.3}.period .tm{font-size:16px;color:var(--text-muted)}.period .fc{font-size:15px;color:var(--text-muted)}
+.cnt{display:flex;gap:12px;flex-wrap:wrap;font-size:15px;font-weight:700}.cnt .p{color:var(--green)}.cnt .l{color:var(--amber)}.cnt .a{color:var(--red)}
+.meter{height:10px;border-radius:99px;background:var(--border);overflow:hidden}.meter span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.meter.mid span{background:var(--amber)}.meter.low span{background:var(--red)}
+.hol{text-align:center;padding:50px 16px;color:var(--text-muted)}.hol i{font-size:36px;color:var(--primary);display:block;margin-bottom:12px}.hol strong{display:block;font-size:20px;color:var(--text-dark);margin-bottom:4px}
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--primary);font:700 17px inherit;font-family:inherit;background:none;border:0;cursor:pointer;margin-bottom:14px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tools input{flex:1;min-width:200px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.chip{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 15px inherit;font-family:inherit;padding:8px 16px;border-radius:99px;cursor:pointer}.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}
+th{text-align:left;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:12px 10px;border-bottom:1px solid var(--border)}
+td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{border-bottom:0}
+.who{display:flex;align-items:center;gap:12px}.av{width:40px;height:40px;border-radius:50%;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.pill{display:inline-flex;align-items:center;padding:4px 14px;border-radius:99px;font-size:15px;font-weight:700}
+.pill.present{background:var(--green-bg);color:var(--green)}.pill.late{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}
+.empty{color:var(--text-muted);padding:18px 4px;font-size:16px}
+@media(max-width:1000px){.sidebar>div:last-child{flex:1}.sidebar>div:last-child .nav-item{flex-direction:column;text-align:center;justify-content:center;gap:2px;padding:8px 2px;font-size:12px}}
 </style>
 </head>
-
 <body>
-
 <div class="layout">
-<div id="sidebar-root"></div>
-
-
-  <main class="main">
-
-    <div class="main-heading">
-      <h1>Reports</h1>
-      <p>Class CSE-F timetable and attendance, day by day</p>
+  <div id="sidebar-root"></div>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p id="sub">Class timetable and attendance, period by period</p><h1>Reports</h1></div>
+      <div class="topbar-right"><div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div></div>
     </div>
+    <div class="demo-note" id="demoNote" hidden>Demo mode: the attendance numbers below are sample values, not from the server. The timetable is the real CSE F timetable. Set DEMO to false in teacher-sample.js to use real data.</div>
 
-    <div class="day-tabs" id="dayTabs"></div>
-
-    <div class="panel">
-      <div class="panel-heading">
-        <h3 id="panelDayTitle">Monday</h3>
-        <div class="day-summary" id="panelDaySummary"></div>
+    <div id="listView">
+      <div class="weekbar">
+        <button class="btn" id="prev" type="button">&larr; Previous week</button>
+        <b id="weekLabel"></b>
+        <button class="btn" id="next" type="button">Next week &rarr;</button>
+        <input type="date" id="pick" aria-label="Jump to a date">
       </div>
-
-      <div id="panelBody"></div>
+      <div class="tabs" id="tabs"></div>
+      <div class="panel">
+        <div class="panel-heading"><h4 id="dayTitle"></h4><div class="sum" id="daySum"></div></div>
+        <div id="body"></div>
+      </div>
     </div>
 
+    <div id="sessionView" style="display:none">
+      <button class="back" id="backBtn" type="button"><i class="fa-solid fa-arrow-left"></i> Back to timetable</button>
+      <div class="panel">
+        <div class="panel-heading"><h4 id="sessionTitle"></h4></div>
+        <div class="stats-grid" id="sessStats"></div>
+        <div class="tools"><input type="search" id="q" placeholder="Search student name" aria-label="Search student"><span id="chips"></span></div>
+        <div class="scroll"><table><thead><tr><th>Student</th><th>Check-in</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table></div>
+      </div>
+    </div>
   </main>
-
 </div>
-
-
-
-    <div class="notification-item">
-      <div class="icon-circle"><i class="fa-solid fa-file-pen"></i></div>
-      <div class="content">
-        <strong>Report generated</strong>
-        <span>Monthly attendance report is ready</span>
-      </div>
-      <span class="time">1 day ago</span>
-    </div>
-  </div>
-</div>
-
-<script>
-/*
-  ================================================================
-  MOCK DATA — replace with a real fetch() call once the backend
-  exposes the class timetable + per-period present/absent counts
-  for a given day, e.g.:
-
-    async function loadDay(day) {
-      const token = localStorage.getItem("token");
-      const res = await fetch("/api/reports/class/CSE-F/" + day, {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const data = await res.json(); // { periods: [...], classSize }
-      renderDay(day, data.periods, data.classSize);
-    }
-
-  Each period item should keep this shape so renderDay() doesn't
-  need to change: { period, time, subject, present, absent }
-  ================================================================
-*/
-
-const CLASS_SIZE = 68;
-
-// Real class timetable: II Year - III Semester, CSE F Section
-// (w.e.f. 06.07.2026). present/absent counts are still placeholders
-// until the backend supplies real per-period attendance.
-const timetableByDay = {
-  Monday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Computer Networks", present: 63, absent: 5 },
-    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", present: 60, absent: 8 },
-    { period: "3-5", time: "10:10 - 12:40", subject: "Advanced Data Structures and Algorithms", present: 61, absent: 7 },
-    { period: 6, time: "1:30 - 2:15", subject: "Discrete Mathematics", present: 64, absent: 4 },
-    { period: "7-8", time: "2:15 - 3:45", subject: "OOP using Java - Lab", present: 65, absent: 3 },
-  ],
-  Tuesday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Aptitude Test", present: 62, absent: 6 },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", present: 60, absent: 8 },
-    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", present: 59, absent: 9 },
-    { period: 4, time: "11:00 - 11:50", subject: "Discrete Mathematics", present: 57, absent: 11 },
-    { period: 5, time: "11:50 - 12:40", subject: "Counselling", present: 63, absent: 5 },
-    { period: 6, time: "1:30 - 2:15", subject: "OOP using Java", present: 61, absent: 7 },
-    { period: "7-8", time: "2:15 - 3:45", subject: "Embedded System Design - Lab", present: 64, absent: 4 },
-  ],
-  Wednesday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Fundamentals of AI and ML", present: 60, absent: 8 },
-    { period: 2, time: "9:05 - 9:55", subject: "Embedded System Design", present: 58, absent: 10 },
-    { period: 3, time: "10:10 - 11:00", subject: "Discrete Mathematics", present: 62, absent: 6 },
-    { period: "4-5", time: "11:00 - 12:40", subject: "OOP using Java - Lab", present: 65, absent: 3 },
-    { period: 6, time: "1:30 - 2:15", subject: "Advanced Data Structures and Algorithms", present: 59, absent: 9 },
-    { period: "7-8", time: "2:15 - 3:45", subject: "ADSA Lab", present: 61, absent: 7 },
-  ],
-  Thursday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Technical Test", present: 60, absent: 8 },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", present: 63, absent: 5 },
-    { period: 3, time: "10:10 - 11:00", subject: "Fundamentals of AI and ML", present: 61, absent: 7 },
-    { period: "4-5", time: "11:00 - 12:40", subject: "Career Skill Development III", present: 58, absent: 10 },
-    { period: 6, time: "1:30 - 2:15", subject: "Embedded System Design", present: 62, absent: 6 },
-    { period: 7, time: "2:15 - 3:00", subject: "Discrete Mathematics (Tutorial)", present: 64, absent: 4 },
-    { period: 8, time: "3:00 - 3:45", subject: "Leet Code", present: 59, absent: 9 },
-  ],
-  Friday: [
-    { period: 1, time: "8:15 - 9:05", subject: "Embedded System Design", present: 57, absent: 11 },
-    { period: 2, time: "9:05 - 9:55", subject: "Computer Networks", present: 62, absent: 6 },
-    { period: 3, time: "10:10 - 11:00", subject: "OOP using Java", present: 60, absent: 8 },
-    { period: 4, time: "11:00 - 11:50", subject: "Fundamentals of AI and ML", present: 64, absent: 4 },
-    { period: 5, time: "11:50 - 12:40", subject: "Discrete Mathematics", present: 58, absent: 10 },
-    { period: 6, time: "1:30 - 2:15", subject: "NPTEL", present: 61, absent: 7 },
-    { period: "7-8", time: "2:15 - 3:45", subject: "Fundamentals of AI and ML - Lab", present: 63, absent: 5 },
-  ],
-  // No Saturday classes on this timetable - shows as a holiday below
-};
-
-const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const weekendDays = ["Saturday", "Sunday"];
-
-function todayName() {
-  const names = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  return names[new Date().getDay()];
-}
-
-function renderTabs(selectedDay) {
-  const dayTabs = document.getElementById("dayTabs");
-  dayTabs.innerHTML = "";
-
-  dayOrder.forEach(function (day) {
-    const btn = document.createElement("button");
-    btn.className = "day-tab" + (day === selectedDay ? " active" : "");
-    btn.textContent = day;
-    btn.addEventListener("click", function () {
-      renderDay(day);
-    });
-    dayTabs.appendChild(btn);
-  });
-}
-
-function renderDay(day) {
-  renderTabs(day);
-
-  document.getElementById("panelDayTitle").textContent = day;
-
-  const panelBody = document.getElementById("panelBody");
-  const panelDaySummary = document.getElementById("panelDaySummary");
-
-  if (weekendDays.includes(day) && !timetableByDay[day]) {
-    panelDaySummary.textContent = "";
-    panelBody.innerHTML =
-      '<div class="holiday-box">' +
-        '<i class="fa-solid fa-mug-hot"></i>' +
-        '<strong>Holiday</strong>' +
-        '<span>No classes scheduled on ' + day + '</span>' +
-      '</div>';
-    return;
-  }
-
-  const periods = timetableByDay[day] || [];
-
-  const avgPct = periods.length
-    ? Math.round(
-        periods.reduce(function (sum, p) { return sum + (p.present / CLASS_SIZE) * 100; }, 0) / periods.length
-      )
-    : 0;
-
-  panelDaySummary.innerHTML = '<strong>' + avgPct + '%</strong> average attendance';
-
-  const grid = document.createElement("div");
-  grid.className = "class-grid";
-
-  periods.forEach(function (p) {
-    const pct = Math.round((p.present / CLASS_SIZE) * 100);
-    const barClass = pct < 60 ? "low" : pct < 75 ? "mid" : "";
-
-    const box = document.createElement("div");
-    box.className = "class-box";
-    box.innerHTML =
-      '<div class="period-tag">Period ' + p.period + '</div>' +
-      '<div class="subject">' + p.subject + '</div>' +
-      '<div class="time">' + p.time + '</div>' +
-      '<div class="pct-bar-wrap">' +
-        '<div class="pct-bar"><div class="pct-bar-fill ' + barClass + '" style="width:' + pct + '%;"></div></div>' +
-        '<span>' + pct + '%</span>' +
-      '</div>' +
-      '<div class="count-row">' +
-        '<span class="present-count">' + p.present + ' present</span>' +
-        '<span class="absent-count">' + p.absent + ' absent</span>' +
-      '</div>';
-    grid.appendChild(box);
-  });
-
-  panelBody.innerHTML = "";
-  panelBody.appendChild(grid);
-}
-
-const initialDay = dayOrder.includes(todayName()) ? todayName() : "Monday";
-renderDay(initialDay);
-</script>
 
 <script src="teacher-sidebar.js"></script>
-<script src="theme.js"></script>
+<script src="timetable-data.js"></script>
+<script src="teacher-sample.js"></script>
+<script>
+(function () {
+  const DEMO = TS.DEMO, token = localStorage.getItem("token");
+  if (!token) { window.location.href = "login-teacher.html"; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const short = (d) => d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  const NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+  let myClass = "CSE F";
+  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
+  fetch("/api/auth/me", { headers: { "Authorization": "Bearer " + token } }).then((r) => r.json()).then((d) => {
+    const a = d && d.user; if (a && a.coordinatorClass) { myClass = a.coordinatorClass; head(); }
+  }).catch(() => {});
+  function head() { $("sub").textContent = "Class " + myClass + " timetable and attendance, period by period"; }
+  head(); $("demoNote").hidden = !DEMO;
+
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const monday0 = new Date(today); monday0.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  let weekOffset = 0, sel = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : 4;
+  const dateOf = (i) => { const d = new Date(monday0); d.setDate(d.getDate() + weekOffset * 7 + i); return d; };
+
+  function render() {
+    const mon = dateOf(0), sat = dateOf(5), date = dateOf(sel), day = iso(date), future = date > today;
+    $("weekLabel").textContent = short(mon) + " – " + short(sat) + " " + sat.getFullYear();
+    $("next").disabled = weekOffset >= 0; $("pick").max = iso(today); $("pick").value = day;
+    $("tabs").innerHTML = NAMES.map((n, i) => '<button class="tab' + (i === sel ? " on" : "") + '" data-i="' + i + '" type="button">' + n + "</button>").join("");
+    document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { sel = +b.dataset.i; render(); }));
+    $("dayTitle").textContent = NAMES[sel] + ", " + date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+    if (sel === 5) { $("daySum").textContent = ""; $("body").innerHTML = '<div class="hol"><i class="fa-solid fa-mug-hot"></i><strong>Holiday</strong>No classes on Saturday</div>'; return; }
+
+    const slots = SS.TT[sel]; let sum = 0, n = 0;
+    const cards = slots.map((s, i) => {
+      const x = SS.info(s[0]), title = '<span class="pt">Period ' + (s[1] === s[2] ? s[1] : s[1] + "–" + s[2]) + '</span><span class="sj">' + esc(x.name) + '</span><span class="tm">' + SS.timeLabel(s[1], s[2]) + '</span><span class="fc">' + esc(x.lab ? "Lab session" : x.faculty) + "</span>";
+      if (!DEMO || future) return '<div class="period static' + (x.lab ? " lab" : "") + '">' + title + '<span class="fc">' + (future ? "Upcoming" : "No per-period attendance saved yet") + "</span></div>";
+      const rec = TS.records(myClass, s[0], day, SS.startMin(s[1])), c = { present: 0, late: 0, absent: 0 };
+      rec.forEach((r) => c[r.status]++);
+      const pct = Math.round(((c.present + c.late) / rec.length) * 1000) / 10; sum += pct; n++;
+      return '<button class="period' + (x.lab ? " lab" : "") + '" data-i="' + i + '" type="button">' + title + '<span class="cnt"><span class="p">' + c.present + ' present</span><span class="l">' + c.late + ' late</span><span class="a">' + c.absent + ' absent</span></span><span class="meter ' + (pct < 60 ? "low" : pct < 75 ? "mid" : "") + '"><span style="width:' + pct + '%"></span></span><span class="fc"><b>' + pct + "%</b> attended</span></button>";
+    }).join("");
+    $("daySum").innerHTML = n ? "<b>" + Math.round(sum / n) + "%</b> average attendance" : "";
+    $("body").innerHTML = '<div class="periods">' + cards + "</div>";
+    document.querySelectorAll(".period[data-i]").forEach((b) => b.addEventListener("click", () => {
+      const s = slots[+b.dataset.i], x = SS.info(s[0]);
+      openSession(x.name + " — " + myClass + " — " + short(date), TS.records(myClass, s[0], day, SS.startMin(s[1])));
+    }));
+  }
+  $("prev").addEventListener("click", () => { weekOffset--; render(); });
+  $("next").addEventListener("click", () => { if (weekOffset < 0) { weekOffset++; render(); } });
+  $("pick").addEventListener("change", () => {
+    if (!$("pick").value) return; const d = new Date($("pick").value + "T00:00:00"), w = d.getDay();
+    weekOffset = Math.min(0, Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((w + 6) % 7)) - monday0) / 604800000)); sel = w === 0 ? 5 : w - 1; render();
+  });
+
+  /* ---------- student list for one period ---------- */
+  let RECORDS = [], status = "all", title = "";
+  function renderSession() {
+    const c = { present: 0, late: 0, absent: 0 }; RECORDS.forEach((r) => c[r.status]++);
+    const t = RECORDS.length, pct = t ? Math.round(((c.present + c.late) / t) * 1000) / 10 : 0;
+    $("sessionTitle").textContent = title + " · " + pct + "% attended";
+    $("sessStats").innerHTML = [["Students", t, "fa-users", ""], ["Present", c.present, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
+      .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
+    $("chips").innerHTML = ["all", "present", "late", "absent"].map((k) => '<button class="chip' + (k === status ? " on" : "") + '" data-s="' + k + '" type="button">' + k.charAt(0).toUpperCase() + k.slice(1) + "</button>").join(" ");
+    document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { status = b.dataset.s; renderSession(); }));
+    const q = $("q").value.trim().toLowerCase(), list = RECORDS.filter((r) => (status === "all" || r.status === status) && (!q || r.student.name.toLowerCase().includes(q)));
+    $("rows").innerHTML = list.length ? list.map((r) => {
+      const tm = r.checkInTime ? r.checkInTime.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—";
+      return '<tr><td><div class="who"><div class="av">' + esc(r.student.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()) + '</div><div>' + esc(r.student.name) + '<div class="fc">' + esc(r.student.studentId || "") + "</div></div></div></td><td>" + tm + '</td><td><span class="pill ' + r.status + '">' + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></td></tr>";
+    }).join("") : '<tr><td colspan="3" class="empty">No students match.</td></tr>';
+  }
+  function openSession(t, recs) { title = t; RECORDS = recs; status = "all"; $("q").value = ""; $("listView").style.display = "none"; $("sessionView").style.display = "block"; window.scrollTo(0, 0); renderSession(); }
+  $("backBtn").addEventListener("click", () => { $("sessionView").style.display = "none"; $("listView").style.display = "block"; });
+  $("q").addEventListener("input", renderSession);
+
+  render();
+})();
+</script>
+<script src="theme.js"></script>
 </body>
 </html>

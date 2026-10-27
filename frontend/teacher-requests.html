@@ -2,238 +2,134 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leave & OD Requests | SmartSense</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Leave &amp; OD Requests | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="teacher-sidebar.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
-
-.layout { display: flex; min-height: 100vh; }
-
-.main { flex: 1; padding: 32px 4%; max-width: 1300px; }
-
-.main-heading { margin-bottom: 24px; }
-.main-heading h1 { font-size: 24px; margin-bottom: 4px; }
-.main-heading p { color: var(--text-muted); font-size: 13px; }
-
-.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.tab-btn {
-  padding: 9px 16px; border-radius: 100px; border: 1px solid var(--border); background: var(--white);
-  font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer;
-}
-.tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; }
-
-.request-card {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  padding: 18px 0; border-bottom: 1px solid var(--border); gap: 16px;
-}
-.request-card:last-child { border-bottom: none; }
-
-.request-info { flex: 1; }
-.request-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.request-name { font-size: 14px; font-weight: 700; }
-.request-type-tag {
-  font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 9px;
-  border-radius: 100px; background: var(--primary-light); color: var(--primary-dark);
-}
-.request-dates { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-.request-reason { font-size: 13px; color: var(--text-dark); }
-
-.request-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.btn-approve, .btn-reject {
-  padding: 8px 16px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer;
-}
-.btn-approve { background: var(--green-bg); color: var(--green); }
-.btn-approve:hover { background: var(--green); color: white; }
-.btn-reject { background: var(--red-bg); color: var(--red); }
-.btn-reject:hover { background: var(--red); color: white; }
-.btn-approve:disabled, .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
-  border-radius: 100px; font-size: 11px; font-weight: 700; text-transform: capitalize;
-}
-.status-badge.approved { background: var(--green-bg); color: var(--green); }
-.status-badge.rejected { background: var(--red-bg); color: var(--red); }
-
-.empty-state { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 13px; }
-.loading-state { text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 13px; }
+.toast{display:none;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;margin-bottom:16px}
+.toast.show{display:block}.toast.ok{background:var(--green-bg);color:var(--green)}.toast.bad{background:var(--red-bg);color:var(--red)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.tools input{flex:1;min-width:220px;max-width:380px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.chip{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 16px inherit;font-family:inherit;padding:9px 18px;border-radius:99px;cursor:pointer;transition:.15s}
+.chip:hover{background:var(--primary-soft)}.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.req{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;padding:20px 0;border-top:1px solid var(--border);flex-wrap:wrap}.req:first-child{border-top:0}
+.req .main{display:flex;gap:14px;flex:1;min-width:260px}
+.av{width:46px;height:46px;border-radius:50%;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:700;font-size:16px;flex:none}
+.req .nm{font-size:19px;font-weight:700;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.req .id{font-size:15px;color:var(--text-muted);font-weight:500}
+.tag{font-size:13px;font-weight:700;text-transform:uppercase;padding:3px 12px;border-radius:99px;background:var(--primary-light);color:var(--primary-dark)}
+.req .dt{font-size:16px;color:var(--text-muted);margin:3px 0 6px}.req .rs{font-size:17px}.req .nt{font-size:15px;color:var(--text-muted);margin-top:6px;font-style:italic}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.ok-btn,.no-btn,.cancel{border:0;border-radius:12px;padding:11px 20px;font:700 16px inherit;font-family:inherit;cursor:pointer;transition:.15s}
+.ok-btn{background:var(--green-bg);color:var(--green)}.ok-btn:hover:not(:disabled){background:var(--green);color:#fff}
+.no-btn{background:var(--red-bg);color:var(--red)}.no-btn:hover:not(:disabled){background:var(--red);color:#fff}
+.cancel{background:var(--white);border:1px solid var(--border);color:var(--text-dark)}
+button:disabled{opacity:.55;cursor:not-allowed}
+.badge{margin:0;font-size:15px;padding:5px 16px}
+.confirm{flex-basis:100%;background:var(--primary-soft);border:1px solid var(--border);border-radius:14px;padding:16px}
+.confirm textarea{width:100%;min-height:70px;margin:8px 0;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark);resize:vertical}
+.confirm .warn{font-size:15px;color:var(--amber);font-weight:600}.confirm label{font-weight:700;font-size:16px}
+.empty{text-align:center;color:var(--text-muted);padding:40px 0;font-size:17px}.empty.err{color:var(--red);font-weight:600}
+@media(max-width:1000px){.sidebar>div:last-child{flex:1}.sidebar>div:last-child .nav-item{flex-direction:column;text-align:center;justify-content:center;gap:2px;padding:8px 2px;font-size:12px}}
 </style>
 </head>
 <body>
-
 <div class="layout">
-
   <div id="sidebar-root"></div>
-
-  <main class="main">
-
-    <div class="main-heading">
-      <h1>Leave & OD Requests</h1>
-      <p>Review and respond to student requests</p>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p>Review and respond to student requests</p><h1>Leave &amp; OD Requests</h1></div>
+      <div class="topbar-right"><div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div></div>
     </div>
-
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="pending">Pending</button>
-      <button class="tab-btn" data-tab="all">All Requests</button>
-    </div>
-
+    <div class="toast" id="toast" role="status"></div>
+    <div class="stats-grid" id="stats"></div>
     <div class="panel">
-      <div id="requestsList">
-        <div class="loading-state">Loading requests...</div>
-      </div>
+      <div class="tools"><span id="chips"></span><input type="search" id="q" placeholder="Search by student name or ID" aria-label="Search requests"></div>
+      <div id="list"><p class="empty">Loading requests...</p></div>
     </div>
-
   </main>
-
 </div>
 
 <script src="teacher-sidebar.js"></script>
-<script src="theme.js"></script>
 <script>
-   const API_BASE = "/api";
-const token = localStorage.getItem("token");
+(function () {
+  const API_BASE = "/api", token = localStorage.getItem("token");
+  if (!token) { window.location.href = "login-teacher.html"; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const showDate = (v) => { const d = new Date(v); return isNaN(d) ? esc(v) : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); };
+  const nDays = (r) => { const n = Math.round((new Date(r.toDate) - new Date(r.fromDate)) / 86400000) + 1; return isNaN(n) || n < 1 ? "" : n + (n === 1 ? " day" : " days"); };
+  const STATUS = ["pending", "approved", "rejected"];
 
-if (!token) {
-  window.location.href = "login-teacher.html";
-}
+  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
 
-const requestsList = document.getElementById("requestsList");
-const tabButtons = document.querySelectorAll(".tab-btn");
-let currentTab = "pending";
+  function api(path, options) {
+    options = options || {};
+    return fetch(API_BASE + path, { ...options, headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, ...(options.headers || {}) } })
+      .then((res) => {
+        if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-teacher.html"; return Promise.reject(new Error("Unauthorized")); }
+        return res.json().then((data) => ({ status: res.status, data }));
+      });
+  }
+  function toast(msg, ok) { const t = $("toast"); t.textContent = msg; t.className = "toast show " + (ok ? "ok" : "bad"); clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = "toast"; }, 6000); }
 
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-}
+  let ALL = [], tab = "pending", open = null, busy = false;       // open = { id, action }
 
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
+  function render() {
+    const c = { all: ALL.length }; STATUS.forEach((s) => { c[s] = ALL.filter((r) => r.status === s).length; });
+    $("stats").innerHTML = [["Pending", c.pending, "fa-hourglass-half", "pending"], ["Approved", c.approved, "fa-circle-check", "present"], ["Rejected", c.rejected, "fa-circle-xmark", "absent"], ["All requests", c.all, "fa-file-lines", ""]]
+      .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
+    $("chips").innerHTML = ["pending", "approved", "rejected", "all"].map((k) => '<button class="chip' + (k === tab ? " on" : "") + '" data-t="' + k + '" type="button">' + k.charAt(0).toUpperCase() + k.slice(1) + " (" + c[k] + ")</button>").join(" ");
+    document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { tab = b.dataset.t; open = null; render(); }));
 
-function renderRequests(requests) {
-  if (!requests.length) {
-    requestsList.innerHTML = '<div class="empty-state">No ' + (currentTab === "pending" ? "pending" : "") + ' requests to show.</div>';
-    return;
+    const q = $("q").value.trim().toLowerCase();
+    let list = ALL.filter((r) => (tab === "all" || r.status === tab) && (!q || ((r.student && (r.student.name + " " + r.student.studentId)) || "").toLowerCase().includes(q)));
+    list = list.slice().sort((a, b) => (tab === "pending" ? 1 : -1) * (new Date(a.createdAt) - new Date(b.createdAt)));   // oldest pending first
+    if (!list.length) { $("list").innerHTML = '<p class="empty">' + (ALL.length ? "No " + (tab === "all" ? "" : tab + " ") + "requests match." : "No requests yet.") + "</p>"; return; }
+
+    $("list").innerHTML = list.map((r) => {
+      const s = r.student || {}, name = s.name || "Unknown student", ini = name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase(), st = STATUS.includes(r.status) ? r.status : "pending";
+      const acts = st === "pending" ? '<div class="acts"><button class="ok-btn" data-a="approve" data-id="' + r._id + '" type="button">Approve</button><button class="no-btn" data-a="reject" data-id="' + r._id + '" type="button">Reject</button></div>'
+        : '<span class="badge ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span>";
+      const form = open && open.id === r._id ? '<div class="confirm"><label for="note">Note to the student (optional)</label><textarea id="note" maxlength="300" placeholder="e.g. Approved, please submit the OD certificate"></textarea>' +
+        (open.action === "approve" ? '<div class="warn">Approving marks attendance as present for every date in this range.</div>' : "") +
+        '<div class="acts" style="margin-top:10px"><button class="' + (open.action === "approve" ? "ok-btn" : "no-btn") + '" id="go" type="button">Confirm ' + open.action + '</button><button class="cancel" id="stop" type="button">Cancel</button></div></div>' : "";
+      return '<div class="req"><div class="main"><div class="av">' + esc(ini) + '</div><div><div class="nm">' + esc(name) + '<span class="id">' + esc(s.studentId || "") + '</span><span class="tag">' + (r.type === "od" ? "OD" : "Leave") + '</span></div><div class="dt">' + showDate(r.fromDate) + " — " + showDate(r.toDate) + (nDays(r) ? " · " + nDays(r) : "") + '</div><div class="rs">' + esc(r.reason) + "</div>" + (r.reviewNote ? '<div class="nt">Note: ' + esc(r.reviewNote) + "</div>" : "") + "</div></div>" + (open && open.id === r._id ? "" : acts) + form + "</div>";
+    }).join("");
+    if (open) { const n = $("note"); if (n) n.focus(); }
   }
 
-  requestsList.innerHTML = requests.map(function (r) {
-    const studentName = r.student ? r.student.name : "Unknown student";
-
-    const actionsHtml = r.status === "pending"
-      ? '<div class="request-actions">' +
-          '<button class="btn-approve" data-action="approve" data-id="' + r._id + '">Approve</button>' +
-          '<button class="btn-reject" data-action="reject" data-id="' + r._id + '">Reject</button>' +
-        '</div>'
-      : '<span class="status-badge ' + r.status + '">' + escapeHtml(r.status) + '</span>';
-
-    return (
-      '<div class="request-card">' +
-        '<div class="request-info">' +
-          '<div class="request-top">' +
-            '<span class="request-name">' + escapeHtml(studentName) + '</span>' +
-            '<span class="request-type-tag">' + escapeHtml(r.type) + '</span>' +
-          '</div>' +
-          '<div class="request-dates">' + formatDate(r.fromDate) + ' &mdash; ' + formatDate(r.toDate) + '</div>' +
-          '<div class="request-reason">' + escapeHtml(r.reason) + '</div>' +
-        '</div>' +
-        actionsHtml +
-      '</div>'
-    );
-  }).join("");
-}
-
-function loadRequests() {
-  requestsList.innerHTML = '<div class="loading-state">Loading requests...</div>';
-
-  const endpoint = currentTab === "pending" ? "/requests/pending" : "/requests";
-
-  fetch(API_BASE + endpoint, {
-    headers: { "Authorization": "Bearer " + token }
-  })
-    .then(function (res) {
-      if (res.status === 401) {
-        window.location.href = "login-teacher.html";
-        return;
-      }
-      return res.json();
-    })
-    .then(function (requests) {
-      if (requests) renderRequests(requests);
-    })
-    .catch(function () {
-      requestsList.innerHTML = '<div class="empty-state">Could not load requests. Is the server running?</div>';
-    });
-}
-
-tabButtons.forEach(function (btn) {
-  btn.addEventListener("click", function () {
-    tabButtons.forEach(function (b) { b.classList.remove("active"); });
-    btn.classList.add("active");
-    currentTab = btn.getAttribute("data-tab");
-    loadRequests();
+  $("list").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b || busy) return;
+    if (b.dataset.a) { open = { id: b.dataset.id, action: b.dataset.a }; render(); return; }
+    if (b.id === "stop") { open = null; render(); return; }
+    if (b.id === "go" && open) {
+      busy = true; b.disabled = true; b.textContent = "Saving...";
+      const { id, action } = open, note = ($("note").value || "").trim();
+      api("/requests/" + id + "/" + action, { method: "PATCH", body: JSON.stringify({ reviewNote: note }) })
+        .then(({ status, data }) => {
+          if (status !== 200) { toast((data && data.error) || "Could not save. Please try again.", false); return; }
+          toast((data && data.message) || "Saved.", true); open = null; return load();
+        })
+        .catch((err) => { if (err.message !== "Unauthorized") toast("Could not reach the server. Please try again.", false); })
+        .finally(() => { busy = false; render(); });
+    }
   });
-});
+  $("q").addEventListener("input", render);
 
-requestsList.addEventListener("click", function (e) {
-  const btn = e.target.closest("button[data-action]");
-  if (!btn) return;
-
-  const id = btn.getAttribute("data-id");
-  const action = btn.getAttribute("data-action");
-
-  btn.disabled = true;
-  const siblingBtns = btn.parentElement.querySelectorAll("button");
-  siblingBtns.forEach(function (b) { b.disabled = true; });
-
-  fetch(API_BASE + "/requests/" + id + "/" + action, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + token
-    },
-    body: JSON.stringify({})
-  })
-    .then(function (res) { return res.json(); })
-    .then(function () {
-      loadRequests();
-    })
-    .catch(function () {
-      alert("Could not reach the server. Please try again.");
-      siblingBtns.forEach(function (b) { b.disabled = false; });
-    });
-});
-
-loadRequests();
+  function load() {
+    return api("/requests").then(({ status, data }) => {
+      if (status !== 200 || !Array.isArray(data)) throw new Error((data && data.error) || "Could not load requests.");
+      ALL = data; render();
+    }).catch((err) => { if (err.message !== "Unauthorized") $("list").innerHTML = '<p class="empty err">' + esc(err.message || "Could not load requests. Is the server running?") + "</p>"; });
+  }
+  load();
+})();
 </script>
-
+<script src="theme.js"></script>
 </body>
 </html>

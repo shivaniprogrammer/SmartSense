@@ -1,727 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="stylesheet" href="teacher-sidebar.css">
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Students | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+<link rel="stylesheet" href="teacher-sidebar.css">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  font-family: "Inter", sans-serif;
-  background: var(--background);
-  color: var(--text-dark);
-}
-
-.layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-
-/* Notification Modal */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 9998;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-overlay.show {
-  display: flex;
-}
-
-.modal {
-  background: white;
-  border-radius: 18px;
-  padding: 32px;
-  max-width: 500px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-
-.modal-close {
-  position: absolute;
-  top: 12px;
-  right: 15px;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 50%;
-  background: #f1f3f4;
-  color: #555;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.modal-close:hover {
-  background: #e5e7eb;
-}
-
-.modal h2 {
-  font-size: 20px;
-  margin-bottom: 16px;
-  color: var(--text-dark);
-}
-
-.notification-item {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.notification-item:last-child {
-  border-bottom: none;
-}
-
-.notification-item .icon-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.notification-item .content {
-  flex: 1;
-}
-
-.notification-item .content strong {
-  display: block;
-  font-size: 13px;
-  color: var(--text-dark);
-}
-
-.notification-item .content span {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.notification-item .time {
-  font-size: 11px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-
-.main {
-  flex: 1;
-  padding: 32px 4%;
-}
-
-.main-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.main-heading h1 {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.main-heading p {
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.toolbar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.search-box {
-  flex: 1;
-  max-width: 320px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 14px;
-}
-
-.search-box input {
-  border: none;
-  outline: none;
-  font-size: 13px;
-  flex: 1;
-  font-family: inherit;
-}
-
-.search-box i {
-  color: var(--text-muted);
-}
-
-.filter-select {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--text-muted);
-  background: var(--white);
-  cursor: pointer;
-}
-
-.panel {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th {
-  text-align: left;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--primary-soft);
-}
-
-td {
-  padding: 14px 16px;
-  font-size: 13px;
-  border-bottom: 1px solid var(--border);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr:hover td {
-  background: var(--primary-soft);
-}
-
-.student-cell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.student-cell .avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.student-cell .info strong {
-  display: block;
-  font-size: 13px;
-}
-
-.student-cell .info span {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
-.pct-bar-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pct-bar {
-  width: 70px;
-  height: 6px;
-  background: var(--border);
-  border-radius: 100px;
-  overflow: hidden;
-}
-
-.pct-bar-fill {
-  height: 100%;
-  background: var(--primary);
-  border-radius: 100px;
-}
-
-.pct-bar-fill.low {
-  background: var(--red);
-}
-
-.pct-bar-fill.mid {
-  background: var(--amber);
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 100px;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.status-badge.present {
-  background: var(--green-bg);
-  color: var(--green);
-}
-
-.status-badge.absent {
-  background: var(--red-bg);
-  color: var(--red);
-}
-
-.status-badge .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.action-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--white);
-  color: var(--text-muted);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-@media (max-width: 900px) {
-  .sidebar {
-    display: none;
-  }
-
-  table {
-    font-size: 11px;
-  }
-
-  th,
-  td {
-    padding: 10px 8px;
-  }
-}
-
+.demo-note{background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:16px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.tools input,.tools select{padding:13px 14px;border:1px solid var(--border);border-radius:12px;font:17px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.tools input{flex:1;min-width:240px;max-width:420px}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px;min-width:680px}
+th{text-align:left;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:14px 12px;border-bottom:1px solid var(--border);background:var(--primary-soft);white-space:nowrap}
+td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{border-bottom:0}tr:hover td{background:var(--primary-soft)}
+.who{display:flex;align-items:center;gap:12px}.av{width:42px;height:42px;border-radius:50%;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.who b{display:block;font-size:17px}.who span{font-size:14px;color:var(--text-muted)}
+.pc{display:flex;align-items:center;gap:10px}.meter{width:110px;height:10px;border-radius:99px;background:var(--border);overflow:hidden}.meter span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.meter.mid span{background:var(--amber)}.meter.low span{background:var(--red)}.pc b{min-width:48px}
+.pill{display:inline-flex;align-items:center;padding:4px 14px;border-radius:99px;font-size:15px;font-weight:700}
+.pill.present{background:var(--green-bg);color:var(--green)}.pill.late{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}.pill.none{background:var(--border);color:var(--text-medium)}
+.empty{color:var(--text-muted);padding:22px 12px;font-size:16px;text-align:center}.empty.err{color:var(--red);font-weight:600}
+@media(max-width:1000px){.sidebar>div:last-child{flex:1}.sidebar>div:last-child .nav-item{flex-direction:column;text-align:center;justify-content:center;gap:2px;padding:8px 2px;font-size:12px}}
 </style>
 </head>
-
 <body>
-
 <div class="layout">
+  <div id="sidebar-root"></div>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p id="sub">Class students</p><h1>Students</h1></div>
+      <div class="topbar-right"><div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div></div>
+    </div>
+    <div class="demo-note" id="demoNote" hidden>Demo mode: names and register numbers are the real class list, but the attendance days and today’s status are sample values. Set DEMO to false in teacher-sample.js to use real data.</div>
 
- <div id="sidebar-root"></div>
+    <div class="stats-grid" id="stats"></div>
 
-
-  <main class="main">
-
-    <div class="main-heading">
-      <div>
-        <h1>Students</h1>
-        <p>Class CSE-F- 68 enrolled students</p>
-      </div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search by name or register number" aria-label="Search students">
+      <select id="f" aria-label="Filter"><option value="all">All students</option><option value="low">Low attendance (&lt;75%)</option><option value="absent">Absent today</option></select>
     </div>
 
-    <div class="toolbar">
-
-      <div class="search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search by name or Student ID..."
-        >
-      </div>
-
-      <select class="filter-select" id="filterSelect">
-        <option value="all">All Students</option>
-        <option value="low">Low Attendance (&lt;75%)</option>
-      </select>
-
+    <div class="panel" style="padding:0;overflow:hidden">
+      <div class="scroll"><table>
+        <thead><tr><th>Student</th><th>Present days</th><th>Absent days</th><th>Attendance</th><th>Today</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="5" class="empty">Loading students...</td></tr></tbody>
+      </table></div>
     </div>
-
-
-    <div class="panel">
-
-      <table>
-
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Present Days</th>
-            <th>Absent Days</th>
-            <th>Attendance %</th>
-            <th>Today</th>
-          </tr>
-        </thead>
-
-        <tbody id="studentTableBody">
-          <!-- rows generated by script below from mockStudents -->
-        </tbody>
-
-      </table>
-
-    </div>
-
   </main>
-
 </div>
 
-
-<!-- =========================================================
-     NOTIFICATIONS MODAL
-     ========================================================= -->
-<div class="modal-overlay" id="notificationsModal">
-  <div class="modal">
-    <button class="modal-close" id="notificationsModalClose">×</button>
-    <h2>🔔 Notifications</h2>
-    
-    <div class="notification-item">
-      <div class="icon-circle">
-        <i class="fa-solid fa-user-plus"></i>
-      </div>
-      <div class="content">
-        <strong>New student enrolled</strong>
-        <span>Rahul K has joined CSE-F class</span>
-      </div>
-      <span class="time">2 min ago</span>
-    </div>
-
-    <div class="notification-item">
-      <div class="icon-circle">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-      </div>
-      <div class="content">
-        <strong>Low attendance alert</strong>
-        <span>5 students have attendance below 75%</span>
-      </div>
-      <span class="time">1 hour ago</span>
-    </div>
-
-    <div class="notification-item">
-      <div class="icon-circle">
-        <i class="fa-solid fa-calendar-check"></i>
-      </div>
-      <div class="content">
-        <strong>Attendance marked</strong>
-        <span>Today's attendance has been recorded</span>
-      </div>
-      <span class="time">3 hours ago</span>
-    </div>
-
-    <div class="notification-item">
-      <div class="icon-circle">
-        <i class="fa-solid fa-file-pen"></i>
-      </div>
-      <div class="content">
-        <strong>Report generated</strong>
-        <span>Monthly attendance report is ready</span>
-      </div>
-      <span class="time">1 day ago</span>
-    </div>
-  </div>
-</div>
-
-
-<script>
-/*
-  ================================================================
-  MOCK DATA — replace this array with a real fetch() call once
-  your backend has real attendance numbers to report on.
-
-  Swap point: replace loadStudents() body with something like:
-
-    async function loadStudents() {
-      const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/students", {
-        headers: { Authorization: "Bearer " + token }
-      });
-      const students = await res.json();
-      renderStudents(students);
-    }
-
-  ...then map each real student's fields into the same shape
-  used below (name, studentId, present, absent, todayStatus)
-  so renderStudents() doesn't need to change at all.
-  ================================================================
-*/
-
-const mockStudents = [
-  { name: "Santhosh M", studentId: "CSE325", present: 38, absent: 7, todayStatus: "present" },
-  { name: "Santhosh Narayan", studentId: "CSE326", present: 43, absent: 2, todayStatus: "present" },
-  { name: "Saranraj J", studentId: "CSE327", present: 36, absent: 9, todayStatus: "present" },
-  { name: "S Saravana Kumar", studentId: "CSE328", present: 41, absent: 4, todayStatus: "present" },
-  { name: "Saravanan S", studentId: "CSE329", present: 34, absent: 11, todayStatus: "absent" },
-  { name: "Sarika G", studentId: "CSE330", present: 39, absent: 6, todayStatus: "present" },
-  { name: "Sarvendra J", studentId: "CSE331", present: 44, absent: 1, todayStatus: "present" },
-  { name: "Sarveshaa B D", studentId: "CSE332", present: 37, absent: 8, todayStatus: "present" },
-  { name: "Sathish Manikandan", studentId: "CSE333", present: 42, absent: 3, todayStatus: "present" },
-  { name: "Sathiya Priya C", studentId: "CSE334", present: 35, absent: 10, todayStatus: "absent" },
-  { name: "Sathya Prasanna R", studentId: "CSE335", present: 40, absent: 5, todayStatus: "present" },
-  { name: "Satindra R", studentId: "CSE336", present: 45, absent: 0, todayStatus: "present" },
-  { name: "Saveetha J", studentId: "CSE337", present: 38, absent: 7, todayStatus: "present" },
-  { name: "Sevitha A", studentId: "CSE338", present: 43, absent: 2, todayStatus: "present" },
-  { name: "Shahana K", studentId: "CSE339", present: 36, absent: 9, todayStatus: "absent" },
-  { name: "Shakthyvel S", studentId: "CSE340", present: 41, absent: 4, todayStatus: "present" },
-  { name: "T Shalini", studentId: "CSE341", present: 34, absent: 11, todayStatus: "present" },
-  { name: "Shameer S", studentId: "CSE342", present: 39, absent: 6, todayStatus: "present" },
-  { name: "Shamithra S", studentId: "CSE343", present: 44, absent: 1, todayStatus: "present" },
-  { name: "Shanmuga Priya A", studentId: "CSE344", present: 37, absent: 8, todayStatus: "absent" },
-  { name: "Sharan M", studentId: "CSE345", present: 42, absent: 3, todayStatus: "present" },
-  { name: "Sharukhkhan B", studentId: "CSE346", present: 35, absent: 10, todayStatus: "present" },
-  { name: "Shaun Jeffery P", studentId: "CSE347", present: 40, absent: 5, todayStatus: "present" },
-  { name: "Sherline P", studentId: "CSE348", present: 45, absent: 0, todayStatus: "present" },
-  { name: "Shikha Kumari", studentId: "CSE349", present: 38, absent: 7, todayStatus: "absent" },
-  { name: "Shiva Prasaadh R", studentId: "CSE350", present: 43, absent: 2, todayStatus: "present" },
-  { name: "S Shivani", studentId: "CSE351", present: 36, absent: 9, todayStatus: "present" },
-  { name: "Shivani S", studentId: "CSE352", present: 41, absent: 4, todayStatus: "present" },
-  { name: "S Shivani Shree", studentId: "CSE353", present: 34, absent: 11, todayStatus: "present" },
-  { name: "Shree Sai Lakshmi", studentId: "CSE354", present: 40, absent: 5, todayStatus: "present" },
-  { name: "Shree Sudharsan R P", studentId: "CSE355", present: 39, absent: 6, todayStatus: "absent" },
-  { name: "J Shreehari", studentId: "CSE356", present: 44, absent: 1, todayStatus: "present" },
-  { name: "S Shreya", studentId: "CSE357", present: 37, absent: 8, todayStatus: "present" },
-  { name: "Shreya Sivanath", studentId: "CSE358", present: 42, absent: 3, todayStatus: "present" },
-  { name: "Shreyan Arunlal", studentId: "CSE359", present: 35, absent: 10, todayStatus: "present" },
-  { name: "Shri Bala Vignesh A", studentId: "CSE360", present: 40, absent: 5, todayStatus: "absent" },
-  { name: "K Shriarjun", studentId: "CSE361", present: 45, absent: 0, todayStatus: "present" },
-  { name: "Shriram S", studentId: "CSE362", present: 38, absent: 7, todayStatus: "present" },
-  { name: "Shrriyas A", studentId: "CSE363", present: 43, absent: 2, todayStatus: "present" },
-  { name: "S Shruthi", studentId: "CSE364", present: 36, absent: 9, todayStatus: "present" },
-  { name: "R Shruti", studentId: "CSE365", present: 41, absent: 4, todayStatus: "absent" },
-  { name: "Shruti Roy", studentId: "CSE366", present: 34, absent: 11, todayStatus: "present" },
-  { name: "A Shyamganesh", studentId: "CSE367", present: 39, absent: 6, todayStatus: "present" },
-  { name: "Sivadharsan R S", studentId: "CSE368", present: 44, absent: 1, todayStatus: "present" },
-  { name: "Snowin Karl Shelton", studentId: "CSE369", present: 37, absent: 8, todayStatus: "present" },
-  { name: "Sonali S", studentId: "CSE370", present: 42, absent: 3, todayStatus: "absent" },
-  { name: "Sree Vaibavi V", studentId: "CSE371", present: 35, absent: 10, todayStatus: "present" },
-  { name: "Sreeja Ramanathan", studentId: "CSE372", present: 40, absent: 5, todayStatus: "present" },
-  { name: "Sreekar Karthik VI", studentId: "CSE373", present: 45, absent: 0, todayStatus: "present" },
-  { name: "Sreeram R", studentId: "CSE374", present: 38, absent: 7, todayStatus: "present" },
-  { name: "Sri Abinandhan S", studentId: "CSE375", present: 43, absent: 2, todayStatus: "absent" },
-  { name: "Sri Sudhiksha J", studentId: "CSE376", present: 36, absent: 9, todayStatus: "present" },
-  { name: "Srikesh HS", studentId: "CSE377", present: 41, absent: 4, todayStatus: "present" },
-  { name: "M Srilaja", studentId: "CSE378", present: 34, absent: 11, todayStatus: "present" },
-  { name: "Srinidi R", studentId: "CSE379", present: 39, absent: 6, todayStatus: "present" },
-  { name: "Sri Raam S K", studentId: "CSE380", present: 44, absent: 1, todayStatus: "absent" },
-  { name: "B Sriraghav", studentId: "CSE381", present: 37, absent: 8, todayStatus: "present" },
-  { name: "Srivari R", studentId: "CSE382", present: 42, absent: 3, todayStatus: "present" },
-  { name: "Srivatsan R", studentId: "CSE383", present: 35, absent: 10, todayStatus: "present" },
-  { name: "V Sruthika", studentId: "CSE384", present: 40, absent: 5, todayStatus: "present" },
-  { name: "Suchith Kumar V S", studentId: "CSE385", present: 45, absent: 0, todayStatus: "absent" },
-  { name: "Sudarsanan K", studentId: "CSE386", present: 38, absent: 7, todayStatus: "present" },
-  { name: "H Sujita", studentId: "CSE387", present: 43, absent: 2, todayStatus: "present" },
-  { name: "Sunilkumar R", studentId: "CSE388", present: 36, absent: 9, todayStatus: "present" },
-  { name: "Nirmalkumar S", studentId: "CSE2026064", present: 41, absent: 4, todayStatus: "present" },
-  { name: "Santhosh Kumar S", studentId: "CSE2026065", present: 34, absent: 11, todayStatus: "absent" },
-  { name: "Nithesh K", studentId: "CSE2026066", present: 39, absent: 6, todayStatus: "present" },
-  { name: "Sirish Kumar S", studentId: "CSE2026067", present: 44, absent: 1, todayStatus: "present" },
-];
-
-
-function getInitials(name) {
-  return name
-    .split(" ")
-    .map(n => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-
-function renderStudents(students) {
-
-  const tbody = document.getElementById("studentTableBody");
-
-  tbody.innerHTML = "";
-
-  students.forEach(s => {
-
-    const total = s.present + s.absent;
-
-    const pct =
-      total > 0
-        ? Math.round((s.present / total) * 100)
-        : 0;
-
-    const barClass =
-      pct < 60
-        ? "low"
-        : pct < 75
-          ? "mid"
-          : "";
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-      <td>
-        <div class="student-cell">
-          <div class="avatar">
-            ${getInitials(s.name)}
-          </div>
-
-          <div class="info">
-            <strong>${s.name}</strong>
-            <span>${s.studentId}</span>
-          </div>
-        </div>
-      </td>
-
-      <td>${s.present}</td>
-
-      <td>${s.absent}</td>
-
-      <td>
-        <div class="pct-bar-wrap">
-          <div class="pct-bar">
-            <div
-              class="pct-bar-fill ${barClass}"
-              style="width: ${pct}%;"
-            ></div>
-          </div>
-
-          <span>${pct}%</span>
-        </div>
-      </td>
-
-      <td>
-        <span class="status-badge ${s.todayStatus}">
-          <span class="dot"></span>
-          ${s.todayStatus === "present" ? "Present" : "Absent"}
-        </span>
-      </td>
-    `;
-
-    tbody.appendChild(row);
-
-  });
-
-}
-
-
-function loadStudents() {
-
-  // MOCK MODE — replace with the fetch() version shown in the comment above
-
-  renderStudents(mockStudents);
-
-}
-
-
-// Simple client-side search + filter over the mock data
-
-document
-  .getElementById("searchInput")
-  .addEventListener("input", applyFilters);
-
-document
-  .getElementById("filterSelect")
-  .addEventListener("change", applyFilters);
-
-
-function applyFilters() {
-
-  const query =
-    document
-      .getElementById("searchInput")
-      .value
-      .toLowerCase();
-
-  const filter =
-    document
-      .getElementById("filterSelect")
-      .value;
-
-
-  let filtered = mockStudents.filter(s =>
-    s.name.toLowerCase().includes(query) ||
-    s.studentId.toLowerCase().includes(query)
-  );
-
-
-  if (filter === "low") {
-
-    filtered = filtered.filter(s => {
-
-      const total =
-        s.present + s.absent;
-
-      const pct =
-        total > 0
-          ? (s.present / total) * 100
-          : 0;
-
-      return pct < 75;
-
-    });
-
-  }
-
-
-  renderStudents(filtered);
-
-}
-
-
-loadStudents();
-
-</script>
-
-
-<!-- =========================================================
-     NOTIFICATIONS MODAL CONTROLS
-     ========================================================= -->
 <script src="teacher-sidebar.js"></script>
+<script src="teacher-sample.js"></script>
+<script>
+(function () {
+  const DEMO = TS.DEMO, LOW = 75, token = localStorage.getItem("token");
+  if (!token) { window.location.href = "login-teacher.html"; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const H = { "Authorization": "Bearer " + token };
+  const getJson = (u) => fetch("/api" + u, { headers: H }).then((r) => { if (r.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-teacher.html"; throw new Error("Unauthorized"); } return r.json(); });
+  const norm = (x) => String(x || "").replace(/[\s-]/g, "").toUpperCase();
+
+  let myClass = "CSE F", ROWS = [];
+  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
+  $("demoNote").hidden = !DEMO;
+
+  const pct = (r) => (r.present == null ? null : (r.present + r.absent ? Math.round((r.present / (r.present + r.absent)) * 100) : 0));
+
+  function render() {
+    const low = ROWS.filter((r) => pct(r) !== null && pct(r) < LOW).length, pr = ROWS.filter((r) => r.today === "present" || r.today === "late").length, ab = ROWS.filter((r) => r.today === "absent").length;
+    $("sub").textContent = "Class " + myClass + " · " + ROWS.length + " enrolled students";
+    $("stats").innerHTML = [["Students", ROWS.length, "fa-users", ""], ["Low attendance", low, "fa-triangle-exclamation", "absent"], ["Present today", pr, "fa-user-check", "present"], ["Absent today", ab, "fa-user-xmark", "absent"]]
+      .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
+
+    const q = $("q").value.trim().toLowerCase(), f = $("f").value;
+    const list = ROWS.filter((r) => (!q || r.name.toLowerCase().includes(q) || String(r.studentId).toLowerCase().includes(q)) && (f === "all" || (f === "low" && pct(r) !== null && pct(r) < LOW) || (f === "absent" && r.today === "absent")));
+    $("rows").innerHTML = list.length ? list.map((r) => {
+      const p = pct(r), t = r.today || "none", ini = r.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+      return '<tr><td><div class="who"><div class="av">' + esc(ini) + "</div><div><b>" + esc(r.name) + "</b><span>" + esc(r.studentId) + "</span></div></div></td><td>" + (r.present == null ? "--" : r.present) + "</td><td>" + (r.absent == null ? "--" : r.absent) +
+        '</td><td><div class="pc"><div class="meter ' + (p === null ? "" : p < 60 ? "low" : p < LOW ? "mid" : "") + '"><span style="width:' + (p || 0) + '%"></span></div><b>' + (p === null ? "--" : p + "%") + '</b></div></td><td><span class="pill ' + t + '">' + (t === "none" ? "No record" : t.charAt(0).toUpperCase() + t.slice(1)) + "</span></td></tr>";
+    }).join("") : '<tr><td colspan="5" class="empty">' + (ROWS.length ? "No students match." : "No students found for this class yet.") + "</td></tr>";
+  }
+  $("q").addEventListener("input", render); $("f").addEventListener("change", render);
+
+  if (DEMO) { ROWS = TS.summary(iso(new Date())).map((r) => ({ ...r })); render(); }
+
+  getJson("/auth/me").then((d) => { const a = d && d.user; if (a && a.coordinatorClass) { myClass = a.coordinatorClass; render(); } return a; }).catch(() => null).then(() => {
+    if (DEMO) return;
+    return getJson("/students").then((all) => {
+      if (!Array.isArray(all)) throw new Error("Could not load students.");
+      const mine = all.filter((s) => norm(s.classSection) === norm(myClass));
+      ROWS = mine.map((s) => ({ name: s.name, studentId: s.studentId || "—", present: null, absent: null, today: null })); render();
+      const today = iso(new Date());
+      return Promise.all(mine.map((s, i) => getJson("/attendance/history/" + s._id).then((h) => {
+        if (!Array.isArray(h)) return;
+        const days = {}; h.forEach((x) => { days[String(x.date).slice(0, 10)] = x.status; });
+        const v = Object.values(days); ROWS[i].present = v.filter((x) => x === "present" || x === "late").length; ROWS[i].absent = v.filter((x) => x === "absent").length; ROWS[i].today = days[today] || null;
+      }).catch(() => {}))).then(render);
+    });
+  }).catch((e) => { if (e && e.message !== "Unauthorized") $("rows").innerHTML = '<tr><td colspan="5" class="empty err">' + esc(e.message || "Could not load students.") + "</td></tr>"; });
+})();
+</script>
 <script src="theme.js"></script>
-
-
 </body>
 </html>

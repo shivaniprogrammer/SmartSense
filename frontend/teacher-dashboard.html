@@ -2,417 +2,281 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%E2%9C%A8</text></svg>">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Teacher Dashboard | SmartSense</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="teacher-sidebar.css">
 <link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="student-ui.css">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-:root {
-  --primary: #0f9fa8;
-  --primary-dark: #087f86;
-  --primary-light: #dff7f8;
-  --primary-soft: #eefafb;
-  --white: #ffffff;
-  --background: #f7fbfc;
-  --text-dark: #14212b;
-  --text-medium: #465963;
-  --text-muted: #72818a;
-  --border: #d9ecee;
-  --green: #1f9d55;
-  --green-bg: #e5f7ec;
-  --amber: #b7791f;
-  --amber-bg: #fff6e0;
-  --red: #e45858;
-  --red-bg: #ffeaea;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Inter", sans-serif; background: var(--background); color: var(--text-dark); }
-
-.layout { display: flex; min-height: 100vh; }
-
-.main { flex: 1; padding: 32px 4%; max-width: 1300px; }
-
-.main-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-.main-heading h1 { font-size: 24px; margin-bottom: 4px; }
-.main-heading p { color: var(--text-muted); font-size: 13px; }
-.date-pill { background: var(--primary-soft); color: var(--primary-dark); padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; }
-
-.summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 24px; }
-.summary-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
-.summary-card .icon-badge {
-  width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center;
-  justify-content: center; font-size: 13px; margin-bottom: 10px;
-}
-.summary-card.total .icon-badge { background: var(--primary-light); color: var(--primary); }
-.summary-card.present .icon-badge { background: var(--green-bg); color: var(--green); }
-.summary-card.late .icon-badge { background: var(--amber-bg); color: var(--amber); }
-.summary-card.absent .icon-badge { background: var(--red-bg); color: var(--red); }
-.summary-card.inroom .icon-badge { background: var(--primary-light); color: var(--primary); }
-.summary-card .label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
-.summary-card .value { font-size: 22px; font-weight: 700; }
-
-.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; margin-bottom: 20px; }
-
-.panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
-.panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.panel-heading h3 { font-size: 15px; }
-.panel-heading .link { font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer; }
-
-table { width: 100%; border-collapse: collapse; }
-th {
-  text-align: left; font-size: 10px; color: var(--text-muted); text-transform: uppercase;
-  letter-spacing: 0.5px; padding: 8px 10px; border-bottom: 1px solid var(--border);
-}
-td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--border); }
-tr:last-child td { border-bottom: none; }
-
-.student-cell { display: flex; align-items: center; gap: 10px; }
-.student-cell .avatar {
-  width: 28px; height: 28px; border-radius: 50%; background: var(--primary-light);
-  color: var(--primary-dark); display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
-}
-
-.status-badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
-  border-radius: 100px; font-size: 11px; font-weight: 600;
-}
-.status-badge.present { background: var(--green-bg); color: var(--green); }
-.status-badge.late { background: var(--amber-bg); color: var(--amber); }
-.status-badge.absent { background: var(--red-bg); color: var(--red); }
-.status-badge.unverified { background: #f0f0f0; color: var(--text-muted); }
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-.bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 160px; padding-top: 10px; }
-.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
-.bar {
-  width: 100%; background: linear-gradient(180deg, var(--primary), var(--primary-dark));
-  border-radius: 6px 6px 0 0;
-}
-.bar-col .day-label { font-size: 10px; color: var(--text-muted); }
-.bar-col .day-value { font-size: 11px; font-weight: 700; color: var(--text-dark); }
-
-@media (max-width: 1000px) {
-  .grid-2 { grid-template-columns: 1fr; }
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.see-all-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 16px; padding: 10px; border-radius: 10px;
-  background: var(--primary-light); color: var(--primary-dark);
-  font-size: 13px; font-weight: 600; text-decoration: none;
-}
-.see-all-btn:hover { background: var(--primary); color: white; }
-
-/* --- Timetable panel --- */
-.day-block { margin-bottom: 16px; }
-.day-block:last-child { margin-bottom: 0; }
-.day-block h4 {
-  font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
-  color: var(--text-muted); margin-bottom: 8px;
-}
-.period-row {
-  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
-  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
-  cursor: pointer; transition: border-color 0.15s, background 0.15s;
-}
-.period-row:hover { border-color: var(--primary); background: var(--primary-soft); }
-.period-row .time { font-size: 12px; font-weight: 700; color: var(--text-dark); min-width: 90px; }
-.period-row .subject-code {
-  background: var(--primary-light); color: var(--primary-dark); font-size: 11px;
-  font-weight: 700; padding: 4px 10px; border-radius: 100px;
-}
-.period-row .class-name { font-size: 12px; color: var(--text-medium); font-weight: 600; }
-.period-row .room { font-size: 11px; color: var(--text-muted); margin-left: auto; }
-.empty-note { font-size: 12px; color: var(--text-muted); padding: 8px 0; }
-
-/* --- Attendance session view --- */
-.session-back {
-  font-size: 12px; color: var(--primary); font-weight: 600; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px;
-}
+.date-pill{background:var(--primary-light);color:var(--primary-dark);padding:10px 18px;border-radius:12px;font-size:16px;font-weight:700}
+.btn{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:10px 16px;font:600 16px inherit;font-family:inherit;cursor:pointer;color:var(--text-dark);transition:.2s}
+.btn:hover{border-color:var(--primary)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.bell{position:relative;width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--white);display:grid;place-items:center;color:var(--text-medium);text-decoration:none;font-size:18px}
+.bell .count{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:var(--red);color:#fff;font-size:12px;font-weight:700;display:none;align-items:center;justify-content:center}
+.bell .count.show{display:flex}.topbar-right{flex-wrap:wrap}
+.toast{display:none;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;margin-bottom:16px}
+.toast.show{display:block}.toast.ok{background:var(--green-bg);color:var(--green)}.toast.bad{background:var(--red-bg);color:var(--red)}
+.demo-note{background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:16px}
+.stats-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.tab{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 17px inherit;font-family:inherit;padding:10px 20px;border-radius:99px;cursor:pointer;transition:.15s}
+.tab:hover{background:var(--primary-soft)}.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.periods{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:14px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit}
+.period:hover{box-shadow:0 8px 22px rgba(11,31,58,.1);transform:translateY(-1px)}
+.period.other{border-left-color:#3B82F6}.period.now{background:var(--primary-light);box-shadow:0 0 0 2px var(--primary)}
+.period .tm{font-size:16px;color:var(--text-muted);font-weight:600}.period .sj{font-size:20px;font-weight:700;line-height:1.25}
+.period .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:15px;color:var(--text-muted)}
+.code{background:var(--primary);color:#fff;font-size:14px;font-weight:700;padding:3px 12px;border-radius:99px}.code.other{background:#3B82F6}
+.meter{height:10px;border-radius:99px;background:var(--border);overflow:hidden;margin-top:4px}.meter span{display:block;height:100%;background:var(--primary);border-radius:99px}
+.cnt{display:flex;gap:12px;font-size:15px;font-weight:700}.cnt .p{color:var(--green)}.cnt .l{color:var(--amber)}.cnt .a{color:var(--red)}
+.dnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.dnav input{padding:10px 12px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.trend{display:flex;align-items:flex-end;gap:12px;height:200px}
+.tcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+.tbar{width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--primary),var(--primary-dark));min-height:4px}
+.tcol b{font-size:16px}.tcol span{font-size:14px;color:var(--text-muted)}
+.back{display:inline-flex;align-items:center;gap:8px;color:var(--primary);font:700 17px inherit;font-family:inherit;background:none;border:0;cursor:pointer;margin-bottom:14px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tools input{flex:1;min-width:200px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
+.chip{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 15px inherit;font-family:inherit;padding:8px 16px;border-radius:99px;cursor:pointer}.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:17px}
+th{text-align:left;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:12px 10px;border-bottom:1px solid var(--border)}
+td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{border-bottom:0}
+.who{display:flex;align-items:center;gap:12px}.av{width:40px;height:40px;border-radius:50%;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+.pill{display:inline-flex;align-items:center;padding:4px 14px;border-radius:99px;font-size:15px;font-weight:700}
+.pill.present{background:var(--green-bg);color:var(--green)}.pill.late{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}.pill.unverified{background:var(--border);color:var(--text-medium)}
+.empty{color:var(--text-muted);padding:18px 4px;font-size:16px}.empty.err{color:var(--red);font-weight:600}.sec{margin-bottom:18px}
+@media(max-width:1000px){.sidebar>div:last-child{flex:1}.sidebar>div:last-child .nav-item{flex-direction:column;text-align:center;justify-content:center;gap:2px;padding:8px 2px;font-size:12px}}
 </style>
 </head>
 <body>
-
 <div class="layout">
-
   <div id="sidebar-root"></div>
-
-  <main class="main">
-
-    <div class="main-heading">
-      <div>
-        <h1>Teacher Dashboard</h1>
-        <p id="dashboardSubtitle">Class CSE-F- live attendance overview</p>
+  <main class="dash-main">
+    <div class="dash-topbar">
+      <div><p id="dashboardSubtitle">Live attendance overview</p><h1>Teacher Dashboard</h1></div>
+      <div class="topbar-right">
+        <button class="btn" id="alertBtn" type="button"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i> Send Low Attendance Alerts</button>
+        <span class="date-pill" id="datePill"></span>
+        <a href="teacher-requests.html" class="bell" aria-label="Leave and OD requests"><i class="fa-solid fa-bell"></i><span class="count" id="notifCount"></span></a>
+        <div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div>
       </div>
-      <div style="display: flex; align-items: center; gap: 14px;">
-        <button id="alertBtn" style="padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--white); color: var(--text-dark); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;">
-          <i class="fa-solid fa-triangle-exclamation" style="color: var(--red);"></i> Send Low Attendance Alerts
-        </button>
-        <div class="date-pill" id="datePill">Jul 29, 2026</div>
-        <a href="teacher-requests.html" class="bell-icon"><i class="fa-solid fa-bell"></i><span class="dot" id="notifDot"></span></a>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="demo-note" id="demoNote" hidden></div>
+
+    <div id="listView">
+      <div class="stats-grid" id="stats"></div>
+
+      <div class="panel sec">
+        <div class="panel-heading"><h4>My timetable</h4><span class="note">Tap a period to see its attendance</span></div>
+        <div class="tabs" id="tabs"></div>
+        <div id="periods"><p class="empty">Loading your timetable...</p></div>
+      </div>
+
+      <div class="panel sec">
+        <div class="panel-heading"><h4>Weekly attendance trend</h4><span class="note">Students present or late each day</span></div>
+        <div class="trend" id="trend"><p class="empty">Loading...</p></div>
       </div>
     </div>
 
-    <!-- Individual timetable, built from /api/timetable/me -->
-    <div class="panel">
-      <div class="panel-heading">
-        <h3>My Timetable</h3>
-        <span class="link" id="timetableHint" style="cursor: default; color: var(--text-muted);">Tap a period to view its attendance</span>
-      </div>
-      <div id="timetableContainer">
-        <p class="empty-note">Loading your timetable...</p>
-      </div>
-    </div>
-
-    <!-- Attendance for the clicked period/session -->
-    <div class="panel" id="sessionPanel" style="display: none;">
-      <span class="session-back" id="sessionBack"><i class="fa-solid fa-arrow-left"></i> Back to timetable</span>
-      <div class="panel-heading">
-        <h3 id="sessionTitle">Attendance</h3>
-      </div>
-      <div id="sessionContent">
-        <p class="empty-note">Loading attendance...</p>
-      </div>
-    </div>
-
-    <!-- Today's Attendance - mock data, not yet wired to backend -->
-    <div class="panel">
-  <div class="panel-heading">
-    <h3>Today's Attendance</h3>
-  </div>
-  <table>
-    <thead>
-      <tr><th>Student</th><th>Check-in</th><th>Status</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><div class="student-cell"><div class="avatar">SM</div>Santhosh M</div></td>
-        <td>08:52 AM</td>
-        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-      </tr>
-      <tr>
-        <td><div class="student-cell"><div class="avatar">SN</div>Santhosh Narayan</div></td>
-        <td>08:55 AM</td>
-        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-      </tr>
-      <tr>
-        <td><div class="student-cell"><div class="avatar">SJ</div>Saranraj J</div></td>
-        <td>09:14 AM</td>
-        <td><span class="status-badge late"><span class="dot"></span>Late</span></td>
-      </tr>
-      <tr>
-        <td><div class="student-cell"><div class="avatar">SS</div>S Saravana Kumar</div></td>
-        <td>08:49 AM</td>
-        <td><span class="status-badge present"><span class="dot"></span>Present</span></td>
-      </tr>
-      <tr>
-        <td><div class="student-cell"><div class="avatar">SS</div>Saravanan S</div></td>
-        <td>â€”</td>
-        <td><span class="status-badge unverified"><span class="dot"></span>Unverified</span></td>
-      </tr>
-    </tbody>
-  </table>
-  <a href="teacher-students.html" class="see-all-btn">
-    See All Students <i class="fa-solid fa-arrow-right"></i>
-  </a>
-</div>
-      <!-- Weekly trend - mock data, not yet wired to backend -->
+    <div id="sessionView" style="display:none">
+      <button class="back" id="backBtn" type="button"><i class="fa-solid fa-arrow-left"></i> Back</button>
       <div class="panel">
-        <div class="panel-heading">
-          <h3>Weekly Attendance Trend</h3>
-        </div>
-        <div class="bar-chart">
-          <div class="bar-col"><span class="day-value">40</span><div class="bar" style="height: 80%;"></div><span class="day-label">Mon</span></div>
-          <div class="bar-col"><span class="day-value">42</span><div class="bar" style="height: 88%;"></div><span class="day-label">Tue</span></div>
-          <div class="bar-col"><span class="day-value">39</span><div class="bar" style="height: 76%;"></div><span class="day-label">Wed</span></div>
-          <div class="bar-col"><span class="day-value">44</span><div class="bar" style="height: 95%;"></div><span class="day-label">Thu</span></div>
-          <div class="bar-col"><span class="day-value">38</span><div class="bar" style="height: 70%;"></div><span class="day-label">Fri</span></div>
-        </div>
+        <div class="panel-heading"><h4 id="sessionTitle">Attendance</h4><button class="btn" id="refreshBtn" type="button"><i class="fa-solid fa-rotate"></i> Refresh</button></div>
+        <div class="stats-grid" id="sessStats"></div>
+        <div class="tools"><input type="search" id="q" placeholder="Search student name" aria-label="Search student"><span id="chips"></span></div>
+        <div class="scroll"><table><thead><tr><th>Student</th><th>Check-in</th><th>Status</th></tr></thead><tbody id="rows"></tbody></table></div>
       </div>
-
     </div>
-
   </main>
-
 </div>
 
 <script src="teacher-sidebar.js"></script>
-<script src="theme.js"></script>
+<script src="timetable-data.js"></script>
+<script src="teacher-sample.js"></script>
 <script>
 (function () {
+  /* ====== SETTINGS ======
+     true  = show clearly-labelled SAMPLE attendance (BLE is only enrolled for a few students right now).
+     false = use the real server endpoints only.                                                   */
+  const USE_DEMO_DATA = TS.DEMO;                           // switch lives in teacher-sample.js
+  const MY_CLASS = "CSE F";                                // used until the account reports its own coordinatorClass
+
   const API_BASE = "/api";
   const token = localStorage.getItem("token");
-  if (!token) return;
+  if (!token) { window.location.href = "login-teacher.html"; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 
-  const authHeaders = { "Authorization": "Bearer " + token };
-
-  fetch(API_BASE + "/requests/pending", { headers: authHeaders })
-    .then(function (res) { return res.json(); })
-    .then(function (requests) {
-      const dot = document.getElementById("notifDot");
-      if (dot && Array.isArray(requests) && requests.length > 0) {
-        dot.classList.add("show");
-      }
-    })
-    .catch(function () {});
-
-  const alertBtn = document.getElementById("alertBtn");
-  if (alertBtn) {
-    alertBtn.addEventListener("click", function () {
-      alertBtn.disabled = true;
-      const originalText = alertBtn.innerHTML;
-      alertBtn.innerHTML = "Checking...";
-
-      fetch("/api/alerts/low-attendance-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders },
-        body: JSON.stringify({})
-      })
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          alertBtn.disabled = false;
-          alertBtn.innerHTML = originalText;
-          alert(data.message || "Check complete.");
-        })
-        .catch(function () {
-          alertBtn.disabled = false;
-          alertBtn.innerHTML = originalText;
-          alert("Could not reach the server.");
-        });
-    });
-  }
-
-  const DAY_LABELS = {
-    MONDAY: "Monday", TUESDAY: "Tuesday", WEDNESDAY: "Wednesday",
-    THURSDAY: "Thursday", FRIDAY: "Friday", SATURDAY: "Saturday"
-  };
-
-  const timetableContainer = document.getElementById("timetableContainer");
-  const sessionPanel = document.getElementById("sessionPanel");
-  const sessionTitle = document.getElementById("sessionTitle");
-  const sessionContent = document.getElementById("sessionContent");
-  const sessionBack = document.getElementById("sessionBack");
-
-  function todayDateLabel() {
-    return new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-  }
-  const datePill = document.getElementById("datePill");
-  if (datePill) datePill.textContent = todayDateLabel();
-
-  function renderTimetable(entries) {
-    if (!entries.length) {
-      timetableContainer.innerHTML = '<p class="empty-note">No timetable periods assigned yet. Contact the admin if this looks wrong.</p>';
-      return;
-    }
-
-    const byDay = {};
-    entries.forEach((e) => {
-      if (!byDay[e.day]) byDay[e.day] = [];
-      byDay[e.day].push(e);
-    });
-
-    let html = "";
-    Object.keys(byDay).forEach((day) => {
-      html += `<div class="day-block"><h4>${DAY_LABELS[day] || day}</h4>`;
-      byDay[day].forEach((e) => {
-        html += `
-          <div class="period-row" data-subject="${e.subjectCode}" data-class="${e.classSection}" data-title="${e.subject}">
-            <div class="time">${e.startTime} - ${e.endTime}</div>
-            <div class="subject-code">${e.subjectCode}</div>
-            <div class="class-name">${e.classSection}</div>
-            ${e.room ? `<div class="room"><i class="fa-solid fa-door-open"></i> ${e.room}</div>` : ""}
-          </div>`;
-      });
-      html += `</div>`;
-    });
-
-    timetableContainer.innerHTML = html;
-
-    document.querySelectorAll(".period-row").forEach((row) => {
-      row.addEventListener("click", () => {
-        openSession(row.getAttribute("data-subject"), row.getAttribute("data-class"), row.getAttribute("data-title"));
-      });
-    });
-  }
-
-  function openSession(subjectCode, classSection, subjectTitle) {
-    timetableContainer.closest(".panel").style.display = "none";
-    sessionPanel.style.display = "block";
-    sessionTitle.textContent = `${subjectTitle} — ${classSection}`;
-    sessionContent.innerHTML = '<p class="empty-note">Loading attendance...</p>';
-
-    fetch(`${API_BASE}/attendance?classSection=${encodeURIComponent(classSection)}&subject=${encodeURIComponent(subjectCode)}`, {
-      headers: authHeaders
-    })
-      .then((res) => res.json().then((data) => ({ status: res.status, data })))
-      .then(({ status, data }) => {
-        if (status !== 200) {
-          sessionContent.innerHTML = `<p class="empty-note">${data.error || "Could not load attendance."}</p>`;
-          return;
-        }
-        const records = data.records || [];
-        if (!records.length) {
-          sessionContent.innerHTML = '<p class="empty-note">No attendance recorded yet for this session today.</p>';
-          return;
-        }
-        sessionContent.innerHTML = `
-          <table>
-            <thead><tr><th>Student</th><th>Check-in</th><th>Status</th></tr></thead>
-            <tbody>
-              ${records.map((r) => `
-                <tr>
-                  <td><div class="student-cell"><div class="avatar">${(r.student && r.student.name || "?").slice(0,2).toUpperCase()}</div>${r.student ? r.student.name : "Unknown"}</div></td>
-                  <td>${r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "—"}</td>
-                  <td><span class="status-badge ${r.status}"><span class="dot"></span>${r.status.charAt(0).toUpperCase() + r.status.slice(1)}</span></td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>`;
-      })
-      .catch(() => {
-        sessionContent.innerHTML = '<p class="empty-note">Could not reach the server.</p>';
+  function api(path, options) {
+    options = options || {};
+    return fetch(API_BASE + path, { ...options, headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token, ...(options.headers || {}) } })
+      .then((res) => {
+        if (res.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-teacher.html"; return Promise.reject(new Error("Unauthorized")); }
+        return res.json().then((data) => ({ status: res.status, data }));
       });
   }
+  function toast(msg, ok) { const t = $("toast"); t.textContent = msg; t.className = "toast show " + (ok ? "ok" : "bad"); clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = "toast"; }, 6000); }
 
-  sessionBack.addEventListener("click", () => {
-    sessionPanel.style.display = "none";
-    timetableContainer.closest(".panel").style.display = "block";
+  const todayD = new Date(); todayD.setHours(0, 0, 0, 0);
+  $("datePill").textContent = todayD.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
+
+  /* ---------- sample data (shared with the Reports page via teacher-sample.js) ---------- */
+  const sampleRecords = TS.records, sampleDay = TS.day;
+  function sampleEntries() {                               // her own teaching only: Java (OOPJ) in several sections
+    const D = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"], out = [], f = (h, m) => (h > 12 ? h - 12 : h) + ":" + String(m).padStart(2, "0");
+    const add = (di, p1, p2, sec, lab) => { const a = SS.PER[p1 - 1], b = SS.PER[p2 - 1]; out.push({ day: D[di], startTime: f(a[0], a[1]), endTime: f(b[2], b[3]), subject: "Object Oriented Programming using Java" + (lab ? " Lab" : ""), subjectCode: "OOPJ", classSection: sec, room: sec === MY_CLASS && !lab ? SS.room : "" }); };
+    add(0, 7, 8, "CSE F", true); add(1, 6, 6, "CSE F"); add(2, 4, 5, "CSE F", true); add(4, 3, 3, "CSE F");   // CSE F: from the college timetable
+    add(0, 1, 1, "IT A"); add(1, 7, 7, "IT A"); add(2, 3, 3, "IT A"); add(3, 7, 7, "IT A");                  // the rest are sample slots
+    add(1, 2, 2, "IT B"); add(2, 6, 6, "IT B"); add(3, 5, 5, "IT B"); add(4, 5, 5, "IT B");
+    add(0, 3, 3, "CSE A"); add(3, 2, 2, "CSE A"); add(4, 6, 6, "CSE A");
+    add(0, 6, 6, "CSE C"); add(2, 1, 1, "CSE C"); add(4, 1, 1, "CSE C");
+    add(1, 4, 4, "CSE G"); add(3, 3, 3, "CSE G");
+    return out;
+  }
+
+  /* ---------- stats ---------- */
+  const S = { total: "--", present: "--", late: "--", absent: "--", pending: "--" };
+  function renderStats() {
+    $("stats").innerHTML = [["Students", S.total, "fa-users", ""], ["Present", S.present, "fa-user-check", "present"], ["Late", S.late, "fa-clock", "pending"], ["Absent", S.absent, "fa-user-xmark", "absent"], ["Pending requests", S.pending, "fa-hourglass-half", "pending"]]
+      .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
+  }
+  renderStats();
+
+  /* ---------- timetable ---------- */
+  const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+  const LABEL = (d) => d.charAt(0) + d.slice(1).toLowerCase();
+  const todayKey = DAYS[todayD.getDay()];
+  let ENTRIES = [], selDay = null, myClass = MY_CLASS, sampleTT = false;
+
+  function mins(t) {
+    const m = String(t || "").match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if (!m) return null;
+    let h = +m[1]; const ap = (m[3] || "").toUpperCase();
+    if (ap === "PM" && h < 12) h += 12; if (ap === "AM" && h === 12) h = 0; if (!ap && h < 8) h += 12;
+    return h * 60 + +m[2];
+  }
+  const byTime = (a, b) => (mins(a.startTime) || 0) - (mins(b.startTime) || 0);
+  const liveIdx = (list) => { const n = new Date().getHours() * 60 + new Date().getMinutes(); return list.findIndex((e) => { const x = mins(e.endTime); return x !== null && x > n; }); };
+
+  function renderTimetable() {
+    if (!ENTRIES.length) { $("tabs").innerHTML = ""; $("periods").innerHTML = '<p class="empty">No timetable periods assigned yet. Contact the admin if this looks wrong.</p>'; return; }
+    const days = DAYS.slice(1).concat(DAYS[0]).filter((d) => ENTRIES.some((e) => e.day === d));
+    if (!selDay || !days.includes(selDay)) selDay = days.includes(todayKey) ? todayKey : days[0];
+    $("tabs").innerHTML = days.map((d) => '<button class="tab' + (d === selDay ? " on" : "") + '" data-d="' + d + '" type="button">' + LABEL(d) + (d === todayKey ? " · today" : "") + "</button>").join("");
+    document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { selDay = b.dataset.d; renderTimetable(); }));
+    const list = ENTRIES.filter((e) => e.day === selDay).sort(byTime), live = selDay === todayKey ? liveIdx(list) : -1;
+    $("periods").innerHTML = '<div class="periods">' + list.map((e, i) => {
+      const own = e.classSection === myClass;
+      return '<button class="period' + (own ? "" : " other") + (i === live ? " now" : "") + '" data-i="' + ENTRIES.indexOf(e) + '" type="button"><span class="tm">' + esc(e.startTime) + " – " + esc(e.endTime) + '</span><span class="sj">' + esc(e.subject || e.subjectCode) +
+        '</span><span class="meta"><span class="code' + (own ? "" : " other") + '">' + esc(e.classSection) + "</span><span>" + (own ? "My class" : "Teaching") + "</span>" + (e.room ? "<span>Room " + esc(e.room) + "</span>" : "") + "</span></button>";
+    }).join("") + "</div>";
+    document.querySelectorAll("#periods .period").forEach((b) => b.addEventListener("click", () => {
+      const e = ENTRIES[+b.dataset.i], title = (e.subject || e.subjectCode) + " — " + e.classSection;
+      openSession(title, sampleTT ? () => Promise.resolve(sampleRecords(e.classSection, e.subjectCode, iso(todayD), mins(e.startTime) || 0)) : () => realRecords(e.classSection, e.subjectCode, iso(todayD)));
+    }));
+  }
+
+  function realRecords(section, code, day) {
+    return api("/attendance?classSection=" + encodeURIComponent(section) + "&subject=" + encodeURIComponent(code) + "&date=" + day)
+      .then(({ status, data }) => { if (status !== 200) throw new Error((data && data.error) || "Could not load attendance."); return data.records || []; });
+  }
+
+  /* ---------- weekly trend ---------- */
+  function renderTrend(items) {
+    if (!items.length) { $("trend").innerHTML = '<p class="empty">No data yet.</p>'; return; }
+    const max = Math.max.apply(null, items.map((x) => x.n).concat([1]));
+    $("trend").innerHTML = items.map((x) => '<div class="tcol"><b>' + x.n + '</b><div class="tbar" style="height:' + Math.max(2, (x.n / max) * 78) + '%"></div><span>' + esc(x.label) + "</span></div>").join("");
+  }
+  const dayLabel = (s) => new Date(s + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short" });
+
+  /* ---------- session view ---------- */
+  let RECORDS = [], status = "all", cur = null;
+  function renderSession() {
+    const c = { present: 0, late: 0, absent: 0 }; RECORDS.forEach((r) => { if (c[r.status] !== undefined) c[r.status]++; });
+    const total = RECORDS.length, pct = total ? Math.round(((c.present + c.late) / total) * 1000) / 10 : 0;
+    $("sessStats").innerHTML = [["Students", total, "fa-users", ""], ["Present", c.present, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
+      .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
+    $("sessionTitle").textContent = cur.title + (total ? " · " + pct + "% attended" : "");
+    const keys = ["all", "present", "late", "absent", "unverified"].filter((k) => k === "all" || RECORDS.some((r) => r.status === k));
+    $("chips").innerHTML = keys.map((k) => '<button class="chip' + (k === status ? " on" : "") + '" data-s="' + k + '" type="button">' + k.charAt(0).toUpperCase() + k.slice(1) + "</button>").join(" ");
+    document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { status = b.dataset.s; renderSession(); }));
+    const q = $("q").value.trim().toLowerCase();
+    const list = RECORDS.filter((r) => (status === "all" || r.status === status) && (!q || String((r.student && r.student.name) || "").toLowerCase().includes(q)));
+    $("rows").innerHTML = list.length ? list.map((r) => {
+      const name = (r.student && r.student.name) || "Unknown", st = ["present", "late", "absent"].includes(r.status) ? r.status : "unverified", t = r.checkInTime ? new Date(r.checkInTime) : null;
+      return '<tr><td><div class="who"><div class="av">' + esc(name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()) + "</div><div>" + esc(name) + (r.student && r.student.studentId ? '<div class="note">' + esc(r.student.studentId) + "</div>" : "") + "</div></div></td><td>" + (t && !isNaN(t) ? t.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—") + '</td><td><span class="pill ' + st + '">' + st.charAt(0).toUpperCase() + st.slice(1) + "</span></td></tr>";
+    }).join("") : '<tr><td colspan="3" class="empty">' + (RECORDS.length ? "No students match." : "No attendance recorded yet for this session.") + "</td></tr>";
+  }
+  function loadSession() {
+    $("rows").innerHTML = '<tr><td colspan="3" class="empty">Loading attendance...</td></tr>';
+    return cur.provider().then((r) => { RECORDS = r; renderSession(); })
+      .catch((e) => { if (e.message !== "Unauthorized") { RECORDS = []; $("sessStats").innerHTML = ""; $("rows").innerHTML = '<tr><td colspan="3" class="empty err">' + esc(e.message || "Could not reach the server.") + "</td></tr>"; } });
+  }
+  function openSession(title, provider) {
+    cur = { title, provider }; status = "all"; $("q").value = ""; RECORDS = []; $("chips").innerHTML = ""; $("sessStats").innerHTML = "";
+    $("sessionTitle").textContent = title; $("listView").style.display = "none"; $("sessionView").style.display = "block"; window.scrollTo(0, 0); loadSession();
+  }
+  $("backBtn").addEventListener("click", () => { $("sessionView").style.display = "none"; $("listView").style.display = "block"; });
+  $("refreshBtn").addEventListener("click", loadSession);
+  $("q").addEventListener("input", renderSession);
+
+  /* ---------- load everything ---------- */
+  function showNote() {
+    const bits = []; if (USE_DEMO_DATA) bits.push("attendance numbers and the weekly chart"); if (sampleTT) bits.push("the timetable");
+    const n = $("demoNote"); n.hidden = !bits.length;
+    n.textContent = "Demo mode: " + bits.join(" and ") + " below are sample values, not from the server. Set USE_DEMO_DATA to false in this file to use real data.";
+  }
+
+  api("/auth/me").then(({ data }) => {
+    const a = data && data.user; if (!a) return;
+    if (a.name) { $("profileName").textContent = a.name.split(" ")[0]; $("avatarInitial").textContent = a.name.charAt(0).toUpperCase(); }
+    if (a.coordinatorClass) { myClass = a.coordinatorClass; renderTimetable(); }
+    const sub = $("dashboardSubtitle");
+    if (a.facultyType === "subject" && Array.isArray(a.facultySubjects) && a.facultySubjects.length) { sub.textContent = "Faculty for: " + a.facultySubjects.join(", "); $("alertBtn").style.display = "none"; }
+    else if (a.facultyType === "coordinator") sub.textContent = "Class Coordinator — " + myClass + " — live attendance overview";
+  }).catch(() => {});
+
+  api("/timetable/me").then(({ data }) => {
+    const all = (data && data.timetable) || [];
+    let myId = null; try { myId = (JSON.parse(localStorage.getItem("user") || "null") || {}).id; } catch (e) {}
+    const real = myId && all.some((e) => e.teacherId) ? all.filter((e) => String(e.teacherId) === String(myId)) : all;   // only periods she teaches herself
+    sampleTT = !all.length && USE_DEMO_DATA; ENTRIES = all.length ? real : (sampleTT ? sampleEntries() : []);
+    renderTimetable(); showNote();
+  }).catch((e) => { if (e.message !== "Unauthorized") $("periods").innerHTML = '<p class="empty err">Could not load your timetable.</p>'; });
+
+  api("/requests/pending").then(({ data }) => {
+    const n = Array.isArray(data) ? data.length : null; S.pending = n === null ? "--" : n; renderStats();
+    const c = $("notifCount"); if (n) { c.textContent = n > 99 ? "99+" : n; c.classList.add("show"); }
+  }).catch(() => {});
+
+  if (USE_DEMO_DATA) {
+    let d = new Date(todayD); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
+    const t = sampleDay(iso(d)); S.total = t.total; S.present = t.present; S.late = t.late; S.absent = t.absent; renderStats();
+    const items = []; for (let i = 6; i >= 0; i--) { const x = new Date(todayD); x.setDate(x.getDate() - i); const w = x.getDay(), v = w === 0 || w === 6 ? 0 : sampleDay(iso(x)); items.push({ label: dayLabel(iso(x)), n: v ? v.present + v.late : 0 }); }
+    renderTrend(items);
+  } else {
+    api("/reports/summary").then(({ data }) => { S.total = data.totalStudents; S.present = data.presentToday; S.late = data.lateToday; S.absent = data.absentToday; renderStats(); }).catch(() => {});
+    api("/reports/weekly-trend").then(({ data }) => renderTrend(Array.isArray(data) ? data.map((x) => ({ label: dayLabel(x.date), n: x.presentCount })) : [])).catch(() => { $("trend").innerHTML = '<p class="empty err">Could not load the weekly trend.</p>'; });
+  }
+  showNote();
+
+  /* ---------- low attendance alerts (same endpoint as before) ---------- */
+  let sending = false;
+  $("alertBtn").addEventListener("click", () => {
+    if (sending) return; sending = true; const b = $("alertBtn"), html = b.innerHTML; b.disabled = true; b.textContent = "Checking...";
+    api("/alerts/low-attendance-check", { method: "POST", body: JSON.stringify({}) })
+      .then(({ status: s, data }) => toast((data && (data.message || data.error)) || "Check complete.", s >= 200 && s < 300))
+      .catch((e) => { if (e.message !== "Unauthorized") toast("Could not reach the server.", false); })
+      .finally(() => { sending = false; b.disabled = false; b.innerHTML = html; });
   });
-
-  fetch(API_BASE + "/timetable/me", { headers: authHeaders })
-    .then((res) => res.json())
-    .then((data) => renderTimetable(data.timetable || []))
-    .catch(() => {
-      timetableContainer.innerHTML = '<p class="empty-note">Could not load your timetable.</p>';
-    });
-
-  fetch(API_BASE + "/auth/me", { headers: authHeaders })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      const account = data && data.user;
-      if (!account) return;
-
-      const subtitleEl = document.getElementById("dashboardSubtitle");
-      const isSubjectTeacher = account.facultyType === "subject" && Array.isArray(account.facultySubjects) && account.facultySubjects.length > 0;
-
-      if (isSubjectTeacher) {
-        if (subtitleEl) {
-          subtitleEl.textContent = "Faculty for: " + account.facultySubjects.join(", ");
-        }
-        if (alertBtn) alertBtn.style.display = "none";
-      } else if (account.facultyType === "coordinator" && subtitleEl) {
-        subtitleEl.textContent = "Class Coordinator — " + (account.coordinatorClass || "") + " — live attendance overview";
-      }
-    })
-    .catch(function () {});
 })();
 </script>
+<script src="theme.js"></script>
 </body>
 </html>
