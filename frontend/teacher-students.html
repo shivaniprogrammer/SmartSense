@@ -35,8 +35,7 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       <div><p id="sub">Class students</p><h1>Students</h1></div>
       <div class="topbar-right"><div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div></div>
     </div>
-    <div class="demo-note" id="demoNote" hidden>Demo mode: names and register numbers are the real class list, but the attendance days and today’s status are sample values. Set DEMO to false in teacher-sample.js to use real data.</div>
-
+    
     <div class="stats-grid" id="stats"></div>
 
     <div class="tools">
@@ -68,7 +67,7 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   let myClass = "CSE F", ROWS = [];
   try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
-  $("demoNote").hidden = !DEMO;
+  
 
   const pct = (r) => (r.present == null ? null : (r.present + r.absent ? Math.round((r.present / (r.present + r.absent)) * 100) : 0));
 
