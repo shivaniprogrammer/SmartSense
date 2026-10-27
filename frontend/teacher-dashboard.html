@@ -229,10 +229,8 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   /* ---------- load everything ---------- */
   function showNote() {
-    const bits = []; if (USE_DEMO_DATA) bits.push("attendance numbers and the weekly chart"); if (sampleTT) bits.push("the timetable");
-    const n = $("demoNote"); n.hidden = !bits.length;
-    n.textContent = "Demo mode: " + bits.join(" and ") + " below are sample values, not from the server. Set USE_DEMO_DATA to false in this file to use real data.";
-  }
+    $("demoNote").hidden = true;
+}
 
   api("/auth/me").then(({ data }) => {
     const a = data && data.user; if (!a) return;
