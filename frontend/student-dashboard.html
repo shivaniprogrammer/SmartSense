@@ -52,28 +52,45 @@
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-chart-pie"></i></div>
-                <p>Attendance</p>
-                <h3 id="attendancePercent">--</h3>
+        <section class="panel attendance-history" aria-labelledby="attendanceHistoryTitle">
+            <div class="attendance-history-heading">
+                <div>
+                    <span class="attendance-kicker">Your records</span>
+                    <h2 id="attendanceHistoryTitle">Attendance History</h2>
+                </div>
+                <span class="attendance-percent-badge" id="attendanceHistoryPercent" aria-label="Overall attendance percentage">--</span>
             </div>
-            <div class="stat-card">
-                <div class="icon present"><i class="fa-solid fa-user-check"></i></div>
-                <p>Periods Present</p>
-                <h3 id="presentDays">--</h3>
+            <button class="calendar-toggle" id="calendarToggle" type="button" aria-expanded="false" aria-controls="attendanceCalendar">
+                <span><i class="fa-regular fa-calendar-days" aria-hidden="true"></i> Calendar View</span>
+                <i class="fa-solid fa-chevron-down calendar-chevron" aria-hidden="true"></i>
+            </button>
+            <div class="attendance-calendar" id="attendanceCalendar" hidden>
+                <div class="calendar-month-navigation">
+                    <button class="calendar-nav-button" id="calendarPrevious" type="button" aria-label="Previous month"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+                    <h3 id="calendarMonth" aria-live="polite"></h3>
+                    <button class="calendar-nav-button" id="calendarNext" type="button" aria-label="Next month"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+                </div>
+                <div class="calendar-weekdays" aria-hidden="true">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div class="calendar-days" id="calendarDays" aria-label="Attendance dates"></div>
+                <div class="calendar-legend" aria-label="Calendar legend">
+                    <span><i class="present" aria-hidden="true"></i> Present</span>
+                    <span><i class="absent" aria-hidden="true"></i> Absent</span>
+                    <span><i class="no-class" aria-hidden="true"></i> No class</span>
+                    <span><i class="no-record" aria-hidden="true"></i> No record</span>
+                </div>
+                <div class="calendar-statistics">
+                    <h4>Monthly statistics</h4>
+                    <div class="calendar-stat-grid">
+                        <div class="calendar-stat present"><span>Present days</span><strong id="calendarPresentDays">--</strong></div>
+                        <div class="calendar-stat absent"><span>Absent days</span><strong id="calendarAbsentDays">--</strong></div>
+                        <div class="calendar-stat no-class"><span>No class</span><strong id="calendarNoClassDays">--</strong></div>
+                    </div>
+                </div>
+                <p class="calendar-status" id="calendarStatus" role="status">Loading attendance history...</p>
             </div>
-            <div class="stat-card">
-                <div class="icon absent"><i class="fa-solid fa-user-xmark"></i></div>
-                <p>Periods Absent</p>
-                <h3 id="absentDays">--</h3>
-            </div>
-            <div class="stat-card">
-                <div class="icon pending"><i class="fa-solid fa-hourglass-half"></i></div>
-                <p>Pending Requests</p>
-                <h3 id="pendingRequests">--</h3>
-            </div>
-        </div>
+        </section>
 
         <div class="dash-lower" style="grid-template-columns: 1fr;">
 

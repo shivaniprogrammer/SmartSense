@@ -18,6 +18,10 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const isoDate = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const showDate = (v) => { const d = new Date(v); return isNaN(d) ? esc(v) : d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); };
+let attendanceCalendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let attendanceRecordsLoaded = false;
+let attendanceLoadError = false;
+let attendanceHistoryRecords = [];
 
 function authFetch(path, options = {}) {
     return fetch(API_BASE + path, {
@@ -78,12 +82,85 @@ function renderTimetable() {
 
 /* ---------- attendance ---------- */
 function setAttendanceUnavailable(msg) {
-    ["attendancePercent", "presentDays", "absentDays", "legendPresent", "legendAbsent", "donutPercent"].forEach((id) => { $(id).textContent = "--"; });
+    ["legendPresent", "legendAbsent", "donutPercent"].forEach((id) => { $(id).textContent = "--"; });
     $("donutChart").style.setProperty("--pct", 0);
+    $("attendanceHistoryPercent").textContent = "--";
     const note = $("attendanceNote");
     note.textContent = msg;
     note.className = "note err";
+    attendanceRecordsLoaded = false;
+    attendanceLoadError = true;
+    attendanceHistoryRecords = [];
+    renderAttendanceCalendar([]);
     renderTodayStatus([], false);
+}
+
+function renderAttendanceCalendar(records) {
+    const year = attendanceCalendarMonth.getFullYear(), month = attendanceCalendarMonth.getMonth();
+    const firstWeekday = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const recordsByDate = new Map();
+    records.forEach((record) => {
+        const date = String(record.date || "").slice(0, 10);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+        const dayRecords = recordsByDate.get(date) || [];
+        dayRecords.push(record);
+        recordsByDate.set(date, dayRecords);
+    });
+
+    $("calendarMonth").textContent = attendanceCalendarMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const days = [];
+    for (let i = 0; i < firstWeekday; i++) days.push('<span class="calendar-day empty" aria-hidden="true"></span>');
+
+    let presentDays = 0, absentDays = 0, noClassDays = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = isoDate(new Date(year, month, day));
+        const dayRecords = recordsByDate.get(date) || [];
+        const weekday = new Date(year, month, day).getDay();
+        let state = "no-record", label = "No attendance record";
+        if (dayRecords.length) {
+            if (dayRecords.some((record) => record.status === "present" || record.status === "late")) {
+                state = "present";
+                label = "Present";
+                presentDays++;
+            } else if (dayRecords.some((record) => record.status === "absent")) {
+                state = "absent";
+                label = "Absent";
+                absentDays++;
+            }
+        } else if (weekday === 0 || weekday === 6) {
+            state = "no-class";
+            label = "No class";
+            noClassDays++;
+        }
+        const accessibleDate = new Date(year, month, day).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+        days.push('<span class="calendar-day ' + state + '" aria-label="' + accessibleDate + ": " + label + '" title="' + label + '">' + day + "</span>");
+    }
+
+    $("calendarDays").innerHTML = days.join("");
+    $("calendarPresentDays").textContent = attendanceRecordsLoaded ? presentDays : "--";
+    $("calendarAbsentDays").textContent = attendanceRecordsLoaded ? absentDays : "--";
+    $("calendarNoClassDays").textContent = attendanceRecordsLoaded ? noClassDays : "--";
+    $("calendarStatus").textContent = attendanceRecordsLoaded
+        ? (records.length ? "Attendance dates are based on your recorded class periods." : "No attendance records are available yet.")
+        : attendanceLoadError ? "Could not load attendance history. Please try again later." : "Loading attendance history...";
+}
+
+function setupAttendanceCalendar() {
+    const toggle = $("calendarToggle"), calendar = $("attendanceCalendar");
+    toggle.addEventListener("click", () => {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        calendar.hidden = expanded;
+    });
+    $("calendarPrevious").addEventListener("click", () => {
+        attendanceCalendarMonth = new Date(attendanceCalendarMonth.getFullYear(), attendanceCalendarMonth.getMonth() - 1, 1);
+        renderAttendanceCalendar(attendanceHistoryRecords);
+    });
+    $("calendarNext").addEventListener("click", () => {
+        attendanceCalendarMonth = new Date(attendanceCalendarMonth.getFullYear(), attendanceCalendarMonth.getMonth() + 1, 1);
+        renderAttendanceCalendar(attendanceHistoryRecords);
+    });
 }
 
 function renderTodayStatus(records, loaded) {
@@ -109,13 +186,15 @@ function renderTodayStatus(records, loaded) {
             const absent = records.filter((r) => r.status === "absent").length;
             const pct = total ? Math.round((present / total) * 1000) / 10 : 0;
 
-            $("attendancePercent").textContent = total ? pct + "%" : "--";
-            $("presentDays").textContent = present;
-            $("absentDays").textContent = absent;
+            $("attendanceHistoryPercent").textContent = total ? pct + "%" : "--";
             $("legendPresent").textContent = present;
             $("legendAbsent").textContent = absent;
             $("donutPercent").textContent = total ? pct + "%" : "--";
             $("donutChart").style.setProperty("--pct", pct);
+            attendanceRecordsLoaded = true;
+            attendanceLoadError = false;
+            attendanceHistoryRecords = records;
+            renderAttendanceCalendar(records);
 
             const note = $("attendanceNote");
             note.className = "note";
@@ -152,12 +231,10 @@ function loadRequests() {
     return authFetch("/requests/mine")
         .then(({ status, data }) => {
             if (status !== 200 || !Array.isArray(data)) throw new Error("HTTP " + status);
-            $("pendingRequests").textContent = data.filter((r) => r.status === "pending").length;
             renderRequests(data);
         })
         .catch((err) => {
             console.error("Failed to load requests:", err);
-            $("pendingRequests").textContent = "--";
             $("activityList").innerHTML = '<p class="note err">Could not load requests. Is the server running?</p>';
         });
 }
@@ -165,6 +242,9 @@ function loadRequests() {
 /* ---------- start ---------- */
 renderTimetable();
 renderTodayStatus([], false);
+setupAttendanceCalendar();
+attendanceHistoryRecords = [];
+renderAttendanceCalendar([]);
 loadRequests();
 
 authFetch("/students/me")
