@@ -28,15 +28,7 @@
 .pill.present{background:var(--green-bg);color:var(--green)}.pill.late,.pill.partial{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}.pill.none,.pill.upcoming{background:var(--border);color:var(--text-medium)}
 .hol{text-align:center;padding:50px 16px;color:var(--text-muted)}.hol i{font-size:36px;color:var(--primary);display:block;margin-bottom:12px}.hol strong{display:block;font-size:20px;color:var(--text-dark);margin-bottom:4px}
 .msg{padding:14px 16px;border-radius:12px;margin-bottom:14px;font-weight:600;display:none}.msg.show{display:block;background:var(--red-bg);color:var(--red)}
-.subj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
-.subj{border:1px solid var(--border);border-radius:16px;padding:18px;background:var(--primary-soft)}
-.subj .head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.subj .head b{font-size:18px}
-.pill.good{background:var(--green-bg);color:var(--green)}.pill.low{background:var(--amber-bg);color:var(--amber)}
-.meter{height:11px;border-radius:99px;background:var(--border);overflow:hidden;margin:8px 0 4px}
-.meter span{display:block;height:100%;border-radius:99px;background:var(--primary)}
-.meter.w span{background:linear-gradient(90deg,#F59E0B,#EF4444)}
-.subj small{color:var(--text-muted);font-size:15px}.subj small.warn{color:var(--amber);font-weight:600;display:block}
+
 </style>
 </head>
 <body>
@@ -52,10 +44,6 @@
 
     <div class="msg" id="err"></div>
 
-    <div class="panel" style="margin-bottom:14px">
-      <div class="panel-heading"><h4>Subject-wise attendance</h4></div>
-      <div class="subj-grid" id="subjGrid"><p class="msg">Loading...</p></div>
-    </div>
 
     <div class="weekbar">
       <button class="btn" id="prev" type="button">&larr; Previous week</button>
@@ -92,7 +80,9 @@ const monday0 = new Date(today); monday0.setDate(today.getDate() - ((today.getDa
 let weekOffset = 0, sel = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : 4;
 let REC = null;                                            // "date|period" -> status ; null until loaded
 let ALL = [];
-const LOW = 75;
+
+
+
 
 const dateOf = (i) => { const d = new Date(monday0); d.setDate(d.getDate() + weekOffset * 7 + i); return d; };
 
@@ -105,45 +95,6 @@ if (!list.length) return date > today ? { k: "upcoming", t: "Upcoming" } : { k: 
   if (att === 0 && list.length === n) return { k: "absent", t: "Absent" };
   return { k: "partial", t: att + "/" + n + " attended" };
 }
-
-const pct = (a, t) => Math.round((a / t) * 1000) / 10;
-const ok = (r) => r.status === "present" || r.status === "late";
-
-function periodOf(r) {
-  const p = Number(r.period);
-  if (p >= 1 && p <= 8) return p;
-  if (!r.checkInTime) return null;
-  const t = new Date(r.checkInTime);
-  if (isNaN(t)) return null;
-  const ist = new Date(t.getTime() + 330 * 60000);
-  const m = ist.getUTCHours() * 60 + ist.getUTCMinutes();
-  for (let i = 1; i <= 8; i++) { if (m < SS.endMin(i)) return i; }
-  return null;
-}
-
-function subjectOf(r) {
-  const d = new Date(String(r.date || "").slice(0, 10) + "T00:00:00"), dow = d.getDay(), p = periodOf(r);
-  if (!(dow >= 1 && dow <= 5) || !p) return null;
-  const slot = SS.TT[dow - 1].find((s) => p >= s[1] && p <= s[2]);
-  return slot ? slot[0].replace(" LAB", "") : null;
-}
-
-const subjName = (code) => (SS.CRS[code] || [code])[0];
-
-function renderSubjects() {
-  const g = {};
-  ALL.forEach((r) => { const c = subjectOf(r); if (!c) return; g[c] = g[c] || { a: 0, t: 0 }; g[c].t++; if (ok(r)) g[c].a++; });
-  const keys = Object.keys(g).sort((x, y) => subjName(x).localeCompare(subjName(y)));
-  if (!keys.length) { $("subjGrid").innerHTML = '<p class="msg">No subject data yet. Subjects are matched using the date and period of each record.</p>'; return; }
-  $("subjGrid").innerHTML = keys.map((k) => {
-    const s = g[k], p = pct(s.a, s.t), low = p < LOW, need = Math.max(0, Math.ceil(3 * s.t - 4 * s.a));
-    return '<div class="subj"><div class="head"><b>' + esc(subjName(k)) + '</b><span class="pill ' + (low ? "low" : "good") + '">' + p + '%</span></div>' +
-      '<div class="meter ' + (low ? "w" : "") + '"><span style="width:' + Math.min(p, 100) + '%"></span></div>' +
-      "<small>" + s.a + "/" + s.t + " classes attended</small>" +
-      (low ? '<small class="warn">Shortage: attend the next ' + need + " classes in a row to reach " + LOW + "%.</small>" : "") + "</div>";
-  }).join("");
-}
-
 function render() {
   const mon = dateOf(0), sat = dateOf(5);
   $("weekLabel").textContent = short(mon) + " – " + short(sat) + " " + sat.getFullYear();
@@ -173,7 +124,7 @@ function render() {
   $("body").innerHTML = '<div class="cls-grid">' + cards + "</div>";
 }
 
-function fail(msg) { const e = $("err"); e.textContent = msg; e.classList.add("show"); REC = {}; ALL = []; $("subjGrid").innerHTML = '<p class="msg">' + esc(msg) + "</p>"; render(); }
+function fail(msg) { const e = $("err"); e.textContent = msg; e.classList.add("show"); REC = {};  $("subjGrid").innerHTML = '<p class="msg">' + esc(msg) + "</p>"; render(); }
 
 $("prev").addEventListener("click", () => { weekOffset--; render(); });
 $("next").addEventListener("click", () => { if (weekOffset < 0) { weekOffset++; render(); } });
@@ -194,8 +145,6 @@ fetch(API_BASE + "/students/me", { headers: { "Authorization": "Bearer " + token
   })
   .then((records) => {
     if (!Array.isArray(records)) throw new Error("Unexpected attendance response");
-    ALL = records;
-    renderSubjects();
     REC = {};
     records.forEach((r) => { REC[String(r.date).slice(0, 10) + "|" + Number(r.period)] = r.status; });
     render();
