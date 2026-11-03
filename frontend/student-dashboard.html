@@ -77,11 +77,15 @@
 
         <div class="dash-lower" style="grid-template-columns: 1fr;">
 
-            <div class="panel">
+            <div class="panel attendance-panel">
                 <div class="panel-heading">
-                    <h4>Attendance Overview</h4>
+                    <div class="attendance-heading">
+                        <span class="attendance-kicker">Your progress</span>
+                        <h4>Attendance Overview</h4>
+                    </div>
+                    <span class="attendance-badge"><i class="fa-solid fa-chart-line"></i> Overall</span>
                 </div>
-                <div class="chart-row">
+                <div class="chart-row attendance-summary">
                     <div class="donut" id="donutChart" style="--pct: 0;">
                         <div class="donut-inner">
                             <strong id="donutPercent">--</strong>
@@ -89,8 +93,8 @@
                         </div>
                     </div>
                     <div class="chart-legend">
-                        <p><span class="dot-sm green"></span> Present <strong id="legendPresent">--</strong></p>
-                        <p><span class="dot-sm red"></span> Absent <strong id="legendAbsent">--</strong></p>
+                        <p class="attendance-metric present"><span class="attendance-metric-label"><span class="dot-sm green"></span> Present</span><strong id="legendPresent">--</strong></p>
+                        <p class="attendance-metric absent"><span class="attendance-metric-label"><span class="dot-sm red"></span> Absent</span><strong id="legendAbsent">--</strong></p>
                     </div>
                 </div>
                 <p class="note" id="attendanceNote"></p>
