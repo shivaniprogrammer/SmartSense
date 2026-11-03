@@ -23,8 +23,8 @@
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .tab{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 17px inherit;font-family:inherit;padding:10px 20px;border-radius:99px;cursor:pointer;transition:.15s}
 .tab:hover{background:var(--primary-soft)}.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
-.periods{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
-.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:14px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit}
+.periods{display:flex;flex-wrap:nowrap;gap:14px;overflow-x:auto;padding-bottom:6px}
+.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:14px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit;min-width:260px;flex:0 0 auto}
 .period:hover{box-shadow:0 8px 22px rgba(11,31,58,.1);transform:translateY(-1px)}
 .period.other{border-left-color:#3B82F6}.period.now{background:var(--primary-light);box-shadow:0 0 0 2px var(--primary)}
 .period .tm{font-size:16px;color:var(--text-muted);font-weight:600}.period .sj{font-size:20px;font-weight:700;line-height:1.25}
@@ -68,11 +68,18 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     <div class="toast" id="toast" role="status"></div>
     <div class="demo-note" id="demoNote" hidden></div>
 
-      <div class="panel sec">
-        <div class="panel-heading"><h4>Weekly attendance trend</h4><span class="note">Students present or late each day</span></div>
+    <div class="stats-grid" id="stats" style="margin-bottom:18px"></div>
+
+    <div class="panel sec">
+      <div class="panel-heading"><h4>Today's timetable</h4><span class="note">Tap a period to take attendance</span></div>
+      <div class="tabs" id="tabs"></div>
+      <div id="periods"></div>
+    </div>
+
+    <div class="panel sec">
+      <div class="panel-heading"><h4>Weekly attendance trend</h4><span class="note">Students present or late each day</span></div>
         <div class="trend" id="trend"><p class="empty">Loading...</p></div>
       </div>
-    </div>
 
     <div id="sessionView" style="display:none">
       <button class="back" id="backBtn" type="button"><i class="fa-solid fa-arrow-left"></i> Back</button>
