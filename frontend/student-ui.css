@@ -63,7 +63,8 @@ body{font:17px/1.5 "Inter",system-ui,sans-serif;background:var(--background);col
 
 .next-card{background:linear-gradient(135deg,#0B2B45,var(--primary-dark));color:#fff;border:0;border-radius:18px;padding:20px 22px;margin-bottom:18px}
 .next-card small{color:rgba(255,255,255,.8);font-size:15px}.next-card strong{display:block;font-size:26px;line-height:1.25;margin:4px 0}
-.tt-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--border)}.tt-row:first-child{border-top:0}
+#todayList{display:flex;gap:12px;overflow-x:auto;padding:2px 6px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.tt-row{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--border);border-radius:12px;min-width:220px;flex:0 0 auto;scroll-snap-align:start}.tt-row:first-child{border-top:1px solid var(--border)}
 .tt-row b{font-size:18px;display:block}.tt-row small{color:var(--text-muted);font-size:15px}.tt-row .tm{color:var(--text-muted);font-size:15px;white-space:nowrap}
 .tt-row.now{background:var(--primary-light);border-radius:12px;padding:12px;margin:2px -6px}
 

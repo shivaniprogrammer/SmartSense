@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <div class="dash-lower">
+        <div class="dash-lower" style="grid-template-columns: 1fr;">
 
             <div class="panel">
                 <div class="panel-heading">
@@ -96,15 +96,13 @@
                 <p class="note" id="attendanceNote"></p>
             </div>
 
-            <div>
+            <div class="panel" style="grid-column: 1 / -1;">
                 <div class="next-card" id="nextCard"><small>Loading timetable...</small></div>
-                <div class="panel">
-                    <div class="panel-heading"><h4 id="ttHeading">Today’s timetable</h4></div>
-                    <div id="todayList"></div>
-                </div>
+                <div class="panel-heading"><h4 id="ttHeading">Today’s timetable</h4></div>
+                <div id="todayList"></div>
             </div>
 
-            <div class="panel">
+            <div class="panel" style="grid-column: 1 / -1;">
                 <div class="panel-heading">
                     <h4>Recent Applications</h4>
                     <button class="action-btn" id="applyBtn" type="button">

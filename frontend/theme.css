@@ -389,3 +389,7 @@ th {
 .theme-icon-button:hover {
     background: var(--primary-light, #dff7f8);
 }
+
+body {
+    zoom: 0.9;
+}
