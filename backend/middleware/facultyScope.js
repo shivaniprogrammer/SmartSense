@@ -4,12 +4,13 @@ async function loadFacultyScope(req, res, next) {
   try {
     if (req.user && req.user.role === "teacher") {
       const teacher = await Student.findById(req.user.id).select(
-        "facultyType facultySubjects facultySetupComplete"
+        "facultyType facultySubjects facultySetupComplete coordinatorClass"
       );
       if (teacher) {
         req.user.facultyType = teacher.facultyType || null;
         req.user.facultySubjects = teacher.facultySubjects || [];
         req.user.facultySetupComplete = !!teacher.facultySetupComplete;
+        req.user.coordinatorClass = teacher.coordinatorClass || null;
       }
     }
     next();
