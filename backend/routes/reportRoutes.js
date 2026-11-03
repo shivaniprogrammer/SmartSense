@@ -3,14 +3,66 @@ const router = express.Router();
 const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { loadFacultyScope } = require("../middleware/facultyScope");
+
+const CSE_F_ROSTER_SIZE = 68;
 
 function todayString() {
   return new Date().toISOString().split("T")[0];
 }
 
-router.get("/summary", requireAuth, requireRole("teacher", "admin"), async (req, res) => {
+router.get("/summary", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, async (req, res) => {
   try {
     const date = todayString();
+    if (req.user.facultyType === "coordinator" && req.user.coordinatorClass === "CSE F") {
+      const roster = await Student.find({
+        role: "student",
+        $or: [
+          { classSection: "CSE F" },
+          { classSection: null },
+          { classSection: { $exists: false } },
+        ],
+      }).select("_id classSection");
+      const rosterIds = new Set(roster.map((student) => String(student._id)));
+      const todayRecords = await AttendanceRecord.find({ date }).populate("student", "_id classSection");
+      const statusesByStudent = new Map();
+      todayRecords.forEach((record) => {
+        const student = record.student;
+        if (!student || (student.classSection && student.classSection !== "CSE F")) return;
+        const id = String(student._id);
+        if (!rosterIds.has(id)) return;
+        const statuses = statusesByStudent.get(id) || new Set();
+        statuses.add(record.status);
+        statusesByStudent.set(id, statuses);
+      });
+
+      let presentToday = 0, lateToday = 0;
+      statusesByStudent.forEach((statuses) => {
+        if (statuses.has("present")) presentToday++;
+        else if (statuses.has("late")) lateToday++;
+      });
+      const activeStudentIds = new Set();
+      todayRecords.forEach((record) => {
+        if (
+          record.checkInTime &&
+          !record.checkOutTime &&
+          record.student &&
+          rosterIds.has(String(record.student._id)) &&
+          (!record.student.classSection || record.student.classSection === "CSE F")
+        ) {
+          activeStudentIds.add(String(record.student._id));
+        }
+      });
+
+      return res.json({
+        totalStudents: CSE_F_ROSTER_SIZE,
+        presentToday,
+        lateToday,
+        absentToday: Math.max(0, CSE_F_ROSTER_SIZE - presentToday - lateToday),
+        currentlyInRoom: activeStudentIds.size,
+      });
+    }
+
     const totalStudents = await Student.countDocuments({ role: "student" });
     const todayRecords = await AttendanceRecord.find({ date });
 
