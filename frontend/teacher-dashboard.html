@@ -18,13 +18,24 @@
 .bell .count.show{display:flex}.topbar-right{flex-wrap:wrap}
 .toast{display:none;padding:14px 18px;border-radius:12px;font-weight:700;font-size:16px;margin-bottom:16px}
 .toast.show{display:block}.toast.ok{background:var(--green-bg);color:var(--green)}.toast.bad{background:var(--red-bg);color:var(--red)}
+.low-alert-feedback{display:flex;align-items:flex-start;gap:14px;padding:16px 18px;border:1px solid #f1c6c6;border-left:5px solid var(--red);border-radius:14px;background:linear-gradient(120deg,var(--red-bg),var(--white));color:#8f3030;margin-bottom:16px;box-shadow:0 6px 18px rgba(120,30,30,.06)}
+.low-alert-feedback[hidden]{display:none}
+.low-alert-feedback .alert-feedback-icon{width:38px;height:38px;display:grid;place-items:center;flex:none;border-radius:12px;background:#fff;color:var(--red);font-size:17px}
+.low-alert-feedback strong{display:block;font-size:15px;margin-bottom:3px}
+.low-alert-feedback p{font-size:14px;line-height:1.5;color:#754444}
+.low-alert-feedback.success{border-color:#b9e8cb;border-left-color:var(--green);background:linear-gradient(120deg,var(--green-bg),var(--white));color:var(--green)}
+.low-alert-feedback.success .alert-feedback-icon{color:var(--green)}
+.low-alert-feedback.success p{color:var(--text-medium)}
+.low-alert-feedback.warning{border-color:#f0dbad;border-left-color:var(--amber);background:linear-gradient(120deg,var(--amber-bg),var(--white));color:var(--amber)}
+.low-alert-feedback.warning .alert-feedback-icon{color:var(--amber)}
+.low-alert-feedback.warning p{color:var(--text-medium)}
 .demo-note{background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:16px}
 .stats-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .tab{border:1px solid var(--border);background:var(--white);color:var(--text-medium);font:600 17px inherit;font-family:inherit;padding:10px 20px;border-radius:99px;cursor:pointer;transition:.15s}
 .tab:hover{background:var(--primary-soft)}.tab.on{background:var(--primary);border-color:var(--primary);color:#fff}
-.periods{display:flex;flex-wrap:nowrap;gap:14px;overflow-x:auto;padding-bottom:6px}
-.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:14px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit;min-width:260px;flex:0 0 auto}
+.periods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+.period{display:flex;flex-direction:column;gap:6px;padding:18px;border:1px solid var(--border);border-left:5px solid var(--primary);border-radius:14px;background:var(--primary-soft);cursor:pointer;transition:.15s;text-align:left;font:inherit;font-family:inherit;color:inherit;min-width:0}
 .period:hover{box-shadow:0 8px 22px rgba(11,31,58,.1);transform:translateY(-1px)}
 .period.other{border-left-color:#3B82F6}.period.now{background:var(--primary-light);box-shadow:0 0 0 2px var(--primary)}
 .period .tm{font-size:16px;color:var(--text-muted);font-weight:600}.period .sj{font-size:20px;font-weight:700;line-height:1.25}
@@ -38,6 +49,10 @@
 .tcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
 .tbar{width:100%;border-radius:8px 8px 0 0;background:linear-gradient(180deg,var(--primary),var(--primary-dark));min-height:4px}
 .tcol b{font-size:16px}.tcol span{font-size:14px;color:var(--text-muted)}
+.live-indicator{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px;font-weight:600}
+.live-indicator::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-bg)}
+.live-indicator.stale::before{background:var(--amber);box-shadow:0 0 0 4px var(--amber-bg)}
+.teacher-profile{display:flex;align-items:center;padding:8px 4px;border:0;background:transparent;color:var(--text-medium);font-size:15px;font-weight:700}
 .back{display:inline-flex;align-items:center;gap:8px;color:var(--primary);font:700 17px inherit;font-family:inherit;background:none;border:0;cursor:pointer;margin-bottom:14px}
 .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .tools input{flex:1;min-width:200px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;font:16px inherit;font-family:inherit;background:var(--white);color:var(--text-dark)}
@@ -62,10 +77,11 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
         <button class="btn" id="alertBtn" type="button"><i class="fa-solid fa-triangle-exclamation" style="color:var(--red)"></i> Send Low Attendance Alerts</button>
         <span class="date-pill" id="datePill"></span>
         <a href="teacher-requests.html" class="bell" aria-label="Leave and OD requests"><i class="fa-solid fa-bell"></i><span class="count" id="notifCount"></span></a>
-        <div class="profile-pill"><div class="profile-avatar" id="avatarInitial">T</div><span id="profileName">Teacher</span></div>
+        <div class="profile-pill teacher-profile" id="profileName">Teacher</div>
       </div>
     </div>
     <div class="toast" id="toast" role="status"></div>
+    <div class="low-alert-feedback" id="lowAlertFeedback" hidden role="status" aria-live="polite"></div>
     <div class="demo-note" id="demoNote" hidden></div>
 
     <div class="stats-grid" id="stats" style="margin-bottom:18px"></div>
@@ -77,9 +93,9 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     </div>
 
     <div class="panel sec">
-      <div class="panel-heading"><h4>Weekly attendance trend</h4><span class="note">Students present or late each day</span></div>
-        <div class="trend" id="trend"><p class="empty">Loading...</p></div>
-      </div>
+      <div class="panel-heading"><h4>Weekly attendance trend</h4><span class="live-indicator" id="trendUpdated">Loading live data...</span></div>
+      <div class="trend" id="trend"><p class="empty">Loading...</p></div>
+    </div>
 
     <div id="sessionView" style="display:none">
       <button class="back" id="backBtn" type="button"><i class="fa-solid fa-arrow-left"></i> Back</button>
@@ -124,7 +140,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   const todayD = new Date(); todayD.setHours(0, 0, 0, 0);
   $("datePill").textContent = todayD.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
+  try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) $("profileName").textContent = u.name.split(" ")[0]; } catch (e) {}
 
   /* ---------- sample data (shared with the Reports page via teacher-sample.js) ---------- */
   const sampleRecords = TS.records, sampleDay = TS.day;
@@ -152,7 +168,8 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const DAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
   const LABEL = (d) => d.charAt(0) + d.slice(1).toLowerCase();
   const todayKey = DAYS[todayD.getDay()];
-  let ENTRIES = [], selDay = null, myClass = MY_CLASS, sampleTT = false;
+  let ENTRIES = [], ALL_ENTRIES = [], selDay = null, myClass = MY_CLASS, sampleTT = false, timetableLoaded = false;
+  let facultyType = null, currentTeacherId = null, currentRole = "teacher";
 
   function mins(t) {
     const m = String(t || "").match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if (!m) return null;
@@ -163,6 +180,18 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const byTime = (a, b) => (mins(a.startTime) || 0) - (mins(b.startTime) || 0);
   const liveIdx = (list) => { const n = new Date().getHours() * 60 + new Date().getMinutes(); return list.findIndex((e) => { const x = mins(e.endTime); return x !== null && x > n; }); };
 
+  function applyTimetableScope() {
+    if (sampleTT || currentRole === "admin" || facultyType === "subject") {
+      ENTRIES = ALL_ENTRIES.slice();
+    } else if (facultyType === "coordinator") {
+      ENTRIES = ALL_ENTRIES.filter((entry) => entry.classSection === myClass ||
+        (currentTeacherId && String(entry.teacherId) === currentTeacherId));
+    } else {
+      ENTRIES = ALL_ENTRIES.slice();
+    }
+    renderTimetable();
+  }
+
   function renderTimetable() {
     if (!ENTRIES.length) { $("tabs").innerHTML = ""; $("periods").innerHTML = '<p class="empty">No timetable periods assigned yet. Contact the admin if this looks wrong.</p>'; return; }
     const days = DAYS.slice(1).concat(DAYS[0]).filter((d) => ENTRIES.some((e) => e.day === d));
@@ -171,9 +200,9 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     document.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => { selDay = b.dataset.d; renderTimetable(); }));
     const list = ENTRIES.filter((e) => e.day === selDay).sort(byTime), live = selDay === todayKey ? liveIdx(list) : -1;
     $("periods").innerHTML = '<div class="periods">' + list.map((e, i) => {
-      const own = e.classSection === myClass;
+      const own = facultyType !== "subject" && e.classSection === myClass;
       return '<button class="period' + (own ? "" : " other") + (i === live ? " now" : "") + '" data-i="' + ENTRIES.indexOf(e) + '" type="button"><span class="tm">' + esc(e.startTime) + " – " + esc(e.endTime) + '</span><span class="sj">' + esc(e.subject || e.subjectCode) +
-        '</span><span class="meta"><span class="code' + (own ? "" : " other") + '">' + esc(e.classSection) + "</span><span>" + (own ? "My class" : "Teaching") + "</span>" + (e.room ? "<span>Room " + esc(e.room) + "</span>" : "") + "</span></button>";
+        '</span><span class="meta"><span class="code' + (own ? "" : " other") + '">' + esc(e.classSection) + "</span>" + (e.room ? "<span>Room " + esc(e.room) + "</span>" : "") + "</span></button>";
     }).join("") + "</div>";
     document.querySelectorAll("#periods .period").forEach((b) => b.addEventListener("click", () => {
       const e = ENTRIES[+b.dataset.i], title = (e.subject || e.subjectCode) + " — " + e.classSection;
@@ -193,6 +222,20 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     $("trend").innerHTML = items.map((x) => '<div class="tcol"><b>' + x.n + '</b><div class="tbar" style="height:' + Math.max(2, (x.n / max) * 78) + '%"></div><span>' + esc(x.label) + "</span></div>").join("");
   }
   const dayLabel = (s) => new Date(s + "T00:00:00").toLocaleDateString("en-IN", { weekday: "short" });
+  function loadWeeklyTrend() {
+    return api("/reports/weekly-trend").then(({ status: s, data }) => {
+      if (s !== 200 || !Array.isArray(data)) throw new Error((data && data.error) || "Could not load weekly attendance.");
+      renderTrend(data.map((x) => ({ label: dayLabel(x.date), n: x.presentCount })));
+      const updated = $("trendUpdated");
+      updated.textContent = "Live · updated " + new Date().toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
+      updated.classList.remove("stale");
+    }).catch((e) => {
+      if (e.message === "Unauthorized") return;
+      $("trendUpdated").textContent = "Live data unavailable";
+      $("trendUpdated").classList.add("stale");
+      $("trend").innerHTML = '<p class="empty err">Could not load the weekly trend (' + esc(e.message) + ").</p>";
+    });
+  }
 
   /* ---------- session view ---------- */
   let RECORDS = [], status = "all", cur = null;
@@ -232,8 +275,12 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   api("/auth/me").then(({ data }) => {
     const a = data && data.user; if (!a) return;
-    if (a.name) { $("profileName").textContent = a.name.split(" ")[0]; $("avatarInitial").textContent = a.name.charAt(0).toUpperCase(); }
-    if (a.coordinatorClass) { myClass = a.coordinatorClass; renderTimetable(); }
+    if (a.name) $("profileName").textContent = a.name.split(" ")[0];
+    currentRole = a.role || currentRole;
+    currentTeacherId = String(a.id || a._id || "");
+    facultyType = a.facultyType || null;
+    if (a.coordinatorClass) myClass = a.coordinatorClass;
+    if (timetableLoaded) applyTimetableScope();
     const sub = $("dashboardSubtitle");
     if (a.facultyType === "subject" && Array.isArray(a.facultySubjects) && a.facultySubjects.length) { sub.textContent = "Faculty for: " + a.facultySubjects.join(", "); $("alertBtn").style.display = "none"; }
     else if (a.facultyType === "coordinator") sub.textContent = "Class Coordinator — " + myClass + " — live attendance overview";
@@ -241,10 +288,11 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   api("/timetable/me").then(({ data }) => {
     const all = (data && data.timetable) || [];
-    let myId = null; try { myId = (JSON.parse(localStorage.getItem("user") || "null") || {}).id; } catch (e) {}
-    const real = myId && all.some((e) => e.teacherId) ? all.filter((e) => String(e.teacherId) === String(myId)) : all;   // only periods she teaches herself
-    sampleTT = !all.length && USE_DEMO_DATA; ENTRIES = all.length ? real : (sampleTT ? sampleEntries() : []);
-    renderTimetable(); showNote();
+    sampleTT = !all.length && USE_DEMO_DATA;
+    ALL_ENTRIES = all.length ? all : (sampleTT ? sampleEntries() : []);
+    timetableLoaded = true;
+    applyTimetableScope();
+    showNote();
   }).catch((e) => { if (e.message !== "Unauthorized") $("periods").innerHTML = '<p class="empty err">Could not load your timetable.</p>'; });
 
   api("/requests/pending").then(({ data }) => {
@@ -262,20 +310,41 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       if (s !== 200 || !data) throw new Error("HTTP " + s);
       S.total = num(data.totalStudents); S.present = num(data.presentToday); S.late = num(data.lateToday); S.absent = num(data.absentToday); renderStats();
     }).catch((e) => { if (e.message !== "Unauthorized") toast("Could not load today's attendance summary (" + e.message + ").", false); });
-    api("/reports/weekly-trend").then(({ status: s, data }) => {
-      if (s !== 200 || !Array.isArray(data)) throw new Error("HTTP " + s);
-      renderTrend(data.map((x) => ({ label: dayLabel(x.date), n: x.presentCount })));
-    }).catch((e) => { if (e.message !== "Unauthorized") $("trend").innerHTML = '<p class="empty err">Could not load the weekly trend (' + esc(e.message) + ").</p>"; });
+    loadWeeklyTrend();
+    setInterval(loadWeeklyTrend, 30000);
   }
   showNote();
 
-  /* ---------- low attendance alerts (same endpoint as before) ---------- */
+  /* ---------- low attendance alerts ---------- */
+  function setLowAlertFeedback(kind, title, message) {
+    const feedback = $("lowAlertFeedback");
+    const icon = kind === "success" ? "fa-circle-check" : kind === "warning" ? "fa-circle-exclamation" : "fa-triangle-exclamation";
+    feedback.className = "low-alert-feedback " + kind;
+    feedback.innerHTML = '<span class="alert-feedback-icon"><i class="fa-solid ' + icon + '" aria-hidden="true"></i></span><span><strong>' +
+      esc(title) + "</strong><p>" + esc(message) + "</p></span>";
+    feedback.hidden = false;
+  }
   let sending = false;
   $("alertBtn").addEventListener("click", () => {
-    if (sending) return; sending = true; const b = $("alertBtn"), html = b.innerHTML; b.disabled = true; b.textContent = "Checking...";
+    if (sending) return; sending = true; const b = $("alertBtn"), html = b.innerHTML; b.disabled = true; b.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> Checking attendance...';
+    setLowAlertFeedback("warning", "Checking attendance", "Reviewing live attendance records and preparing alerts for students below 75%.");
     api("/alerts/low-attendance-check", { method: "POST", body: JSON.stringify({}) })
-      .then(({ status: s, data }) => toast((data && (data.message || data.error)) || "Check complete.", s >= 200 && s < 300))
-      .catch((e) => { if (e.message !== "Unauthorized") toast("Could not reach the server.", false); })
+      .then(({ status: s, data }) => {
+        if (s < 200 || s >= 300) throw new Error((data && data.error) || "Could not send low-attendance alerts.");
+        const telegram = data.telegram || {}, alerts = Array.isArray(data.alerted) ? data.alerted : [];
+        const emailsSent = alerts.filter((student) => student.alertSent).length;
+        const details = alerts.length
+          ? emailsSent + " of " + alerts.length + " student email alerts delivered."
+          : "No students are currently below the 75% threshold.";
+        if (telegram.sent) {
+          setLowAlertFeedback("success", "Low-attendance alert sent to Telegram", "A priority “Below 75% attendance” alert was sent. " + details);
+        } else if (!telegram.configured) {
+          setLowAlertFeedback("warning", "Telegram alert was not sent", "The Telegram bot is not configured. " + details);
+        } else {
+          setLowAlertFeedback("warning", "Telegram alert could not be delivered", "Check the Telegram bot connection. " + details);
+        }
+      })
+      .catch((e) => { if (e.message !== "Unauthorized") setLowAlertFeedback("error", "Could not complete attendance check", e.message || "Please try again."); })
       .finally(() => { sending = false; b.disabled = false; b.innerHTML = html; });
   });
 })();

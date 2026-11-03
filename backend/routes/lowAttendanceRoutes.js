@@ -5,6 +5,7 @@ const Student = require("../models/Student");
 const AttendanceRecord = require("../models/AttendanceRecord");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { loadFacultyScope, requireCoordinatorLevel } = require("../middleware/facultyScope");
+const sendTelegramMessage = require("../utils/sendTelegram");
 const LOW_ATTENDANCE_THRESHOLD = 75; // percent
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -57,10 +58,29 @@ router.post("/low-attendance-check", requireAuth, requireRole("teacher", "admin"
         results.push({ student: student.name, email: student.email, percent, alertSent: sent });
       }
     }
+    const telegramLines = [
+      "🚨 LOW ATTENDANCE ALERT",
+      `Below ${threshold}% attendance`,
+      `${results.length} student${results.length === 1 ? "" : "s"} below threshold`,
+    ];
+    let messageLength = telegramLines.join("\n").length;
+    let omitted = 0;
+    for (const student of results) {
+      const line = `• ${student.student} — ${student.percent}%`;
+      if (messageLength + line.length + 1 > 3800) {
+        omitted++;
+        continue;
+      }
+      telegramLines.push(line);
+      messageLength += line.length + 1;
+    }
+    if (omitted) telegramLines.push(`…and ${omitted} more`);
+    const telegram = await sendTelegramMessage(telegramLines.join("\n"));
     res.json({
       message: `Checked ${students.length} students. ${results.length} below ${threshold}%.`,
       threshold,
       alerted: results,
+      telegram,
     });
   } catch (err) {
     console.error(err);
