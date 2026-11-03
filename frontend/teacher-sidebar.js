@@ -8,21 +8,12 @@
   } catch (e) {
     currentUser = null;
   }
-  const isCoordinator = !!(currentUser && currentUser.facultyType === "coordinator");
-
   const navItems = [
     { href: "teacher-dashboard.html", icon: "fa-house", label: "Dashboard" },
     { href: "teacher-students.html", icon: "fa-user-graduate", label: "Students" },
     { href: "teacher-reports.html", icon: "fa-file-lines", label: "Reports" },
     { href: "teacher-requests.html", icon: "fa-bell", label: "Leave & OD" },
   ];
-
-  // Only the Class Coordinator sees this — a normal subject teacher never does.
-  // The backend re-checks this on every request regardless, so this is purely
-  // about not showing a link that would just 403 for everyone else.
-  if (isCoordinator) {
-    navItems.push({ href: "coordinator-class-assign.html", icon: "fa-users-gear", label: "Assign Classes" });
-  }
 
   const navHtml = navItems.map(function (item) {
     const isActive = item.href === currentPage;

@@ -7,7 +7,7 @@ const sendEmail = require("../utils/sendEmail");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { loadFacultyScope, isSubjectScoped, requireCoordinatorLevel } = require("../middleware/facultyScope");
 
-const LEGACY_CSE_F_ROSTER_SIZE = 68;
+const CSE_F_ROSTER_SIZE = 68;
 
 function todayString() {
   return new Date().toISOString().split("T")[0];
@@ -153,19 +153,15 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
     }
 
     let studentsInClass = await Student.find({ role: "student", classSection }).select("_id");
-    if (!studentsInClass.length && req.user.facultyType === "coordinator" && req.user.coordinatorClass === classSection) {
+    if (classSection === "CSE F" && req.user.coordinatorClass === classSection) {
       const unassignedStudents = await Student.find({
         role: "student",
         $or: [{ classSection: null }, { classSection: { $exists: false } }],
       }).select("_id");
-      const totalStudents = await Student.countDocuments({ role: "student" });
-      if (
-        classSection === "CSE F" &&
-        totalStudents === LEGACY_CSE_F_ROSTER_SIZE &&
-        unassignedStudents.length === LEGACY_CSE_F_ROSTER_SIZE
-      ) {
-        studentsInClass = unassignedStudents;
-      }
+      const rosterIds = new Set(studentsInClass.map((student) => String(student._id)));
+      unassignedStudents.forEach((student) => {
+        if (!rosterIds.has(String(student._id))) studentsInClass.push(student);
+      });
     }
     const studentIds = studentsInClass.map((s) => s._id);
 
@@ -184,7 +180,8 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
       .populate("student", "name studentId email classSection")
       .sort({ checkInTime: 1 });
 
-    res.json({ classSection, subject, date, classSize: studentsInClass.length, records });
+    const classSize = classSection === "CSE F" ? CSE_F_ROSTER_SIZE : studentsInClass.length;
+    res.json({ classSection, subject, date, classSize, records });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error fetching attendance" });
@@ -196,8 +193,8 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
 // proves they personally teach. A subject-scoped teacher likewise only passes
 // for a real Timetable row matching their own subject.
 async function isAllowedForSession(user, classSection, subjectCode) {
+  if (user.coordinatorClass === classSection) return true;
   if (user.facultyType === "coordinator") {
-    if (user.coordinatorClass === classSection) return true;
     const entry = await Timetable.findOne({
       subjectCode,
       classSection,

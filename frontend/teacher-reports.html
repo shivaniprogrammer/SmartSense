@@ -153,7 +153,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       '"><span style="width:' + pct + '%"></span></span><span class="fc"><b>' + pct + "%</b> of class present</span></button>";
   }
 
-  function render() {
+  function render(keepCurrentCards) {
     const renderId = ++reportRenderId;
     const mon = dateOf(0), sat = dateOf(5), date = dateOf(sel), day = iso(date), future = date > today;
     $("weekLabel").textContent = short(mon) + " – " + short(sat) + " " + sat.getFullYear();
@@ -174,8 +174,10 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       return;
     }
 
-    $("daySum").textContent = DEMO ? "Sample attendance" : "Loading live period attendance...";
-    $("body").innerHTML = '<p class="empty">Loading attendance for each period...</p>';
+    if (!keepCurrentCards) {
+      $("daySum").textContent = DEMO ? "Sample attendance" : "Loading live period attendance...";
+      $("body").innerHTML = '<p class="empty">Loading attendance for each period...</p>';
+    }
     const loads = slots.map((slot) => DEMO
       ? Promise.resolve({ records: TS.records(myClass, slot[0], day, SS.startMin(slot[1])), classSize: TS.N, classSection: myClass })
       : loadPeriodAttendance(myClass, slot[0], day, slot[1], slot[2]));
@@ -236,6 +238,10 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   $("q").addEventListener("input", renderSession);
 
   render();
+  setInterval(() => {
+    const todayIndex = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : -1;
+    if (weekOffset === 0 && sel === todayIndex && $("listView").style.display !== "none") render(true);
+  }, 15000);
 })();
 </script>
 <script src="theme.js"></script>
