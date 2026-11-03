@@ -148,15 +148,10 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   /* ---------- sample data (shared with the Reports page via teacher-sample.js) ---------- */
   const sampleRecords = TS.records, sampleDay = TS.day;
-  function sampleEntries() {                               // her own teaching only: Java (OOPJ) in several sections
+  function sampleEntries() {                               // sample periods for the CSE F coordinator
     const D = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"], out = [], f = (h, m) => (h > 12 ? h - 12 : h) + ":" + String(m).padStart(2, "0");
     const add = (di, p1, p2, sec, lab) => { const a = SS.PER[p1 - 1], b = SS.PER[p2 - 1]; out.push({ day: D[di], startTime: f(a[0], a[1]), endTime: f(b[2], b[3]), subject: "Object Oriented Programming using Java" + (lab ? " Lab" : ""), subjectCode: "OOPJ", classSection: sec, room: sec === MY_CLASS && !lab ? SS.room : "" }); };
-    add(0, 7, 8, "CSE F", true); add(1, 6, 6, "CSE F"); add(2, 4, 5, "CSE F", true); add(4, 3, 3, "CSE F");   // CSE F: from the college timetable
-    add(0, 1, 1, "IT A"); add(1, 7, 7, "IT A"); add(2, 3, 3, "IT A"); add(3, 7, 7, "IT A");                  // the rest are sample slots
-    add(1, 2, 2, "IT B"); add(2, 6, 6, "IT B"); add(3, 5, 5, "IT B"); add(4, 5, 5, "IT B");
-    add(0, 3, 3, "CSE A"); add(3, 2, 2, "CSE A"); add(4, 6, 6, "CSE A");
-    add(0, 6, 6, "CSE C"); add(2, 1, 1, "CSE C"); add(4, 1, 1, "CSE C");
-    add(1, 4, 4, "CSE G"); add(3, 3, 3, "CSE G");
+    add(0, 7, 8, "CSE F", true); add(1, 6, 6, "CSE F"); add(2, 4, 5, "CSE F", true); add(4, 3, 3, "CSE F");
     return out;
   }
 
@@ -173,7 +168,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const LABEL = (d) => d.charAt(0) + d.slice(1).toLowerCase();
   const todayKey = DAYS[todayD.getDay()];
   let ENTRIES = [], ALL_ENTRIES = [], selDay = null, myClass = MY_CLASS, sampleTT = false, timetableLoaded = false;
-  let facultyType = null, currentTeacherId = null, currentRole = "teacher";
+  let facultyType = null, currentRole = "teacher";
 
   function mins(t) {
     const m = String(t || "").match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i); if (!m) return null;
@@ -185,13 +180,10 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const liveIdx = (list) => { const n = new Date().getHours() * 60 + new Date().getMinutes(); return list.findIndex((e) => { const x = mins(e.endTime); return x !== null && x > n; }); };
 
   function applyTimetableScope() {
-    if (sampleTT || currentRole === "admin" || facultyType === "subject") {
+    if (currentRole === "admin" || facultyType === "subject") {
       ENTRIES = ALL_ENTRIES.slice();
-    } else if (facultyType === "coordinator") {
-      ENTRIES = ALL_ENTRIES.filter((entry) => entry.classSection === myClass ||
-        (currentTeacherId && String(entry.teacherId) === currentTeacherId));
     } else {
-      ENTRIES = ALL_ENTRIES.slice();
+      ENTRIES = ALL_ENTRIES.filter((entry) => entry.classSection === myClass);
     }
     renderTimetable();
   }
@@ -292,7 +284,6 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     const a = data && data.user; if (!a) return;
     if (a.name) $("profileName").textContent = displayName(a.name);
     currentRole = a.role || currentRole;
-    currentTeacherId = String(a.id || a._id || "");
     facultyType = a.facultyType || null;
     if (a.coordinatorClass) myClass = a.coordinatorClass;
     if (timetableLoaded) applyTimetableScope();
