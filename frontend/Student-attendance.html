@@ -57,11 +57,6 @@ td{padding:14px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       <div class="stat-card"><div class="icon absent"><i class="fa-solid fa-user-xmark"></i></div><p>Periods Absent</p><h3 id="absentDays">--</h3></div>
     </div>
 
-    <div class="panel">
-      <div class="panel-heading"><h4>Subject-wise attendance</h4></div>
-      <div class="subj-grid" id="subjGrid"><p class="msg">Loading...</p></div>
-    </div>
-
     <div class="panel sec">
       <div class="panel-heading"><h4>Attendance history</h4><span class="note" id="count"></span></div>
       <div class="filters">
@@ -132,7 +127,6 @@ const subjName = (code) => (SS.CRS[code] || [code])[0];
 
 function showError(msg) {
   ["attendancePercent", "presentDays", "lateDays", "absentDays"].forEach((i) => { $(i).textContent = "--"; });
-  $("subjGrid").innerHTML = '<p class="msg err">' + esc(msg) + "</p>";
   $("rows").innerHTML = '<tr><td colspan="7" class="msg err">' + esc(msg) + "</td></tr>";
 }
 
@@ -150,14 +144,6 @@ function renderSubjects() {
   ALL.forEach((r) => { const c = subjectOf(r); if (!c) return; g[c] = g[c] || { a: 0, t: 0 }; g[c].t++; if (ok(r)) g[c].a++; });
   const keys = Object.keys(g).sort((x, y) => subjName(x).localeCompare(subjName(y)));
   $("fSubj").innerHTML = '<option value="">All subjects</option>' + keys.map((k) => '<option value="' + esc(k) + '">' + esc(subjName(k)) + "</option>").join("");
-  if (!keys.length) { $("subjGrid").innerHTML = '<p class="msg">No subject data yet. Subjects are matched using the date and period of each record.</p>'; return; }
-  $("subjGrid").innerHTML = keys.map((k) => {
-    const s = g[k], p = pct(s.a, s.t), low = p < LOW, need = Math.max(0, Math.ceil(3 * s.t - 4 * s.a));
-    return '<div class="subj"><div class="head"><b>' + esc(subjName(k)) + '</b><span class="pill ' + (low ? "low" : "good") + '">' + p + '%</span></div>' +
-      '<div class="meter ' + (low ? "w" : "") + '"><span style="width:' + Math.min(p, 100) + '%"></span></div>' +
-      "<small>" + s.a + "/" + s.t + " classes attended</small>" +
-      (low ? '<small class="warn">Shortage: attend the next ' + need + " classes in a row to reach " + LOW + "%.</small>" : "") + "</div>";
-  }).join("");
 }
 
 function renderRows() {

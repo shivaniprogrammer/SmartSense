@@ -1,0 +1,9 @@
+{
+  "updated_at": "2026-10-30T14:16:31.468740+00:00",
+  "updated_epoch": 1793369791.468758,
+  "percent": 20,
+  "phase": "FAILED",
+  "message": "Needs attention",
+  "detail": "The hosted analysis service has exhausted its API credits. Available results were preserved; retry after service credits are restored.",
+  "report_folder": "C:\\Users\\SHIVANI\\AppData\\Local\\Temp\\uvc-1_fa5p_f\\b\\run"
+}

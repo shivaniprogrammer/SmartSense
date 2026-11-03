@@ -93,7 +93,11 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     if (DEMO) return;
     return getJson("/students").then((all) => {
       if (!Array.isArray(all)) throw new Error("Could not load students.");
+      
       const mine = all.filter((s) => norm(s.classSection) === norm(myClass));
+console.log("total:", all.length, "mine:", mine.length, "myClass:", myClass,
+  "sections:", [...new Set(all.map((s) => s.classSection))]);
+
       ROWS = mine.map((s) => ({ name: s.name, studentId: s.studentId || "—", present: null, absent: null, today: null })); render();
       const today = iso(new Date());
       return Promise.all(mine.map((s, i) => getJson("/attendance/history/" + s._id).then((h) => {
