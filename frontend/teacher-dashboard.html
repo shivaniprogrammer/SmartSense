@@ -206,13 +206,19 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     }).join("") + "</div>";
     document.querySelectorAll("#periods .period").forEach((b) => b.addEventListener("click", () => {
       const e = ENTRIES[+b.dataset.i], title = (e.subject || e.subjectCode) + " — " + e.classSection;
-      openSession(title, sampleTT ? () => Promise.resolve(sampleRecords(e.classSection, e.subjectCode, iso(todayD), mins(e.startTime) || 0)) : () => realRecords(e.classSection, e.subjectCode, iso(todayD)));
+      openSession(title, sampleTT
+        ? () => Promise.resolve({ records: sampleRecords(e.classSection, e.subjectCode, iso(todayD), mins(e.startTime) || 0), classSize: TS.N })
+        : () => realRecords(e.classSection, e.subjectCode, iso(todayD), e.period, e.period));
     }));
   }
 
-  function realRecords(section, code, day) {
-    return api("/attendance?classSection=" + encodeURIComponent(section) + "&subject=" + encodeURIComponent(code) + "&date=" + day)
-      .then(({ status, data }) => { if (status !== 200) throw new Error((data && data.error) || "Could not load attendance."); return data.records || []; });
+  function realRecords(section, code, day, periodStart, periodEnd) {
+    const periodQuery = periodStart == null ? "" : "&periodStart=" + encodeURIComponent(periodStart) + "&periodEnd=" + encodeURIComponent(periodEnd == null ? periodStart : periodEnd);
+    return api("/attendance?classSection=" + encodeURIComponent(section) + "&subject=" + encodeURIComponent(code) + "&date=" + day + periodQuery)
+      .then(({ status, data }) => {
+        if (status !== 200) throw new Error((data && data.error) || "Could not load attendance.");
+        return { records: data.records || [], classSize: data.classSize };
+      });
   }
 
   /* ---------- weekly trend ---------- */
@@ -238,13 +244,14 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   }
 
   /* ---------- session view ---------- */
-  let RECORDS = [], status = "all", cur = null;
+  let RECORDS = [], SESSION_CLASS_SIZE = null, status = "all", cur = null;
   function renderSession() {
     const c = { present: 0, late: 0, absent: 0 }; RECORDS.forEach((r) => { if (c[r.status] !== undefined) c[r.status]++; });
-    const total = RECORDS.length, pct = total ? Math.round(((c.present + c.late) / total) * 1000) / 10 : 0;
-    $("sessStats").innerHTML = [["Students", total, "fa-users", ""], ["Present", c.present, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
+    const total = SESSION_CLASS_SIZE == null ? RECORDS.length : SESSION_CLASS_SIZE;
+    const attended = c.present + c.late, pct = total ? Math.round((attended / total) * 1000) / 10 : 0;
+    $("sessStats").innerHTML = [["Students", total, "fa-users", ""], ["Present / late", attended + " / " + total, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
       .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
-    $("sessionTitle").textContent = cur.title + (total ? " · " + pct + "% attended" : "");
+    $("sessionTitle").textContent = cur.title + (total ? " · " + attended + " of " + total + " present/late (" + pct + "%)" : "");
     const keys = ["all", "present", "late", "absent", "unverified"].filter((k) => k === "all" || RECORDS.some((r) => r.status === k));
     $("chips").innerHTML = keys.map((k) => '<button class="chip' + (k === status ? " on" : "") + '" data-s="' + k + '" type="button">' + k.charAt(0).toUpperCase() + k.slice(1) + "</button>").join(" ");
     document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { status = b.dataset.s; renderSession(); }));
@@ -257,8 +264,12 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   }
   function loadSession() {
     $("rows").innerHTML = '<tr><td colspan="3" class="empty">Loading attendance...</td></tr>';
-    return cur.provider().then((r) => { RECORDS = r; renderSession(); })
-      .catch((e) => { if (e.message !== "Unauthorized") { RECORDS = []; $("sessStats").innerHTML = ""; $("rows").innerHTML = '<tr><td colspan="3" class="empty err">' + esc(e.message || "Could not reach the server.") + "</td></tr>"; } });
+    return cur.provider().then((result) => {
+      RECORDS = Array.isArray(result) ? result : result.records;
+      SESSION_CLASS_SIZE = Array.isArray(result) ? result.length : result.classSize;
+      renderSession();
+    })
+      .catch((e) => { if (e.message !== "Unauthorized") { RECORDS = []; SESSION_CLASS_SIZE = null; $("sessStats").innerHTML = ""; $("rows").innerHTML = '<tr><td colspan="3" class="empty err">' + esc(e.message || "Could not reach the server.") + "</td></tr>"; } });
   }
   function openSession(title, provider) {
     cur = { title, provider }; status = "all"; $("q").value = ""; RECORDS = []; $("chips").innerHTML = ""; $("sessStats").innerHTML = "";

@@ -130,9 +130,17 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
   try {
     const date = req.query.date || todayString();
     const { classSection, subject } = req.query;
+    const periodStart = req.query.periodStart == null ? null : Number(req.query.periodStart);
+    const periodEnd = req.query.periodEnd == null ? periodStart : Number(req.query.periodEnd);
 
     if (!classSection || !subject) {
       return res.status(400).json({ error: "classSection and subject are required" });
+    }
+    if (
+      (periodStart !== null && (!Number.isInteger(periodStart) || periodStart < 1 || periodStart > 9)) ||
+      (periodEnd !== null && (!Number.isInteger(periodEnd) || periodStart === null || periodEnd < periodStart || periodEnd > 9))
+    ) {
+      return res.status(400).json({ error: "periodStart and periodEnd must be valid timetable periods" });
     }
 
     if (req.user.role !== "admin") {
@@ -145,15 +153,22 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
     const studentsInClass = await Student.find({ role: "student", classSection }).select("_id");
     const studentIds = studentsInClass.map((s) => s._id);
 
-    const records = await AttendanceRecord.find({
+    const attendanceQuery = {
       date,
       subject,
       student: { $in: studentIds },
-    })
+    };
+    if (periodStart !== null) {
+      attendanceQuery.period = periodStart === periodEnd
+        ? periodStart
+        : { $gte: periodStart, $lte: periodEnd };
+    }
+
+    const records = await AttendanceRecord.find(attendanceQuery)
       .populate("student", "name studentId email classSection")
       .sort({ checkInTime: 1 });
 
-    res.json({ classSection, subject, date, records });
+    res.json({ classSection, subject, date, classSize: studentsInClass.length, records });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error fetching attendance" });

@@ -93,17 +93,68 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   let myClass = "CSE F";
   try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
   fetch("/api/auth/me", { headers: { "Authorization": "Bearer " + token } }).then((r) => r.json()).then((d) => {
-    const a = d && d.user; if (a && a.coordinatorClass) { myClass = a.coordinatorClass; head(); }
+    const a = d && d.user;     if (a && a.coordinatorClass) { myClass = a.coordinatorClass; head(); render(); }
   }).catch(() => {});
   function head() { $("sub").textContent = "Class " + myClass + " timetable and attendance, period by period"; }
   head();
 
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const monday0 = new Date(today); monday0.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-  let weekOffset = 0, sel = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : 4;
+  let weekOffset = 0, sel = today.getDay() >= 1 && today.getDay() <= 5 ? today.getDay() - 1 : 4, reportRenderId = 0;
   const dateOf = (i) => { const d = new Date(monday0); d.setDate(d.getDate() + weekOffset * 7 + i); return d; };
 
+  function loadPeriodAttendance(section, subject, day, periodStart, periodEnd) {
+    const url = "/api/attendance?classSection=" + encodeURIComponent(section) +
+      "&subject=" + encodeURIComponent(subject) +
+      "&date=" + encodeURIComponent(day) +
+      "&periodStart=" + encodeURIComponent(periodStart) +
+      "&periodEnd=" + encodeURIComponent(periodEnd);
+    return fetch(url, { headers: { "Authorization": "Bearer " + token } }).then((response) => {
+      if (response.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "login-teacher.html";
+        throw new Error("Unauthorized");
+      }
+      return response.json().then((data) => {
+        if (!response.ok) throw new Error((data && data.error) || "Could not load period attendance.");
+        if (!data || !Array.isArray(data.records) || !Number.isInteger(data.classSize)) {
+          throw new Error("Unexpected period attendance response.");
+        }
+        return data;
+      });
+    });
+  }
+
+  function periodCard(slot, index, attendance) {
+    const x = SS.info(slot[0]);
+    const title = '<span class="pt">Period ' + (slot[1] === slot[2] ? slot[1] : slot[1] + "–" + slot[2]) +
+      '</span><span class="sj">' + esc(x.name) + '</span><span class="tm">' + SS.timeLabel(slot[1], slot[2]) +
+      '</span><span class="fc">' + esc(x.lab ? "Lab session" : x.faculty) + "</span>";
+    const c = { present: 0, late: 0, absent: 0 }, students = new Map();
+    attendance.records.forEach((record) => {
+      if (c[record.status] === undefined) return;
+      const studentId = record.student && (record.student._id || record.student.studentId);
+      const key = String(studentId || record._id);
+      const existing = students.get(key);
+      if (!existing || (existing === "absent" && record.status !== "absent") || (existing === "late" && record.status === "present")) {
+        students.set(key, record.status);
+      }
+    });
+    students.forEach((status) => { c[status]++; });
+    const attended = c.present + c.late;
+    const classSize = attendance.classSize;
+    const pct = classSize ? Math.round((attended / classSize) * 1000) / 10 : 0;
+    const section = attendance.classSection || myClass;
+    return '<button class="period' + (x.lab ? " lab" : "") + '" data-i="' + index + '" type="button">' + title +
+      '<span class="cnt"><span class="p">' + attended + ' / ' + classSize + ' present</span><span>' + c.present +
+      ' present · ' + c.late + ' late</span><span class="a">' + c.absent + ' absent</span></span>' +
+      '<span class="meter ' + (pct < 60 ? "low" : pct < 75 ? "mid" : "") +
+      '"><span style="width:' + pct + '%"></span></span><span class="fc"><b>' + pct + "%</b> of class present</span></button>";
+  }
+
   function render() {
+    const renderId = ++reportRenderId;
     const mon = dateOf(0), sat = dateOf(5), date = dateOf(sel), day = iso(date), future = date > today;
     $("weekLabel").textContent = short(mon) + " – " + short(sat) + " " + sat.getFullYear();
     $("next").disabled = weekOffset >= 0; $("pick").max = iso(today); $("pick").value = day;
@@ -113,21 +164,48 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
     if (sel === 5) { $("daySum").textContent = ""; $("body").innerHTML = '<div class="hol"><i class="fa-solid fa-mug-hot"></i><strong>Holiday</strong>No classes on Saturday</div>'; return; }
 
-    const slots = SS.TT[sel]; let sum = 0, n = 0;
-    const cards = slots.map((s, i) => {
-      const x = SS.info(s[0]), title = '<span class="pt">Period ' + (s[1] === s[2] ? s[1] : s[1] + "–" + s[2]) + '</span><span class="sj">' + esc(x.name) + '</span><span class="tm">' + SS.timeLabel(s[1], s[2]) + '</span><span class="fc">' + esc(x.lab ? "Lab session" : x.faculty) + "</span>";
-      if (!DEMO || future) return '<div class="period static' + (x.lab ? " lab" : "") + '">' + title + '<span class="fc">' + (future ? "Upcoming" : "No per-period attendance saved yet") + "</span></div>";
-      const rec = TS.records(myClass, s[0], day, SS.startMin(s[1])), c = { present: 0, late: 0, absent: 0 };
-      rec.forEach((r) => c[r.status]++);
-      const pct = Math.round(((c.present + c.late) / rec.length) * 1000) / 10; sum += pct; n++;
-      return '<button class="period' + (x.lab ? " lab" : "") + '" data-i="' + i + '" type="button">' + title + '<span class="cnt"><span class="p">' + c.present + ' present</span><span class="l">' + c.late + ' late</span><span class="a">' + c.absent + ' absent</span></span><span class="meter ' + (pct < 60 ? "low" : pct < 75 ? "mid" : "") + '"><span style="width:' + pct + '%"></span></span><span class="fc"><b>' + pct + "%</b> attended</span></button>";
-    }).join("");
-    $("daySum").innerHTML = n ? "<b>" + Math.round(sum / n) + "%</b> average attendance" : "";
-    $("body").innerHTML = '<div class="periods">' + cards + "</div>";
-    document.querySelectorAll(".period[data-i]").forEach((b) => b.addEventListener("click", () => {
-      const s = slots[+b.dataset.i], x = SS.info(s[0]);
-      openSession(x.name + " — " + myClass + " — " + short(date), TS.records(myClass, s[0], day, SS.startMin(s[1])));
-    }));
+    const slots = SS.TT[sel];
+    if (future) {
+      $("daySum").textContent = "";
+      $("body").innerHTML = '<div class="periods">' + slots.map((slot) => {
+        const x = SS.info(slot[0]), title = '<span class="pt">Period ' + (slot[1] === slot[2] ? slot[1] : slot[1] + "–" + slot[2]) + '</span><span class="sj">' + esc(x.name) + '</span><span class="tm">' + SS.timeLabel(slot[1], slot[2]) + '</span><span class="fc">' + esc(x.lab ? "Lab session" : x.faculty) + "</span>";
+        return '<div class="period static' + (x.lab ? " lab" : "") + '">' + title + '<span class="fc">Upcoming</span></div>';
+      }).join("") + "</div>";
+      return;
+    }
+
+    $("daySum").textContent = DEMO ? "Sample attendance" : "Loading live period attendance...";
+    $("body").innerHTML = '<p class="empty">Loading attendance for each period...</p>';
+    const loads = slots.map((slot) => DEMO
+      ? Promise.resolve({ records: TS.records(myClass, slot[0], day, SS.startMin(slot[1])), classSize: TS.N, classSection: myClass })
+      : loadPeriodAttendance(myClass, slot[0], day, slot[1], slot[2]));
+
+    Promise.all(loads.map((load) => load.then((data) => ({ data }), (error) => ({ error }))))
+      .then((results) => {
+        if (renderId !== reportRenderId) return;
+        const valid = results.filter((result) => result.data);
+        if (!valid.length) {
+          $("daySum").textContent = "";
+          $("body").innerHTML = '<p class="empty err">Could not load live attendance for these periods.</p>';
+          return;
+        }
+        const cards = results.map((result, index) => {
+          if (result.data) return periodCard(slots[index], index, result.data);
+          const x = SS.info(slots[index][0]);
+          const periodLabel = slots[index][1] === slots[index][2] ? slots[index][1] : slots[index][1] + "–" + slots[index][2];
+          return '<div class="period static' + (x.lab ? " lab" : "") + '"><span class="pt">Period ' + periodLabel +
+            '</span><span class="sj">' + esc(x.name) + '</span><span class="fc err">Could not load this period: ' + esc(result.error.message) + "</span></div>";
+        }).join("");
+        const dailyAttended = valid.reduce((total, result) => total + result.data.records.filter((record) => record.status === "present" || record.status === "late").length, 0);
+        const dailyCapacity = valid.reduce((total, result) => total + result.data.classSize, 0);
+        const dailyPercent = dailyCapacity ? Math.round((dailyAttended / dailyCapacity) * 100) : 0;
+        $("daySum").innerHTML = "<b>" + dailyAttended + " / " + dailyCapacity + "</b> present across periods · <b>" + dailyPercent + "%</b>";
+        $("body").innerHTML = '<div class="periods">' + cards + "</div>";
+        document.querySelectorAll(".period[data-i]").forEach((button) => button.addEventListener("click", () => {
+          const index = +button.dataset.i, slot = slots[index], x = SS.info(slot[0]), result = results[index].data;
+          if (result) openSession(x.name + " — " + myClass + " — " + short(date), result.records, result.classSize);
+        }));
+      });
   }
   $("prev").addEventListener("click", () => { weekOffset--; render(); });
   $("next").addEventListener("click", () => { if (weekOffset < 0) { weekOffset++; render(); } });
@@ -138,11 +216,12 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 
   /* ---------- student list for one period ---------- */
   let RECORDS = [], status = "all", title = "";
+  let sessionClassSize = 0;
   function renderSession() {
     const c = { present: 0, late: 0, absent: 0 }; RECORDS.forEach((r) => c[r.status]++);
-    const t = RECORDS.length, pct = t ? Math.round(((c.present + c.late) / t) * 1000) / 10 : 0;
-    $("sessionTitle").textContent = title + " · " + pct + "% attended";
-    $("sessStats").innerHTML = [["Students", t, "fa-users", ""], ["Present", c.present, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
+    const attended = c.present + c.late, pct = sessionClassSize ? Math.round((attended / sessionClassSize) * 1000) / 10 : 0;
+    $("sessionTitle").textContent = title + " · " + attended + " / " + sessionClassSize + " present (" + pct + "%)";
+    $("sessStats").innerHTML = [["Class size", sessionClassSize, "fa-users", ""], ["Present / late", attended + " / " + sessionClassSize, "fa-user-check", "present"], ["Late", c.late, "fa-clock", "pending"], ["Absent", c.absent, "fa-user-xmark", "absent"]]
       .map((x) => '<div class="stat-card"><div class="icon ' + x[3] + '"><i class="fa-solid ' + x[2] + '"></i></div><p>' + x[0] + "</p><h3>" + x[1] + "</h3></div>").join("");
     $("chips").innerHTML = ["all", "present", "late", "absent"].map((k) => '<button class="chip' + (k === status ? " on" : "") + '" data-s="' + k + '" type="button">' + k.charAt(0).toUpperCase() + k.slice(1) + "</button>").join(" ");
     document.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => { status = b.dataset.s; renderSession(); }));
@@ -152,7 +231,7 @@ td{padding:13px 10px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       return '<tr><td><div class="who"><div class="av">' + esc(r.student.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()) + '</div><div>' + esc(r.student.name) + '<div class="fc">' + esc(r.student.studentId || "") + "</div></div></div></td><td>" + tm + '</td><td><span class="pill ' + r.status + '">' + r.status.charAt(0).toUpperCase() + r.status.slice(1) + "</span></td></tr>";
     }).join("") : '<tr><td colspan="3" class="empty">No students match.</td></tr>';
   }
-  function openSession(t, recs) { title = t; RECORDS = recs; status = "all"; $("q").value = ""; $("listView").style.display = "none"; $("sessionView").style.display = "block"; window.scrollTo(0, 0); renderSession(); }
+  function openSession(t, recs, classSize) { title = t; RECORDS = recs; sessionClassSize = classSize; status = "all"; $("q").value = ""; $("listView").style.display = "none"; $("sessionView").style.display = "block"; window.scrollTo(0, 0); renderSession(); }
   $("backBtn").addEventListener("click", () => { $("sessionView").style.display = "none"; $("listView").style.display = "block"; });
   $("q").addEventListener("input", renderSession);
 
