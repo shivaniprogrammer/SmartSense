@@ -7,6 +7,8 @@ const sendEmail = require("../utils/sendEmail");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { loadFacultyScope, isSubjectScoped, requireCoordinatorLevel } = require("../middleware/facultyScope");
 
+const LEGACY_CSE_F_ROSTER_SIZE = 68;
+
 function todayString() {
   return new Date().toISOString().split("T")[0];
 }
@@ -150,7 +152,21 @@ router.get("/", requireAuth, requireRole("teacher", "admin"), loadFacultyScope, 
       }
     }
 
-    const studentsInClass = await Student.find({ role: "student", classSection }).select("_id");
+    let studentsInClass = await Student.find({ role: "student", classSection }).select("_id");
+    if (!studentsInClass.length && req.user.facultyType === "coordinator" && req.user.coordinatorClass === classSection) {
+      const unassignedStudents = await Student.find({
+        role: "student",
+        $or: [{ classSection: null }, { classSection: { $exists: false } }],
+      }).select("_id");
+      const totalStudents = await Student.countDocuments({ role: "student" });
+      if (
+        classSection === "CSE F" &&
+        totalStudents === LEGACY_CSE_F_ROSTER_SIZE &&
+        unassignedStudents.length === LEGACY_CSE_F_ROSTER_SIZE
+      ) {
+        studentsInClass = unassignedStudents;
+      }
+    }
     const studentIds = studentsInClass.map((s) => s._id);
 
     const attendanceQuery = {

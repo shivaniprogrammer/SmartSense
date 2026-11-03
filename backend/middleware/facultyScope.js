@@ -10,6 +10,10 @@ async function loadFacultyScope(req, res, next) {
         req.user.facultyType = teacher.facultyType || null;
         req.user.facultySubjects = teacher.facultySubjects || [];
         req.user.facultySetupComplete = !!teacher.facultySetupComplete;
+        if (teacher.facultyType === "coordinator" && !teacher.coordinatorClass) {
+          teacher.coordinatorClass = "CSE F";
+          await teacher.save();
+        }
         req.user.coordinatorClass = teacher.coordinatorClass || null;
       }
     }

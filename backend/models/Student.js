@@ -7,6 +7,7 @@ const studentSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, enum: ["student", "teacher", "admin"], default: "student" },
+    classSection: { type: String, default: null },
 
     bleId: { type: String, unique: true, sparse: true },
 
@@ -20,6 +21,7 @@ const studentSchema = new mongoose.Schema(
     // "subject"     -> teacher is faculty for one or more specific subjects only
     // "coordinator" -> teacher is the Class Coordinator, same access as the full Teacher Dashboard
     facultyType: { type: String, enum: ["subject", "coordinator"], default: undefined },
+    coordinatorClass: { type: String, default: null },
     // Only populated when facultyType === "subject"
     facultySubjects: { type: [String], default: [] },
     // Tracks whether the teacher has completed the post-OTP faculty role selection step.
