@@ -23,6 +23,10 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
 .meter.mid span{background:var(--amber)}.meter.low span{background:var(--red)}.pc b{min-width:48px}
 .pill{display:inline-flex;align-items:center;padding:4px 14px;border-radius:99px;font-size:15px;font-weight:700}
 .pill.present{background:var(--green-bg);color:var(--green)}.pill.late{background:var(--amber-bg);color:var(--amber)}.pill.absent{background:var(--red-bg);color:var(--red)}.pill.none{background:var(--border);color:var(--text-medium)}
+.pill.unlinked{background:var(--amber-bg);color:var(--amber)}
+.live-indicator{display:inline-flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px;font-weight:600}
+.live-indicator::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-bg)}
+.live-indicator.stale::before{background:var(--amber);box-shadow:0 0 0 4px var(--amber-bg)}
 .empty{color:var(--text-muted);padding:22px 12px;font-size:16px;text-align:center}.empty.err{color:var(--red);font-weight:600}
 @media(max-width:1000px){.sidebar>div:last-child{flex:1}.sidebar>div:last-child .nav-item{flex-direction:column;text-align:center;justify-content:center;gap:2px;padding:8px 2px;font-size:12px}}
 </style>
@@ -41,6 +45,7 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     <div class="tools">
       <input type="search" id="q" placeholder="Search by name or register number" aria-label="Search students">
       <select id="f" aria-label="Filter"><option value="all">All students</option><option value="low">Low attendance (&lt;75%)</option><option value="absent">Absent today</option></select>
+      <span class="live-indicator" id="liveUpdated" role="status">Connecting to live attendance...</span>
     </div>
 
     <div class="panel" style="padding:0;overflow:hidden">
@@ -64,6 +69,16 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
   const H = { "Authorization": "Bearer " + token };
   const getJson = (u) => fetch("/api" + u, { headers: H }).then((r) => { if (r.status === 401) { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "login-teacher.html"; throw new Error("Unauthorized"); } return r.json(); });
   const norm = (x) => String(x || "").replace(/[\s-]/g, "").toUpperCase();
+  const SCREENSHOT_ROSTER = [
+    "SANTHOSH M", "SANTHOSH NARAYAN M", "SARANRAJ J", "SARAVANA KUMAR S", "SARAVANAN S", "SARIKA G", "SARVENDRA J", "SARVESHA B D",
+    "SATHISH MANIKANDAN M", "SATHIYA PRIYA C", "SATHYA PRASANNA R", "SATINDRA R", "SAVEETHA J", "SEVITHA A", "SHAHANA K", "SHAKTHIYVEL S",
+    "SHALINI T", "SHAMEER S", "SHAMITHRA S", "SHANMUGA PRIYA A", "SHARAN M", "SHARUKKHAN B", "SHAUN JEFFERY P", "SHERLINE P",
+    "SHIKHA KUMARI", "SHIVA PRASAADH R", "SHIVANI S", "SHIVANI S", "SHIVANI SHREE S", "SHREE SAI LAKSHMI R", "SHREE SUDHARSHAN R", "SHREEHARI J",
+    "SHREYA S", "SHREYA SIVANATH", "SHREYAN ARUNLAL", "SHRI BALA VIGNESH A R", "SHRIARJUN K", "SHRIRAM S", "SHRIYAS A", "SHRUTHI S",
+    "SHRUTHI R", "SHRUTI ROY", "SHYAMGANESH A", "SIYADHARSAN R S", "SNOWIN KARL SHELTON R", "SONALI S", "SREE VAIBAVI V", "SREEJA RAMANATHAN",
+    "SREEKAR KARTHIK VI R", "SREERAM R", "SRI ABINANDHAN S", "SRI SUDHIKSHA J", "SRIKESH H S", "SRILAJA M", "SRINIDI R", "SRIRAAM S K",
+    "SRIRAGHAV B", "SRIVARI R", "SRIVATSAN R", "SRUTHIKA V", "SUCHITH KUMAR V S", "SUDARSANAN K", "SUJITA H", "SUNILKUMAR R"
+  ];
 
   let myClass = "CSE F", ROWS = [];
   try { const u = JSON.parse(localStorage.getItem("user") || "null"); if (u && u.name) { $("profileName").textContent = u.name.split(" ")[0]; $("avatarInitial").textContent = u.name.charAt(0).toUpperCase(); } } catch (e) {}
@@ -80,14 +95,67 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
     const q = $("q").value.trim().toLowerCase(), f = $("f").value;
     const list = ROWS.filter((r) => (!q || r.name.toLowerCase().includes(q) || String(r.studentId).toLowerCase().includes(q)) && (f === "all" || (f === "low" && pct(r) !== null && pct(r) < LOW) || (f === "absent" && r.today === "absent")));
     $("rows").innerHTML = list.length ? list.map((r) => {
-      const p = pct(r), t = r.today || "none", ini = r.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+      const p = pct(r), t = r.studentRef === null ? "unlinked" : (r.today || "none"), ini = r.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
       return '<tr><td><div class="who"><div class="av">' + esc(ini) + "</div><div><b>" + esc(r.name) + "</b><span>" + esc(r.studentId) + "</span></div></div></td><td>" + (r.present == null ? "--" : r.present) + "</td><td>" + (r.absent == null ? "--" : r.absent) +
-        '</td><td><div class="pc"><div class="meter ' + (p === null ? "" : p < 60 ? "low" : p < LOW ? "mid" : "") + '"><span style="width:' + (p || 0) + '%"></span></div><b>' + (p === null ? "--" : p + "%") + '</b></div></td><td><span class="pill ' + t + '">' + (t === "none" ? "No record" : t.charAt(0).toUpperCase() + t.slice(1)) + "</span></td></tr>";
+        '</td><td><div class="pc"><div class="meter ' + (p === null ? "" : p < 60 ? "low" : p < LOW ? "mid" : "") + '"><span style="width:' + (p || 0) + '%"></span></div><b>' + (p === null ? "--" : p + "%") + '</b></div></td><td><span class="pill ' + t + '">' + (t === "unlinked" ? "Not linked" : t === "none" ? "No record" : t.charAt(0).toUpperCase() + t.slice(1)) + "</span></td></tr>";
     }).join("") : '<tr><td colspan="5" class="empty">' + (ROWS.length ? "No students match." : "No students found for this class yet.") + "</td></tr>";
   }
   $("q").addEventListener("input", render); $("f").addEventListener("change", render);
 
   if (DEMO) { ROWS = TS.summary(iso(new Date())).map((r) => ({ ...r })); render(); }
+
+  function makeRoster(students) {
+    const matchesByName = new Map();
+    students.forEach((student) => {
+      const key = norm(student.name);
+      if (!matchesByName.has(key)) matchesByName.set(key, []);
+      matchesByName.get(key).push(student);
+    });
+    const usedIds = new Set();
+    const roster = SCREENSHOT_ROSTER.map((name) => {
+      const matches = matchesByName.get(norm(name)) || [];
+      const student = matches.shift() || null;
+      if (student) usedIds.add(String(student._id));
+      return { name, studentId: (student && student.studentId) || "—", studentRef: student && student._id, present: null, absent: null, today: null };
+    });
+    students.forEach((student) => {
+      if (!usedIds.has(String(student._id))) {
+        roster.push({ name: student.name, studentId: student.studentId || "—", studentRef: student._id, present: null, absent: null, today: null });
+      }
+    });
+    return roster;
+  }
+
+  let refreshing = false;
+  function refreshAttendance() {
+    if (refreshing) return Promise.resolve();
+    refreshing = true;
+    $("liveUpdated").textContent = "Updating attendance...";
+    const today = iso(new Date());
+    return Promise.all(ROWS.map((row) => {
+      if (!row.studentRef) return Promise.resolve(true);
+      return getJson("/attendance/history/" + encodeURIComponent(row.studentRef)).then((history) => {
+        if (!Array.isArray(history)) return false;
+        const days = {};
+        history.forEach((record) => { days[String(record.date).slice(0, 10)] = record.status; });
+        const values = Object.values(days);
+        row.present = values.filter((value) => value === "present" || value === "late").length;
+        row.absent = values.filter((value) => value === "absent").length;
+        row.today = days[today] || null;
+        return true;
+      }).catch(() => false);
+    })).then((results) => {
+      render();
+      const unlinked = ROWS.filter((row) => row.studentRef === null).length;
+      const updated = new Date().toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
+      const failed = results.filter((result) => !result).length;
+      $("liveUpdated").textContent = (failed ? "Some attendance data unavailable · " : "Live · updated ") + updated + (unlinked ? " · " + unlinked + " names not linked" : "");
+      $("liveUpdated").classList.toggle("stale", failed > 0);
+    }).catch(() => {
+      $("liveUpdated").textContent = "Live attendance unavailable";
+      $("liveUpdated").classList.add("stale");
+    }).finally(() => { refreshing = false; });
+  }
 
   getJson("/auth/me").then((d) => { const a = d && d.user; if (a && a.coordinatorClass) { myClass = a.coordinatorClass; render(); } return a; }).catch(() => null).then(() => {
     if (DEMO) return;
@@ -95,16 +163,10 @@ td{padding:14px 12px;border-bottom:1px solid var(--border)}tr:last-child td{bord
       if (!Array.isArray(all)) throw new Error("Could not load students.");
       
       const mine = all.filter((s) => norm(s.classSection) === norm(myClass));
-console.log("total:", all.length, "mine:", mine.length, "myClass:", myClass,
-  "sections:", [...new Set(all.map((s) => s.classSection))]);
-
-      ROWS = mine.map((s) => ({ name: s.name, studentId: s.studentId || "—", present: null, absent: null, today: null })); render();
-      const today = iso(new Date());
-      return Promise.all(mine.map((s, i) => getJson("/attendance/history/" + s._id).then((h) => {
-        if (!Array.isArray(h)) return;
-        const days = {}; h.forEach((x) => { days[String(x.date).slice(0, 10)] = x.status; });
-        const v = Object.values(days); ROWS[i].present = v.filter((x) => x === "present" || x === "late").length; ROWS[i].absent = v.filter((x) => x === "absent").length; ROWS[i].today = days[today] || null;
-      }).catch(() => {}))).then(render);
+      ROWS = makeRoster(mine);
+      render();
+      refreshAttendance();
+      setInterval(refreshAttendance, 30000);
     });
   }).catch((e) => { if (e && e.message !== "Unauthorized") $("rows").innerHTML = '<tr><td colspan="5" class="empty err">' + esc(e.message || "Could not load students.") + "</td></tr>"; });
 })();
